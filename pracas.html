@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Praças, Itajaí-SC</title>
+		<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+		<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" href="lib/leaflet.css" />	
+		<link rel="stylesheet" href="lib/leaflet-search.min.css" />
+		<link rel="stylesheet" href="lib/leaflet.draw.css" />	
+		<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
+		<link rel="stylesheet" href="lib/MarkerCluster.css" />
+		<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
+
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+			}
+			
+			#map {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+			}
+
+			.leaflet-container {
+				background: #ffffff;
+			}
+
+			td, th {
+				border: 1px solid #dddddd;
+			}
+
+			.legend {
+				padding: 6px 8px;
+				text-align: left;
+				line-height: 18px;
+				color: #555;
+				background : white;
+				box-shadow: 0 0 15px rgba(0,0,0,0.2);
+				border-radius: 5px;
+			}
+
+			.legend i {
+				width: 18px;
+				height: 18px;
+				float: left;
+				margin-right: 20px;
+			}
+
+				.legend .circle {
+				border-radius: 20%;
+				width: 15px;
+				height: 15px;
+			}
+
+			.leaflet-control-draw-measure {
+				background-image: url(images/measure-control.png);
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="map"></div>
+		<script src="lib/jquery-3.2.1.min.js"></script>
+		<script src="lib/leaflet.js"></script>
+		<script src="lib/leaflet-search.min.js"></script>	
+		<script src="lib/leaflet-omnivore.min.js"></script>
+		<script src="lib/leaflet.markercluster.js"></script>
+		<script src="lib/L.Control.MousePosition.js"></script>
+		<script src="lib/leaflet.draw.js"></script>
+		<script src="lib/leaflet.measurecontrol.min.js"></script>
+		<script>		
+
+		//div do mapa
+		var map = new L.Map('map', {
+			zoom: 14,
+			minZoom: 12,
+			maxZoom: 18,
+			maxBounds: [
+				//south west
+				[-27.1279, -48.8954],
+				//north east
+				[-26.8074, -48.5845]
+			],
+			center: new L.latLng([-26.906960, -48.685425]),			
+			measureControl: true
+		});
+
+		//coordenadas
+		L.control.mousePosition().addTo(map);	
+
+		//barra escala
+		L.control.scale({imperial: false}).addTo(map);
+
+		//marca d´água
+		L.Control.Watermark = L.Control.extend({
+			onAdd: function(map) {
+				var img = L.DomUtil.create('img');
+
+				img.src = 'images/brasaoseosem.png';
+				img.style.width = '150px';
+
+				return img;
+			},
+			onRemove: function(map) {}
+		});
+
+		L.control.watermark = function(opts) {
+			return new L.Control.Watermark(opts);
+		}
+		L.control.watermark({ position: 'bottomleft' }).addTo(map);
+
+		//Mapa base, google
+		map.addLayer(new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+			opacity: 0.6,
+			maxZoom: 19,
+			transparent: false,
+			attribution: 'Secretaria Municipal de Obras e Serviços Municipais, desenvolvido por SMU com o apoio do CTIMA, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			subdomains:['mt0','mt1','mt2','mt3']
+		}));
+
+		//1718a
+		map.addLayer(new L.TileLayer('tiles/basemap/1718a/{z}/{x}/{y}.png', {
+			opacity: 0.6,
+			minZoom: 17,
+			maxZoom: 18
+		}));
+
+		//1718b
+		map.addLayer(new L.TileLayer('tiles/basemap/1718b/{z}/{x}/{y}.png', {
+			opacity: 0.6,
+			minZoom: 17,
+			maxZoom: 18
+		}));
+
+		//10a16
+		map.addLayer(new L.TileLayer('tiles/basemap/10a16/{z}/{x}/{y}.png', {
+			opacity: 0.6,
+			minZoom: 10,
+			maxZoom: 16
+		}));
+
+		//bairros
+		map.addLayer(new L.TileLayer('tiles/bairros/{z}/{x}/{y}.png', {
+			opacity: 0.5,
+			minZoom: 10,
+			maxZoom: 14
+		}));
+
+		//sistema viário com pesquisa - viewsistviarioweb
+		var sistviarioweb = L.geoJson(false, {
+			style: {
+				weight: 14,
+				opacity: 0.0
+			},
+
+			onEachFeature: function(feature, layer){			
+				layer.bindPopup(
+					'<strong>' + feature.properties.nomevia + '</strong>' + '<br/>' +
+					'Lei/data: ' + feature.properties.leidata + '<br/>' +
+					'<table><tr>' +
+					'<td>Caixa da via: ' + feature.properties.caixatotal + '<br/>' +
+					'Pista: ' + feature.properties.caixavia + '<br/>' +
+					'Passeios: ' + feature.properties.passeionl + ' - ' + feature.properties.passeioso + '</td>' +				
+					'</tr></table>'
+				);
+			}
+		});
+
+		$.getJSON("data/viewsistviarioweb.geojson", function (data) {
+			sistviarioweb.addData(data).addTo(map);
+		});	
+
+		var searchControl = new L.Control.Search({
+			layer: sistviarioweb,
+			propertyName: 'nomevia',
+			circleLocation: false,
+			hideMarkerOnCollapse: true,
+			textPlaceholder: "Pesquisa logradouro",
+			textErr: "Não localizado",
+			textCancel: "Cancelar",
+			zoom: 18,
+			openPopup: true,
+			initial: false
+		});
+
+		map.addControl(searchControl);
+
+		//Praças
+		var pracaicon = L.icon({
+			iconUrl: 'images/park.png',
+			iconAnchor:   [17,50],
+			popupAnchor:  [0,-35],
+			iconSize: [35,50]
+		});
+
+		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vTrFlUSn1OrVYOZ0MORZzWUPHwfCpsioEx2Tk4UCdB9ugjlw9HTxYD1Qt-WV32iNQl_heCeqF6phJ-c/pub?gid=0&single=true&output=csv')
+		.on('ready', function(layer) {
+
+			this.eachLayer(function(marker) {
+				marker.setIcon(pracaicon);			
+				marker.bindPopup(			
+					'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
+					'Endereço: ' + marker.toGeoJSON().properties.endereco + ', ' + marker.toGeoJSON().properties.bairro + '<br/>' +
+					'Lei: ' + marker.toGeoJSON().properties.lei + '<br/>' +
+					'Obs: ' + marker.toGeoJSON().properties.obs + '<br/>' +
+					'<img src="' + marker.toGeoJSON().properties.imgurl + '" alt="sem foto" style="width:300px;">' + '<br/>' +
+					'<table><tr>' +
+						'<td>Equipamentos disponvíveis: ' + '<br/>' +
+						marker.toGeoJSON().properties.equip + '</td>' +
+					'</tr></table>'			
+				);
+			});
+
+			var clusterGroup = new L.MarkerClusterGroup({ disableClusteringAtZoom: 16 });
+			this.eachLayer(function(layer) {
+				clusterGroup.addLayer(layer);
+			});
+			map.addLayer(clusterGroup);		
+		});
+		</script>
+	</body>
+</html>
