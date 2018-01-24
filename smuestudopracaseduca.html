@@ -84,8 +84,7 @@
 				//north east
 				[-26.8074, -48.5845]
 				],
-			center: new L.latLng([-26.906960, -48.685425]),
-			maxBoundsViscosity: 1.0,
+			center: new L.latLng([-26.906960, -48.685425]),			
 			measureControl: true
 	});
 	
@@ -115,7 +114,7 @@
 
 	//Mapa base, google
 	map.addLayer(new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-		opacity: 0.4,
+		opacity: 0.6,
 		maxZoom: 19,
 		transparent: false,
 		attribution: 'Secretaria Municipal de Urbanismo, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
@@ -124,21 +123,21 @@
 	
 	//1718a
     map.addLayer(new L.TileLayer('tiles/basemap/1718a/{z}/{x}/{y}.png', {
-		opacity: 0.5,
+		opacity: 0.6,
 		minZoom: 17,
 		maxZoom: 18
 	}));
 
 	//1718b
     map.addLayer(new L.TileLayer('tiles/basemap/1718b/{z}/{x}/{y}.png', {
-		opacity: 0.5,
+		opacity: 0.6,
 		minZoom: 17,
 		maxZoom: 18
 	}));
 
 	//10a16
     map.addLayer(new L.TileLayer('tiles/basemap/10a16/{z}/{x}/{y}.png', {
-		opacity: 0.5,
+		opacity: 0.6,
 		minZoom: 10,
 		maxZoom: 16
 	}));
@@ -219,42 +218,11 @@
 				'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
 				'Endereço: ' + marker.toGeoJSON().properties.endereco + '<br/>' +
 				'Obs: ' + marker.toGeoJSON().properties.obs + '<br/>' +
-
-				'<img src="http://10.10.1.158/geo/images/pracas/' + marker.toGeoJSON().properties.imagem + '" alt="sem foto" style="width:300px;">' + '<br/>' +
-
+				'<img src="' + marker.toGeoJSON().properties.imgurl + '" alt="sem foto" style="width:300px;">' + '<br/>' +
 				'<table><tr>' +
-					'<td>academia: ' + marker.toGeoJSON().properties.academia + '</td>' +
-					'<td>skate: ' + marker.toGeoJSON().properties.skate + '</td>' +
-					'<td>cancha bocha: ' + marker.toGeoJSON().properties.canchaboch + '</td>' +
-				'</tr></table>' +
-
-				'<table><tr>' +
-					'<td>playground: ' + marker.toGeoJSON().properties.playground + '</td>' +
-					'<td>paraciclo: ' + marker.toGeoJSON().properties.paraciclo + '</td>' +
-					'<td>acessível: ' + marker.toGeoJSON().properties.acessibili + '</td>' +
-				'</tr></table>' +
-
-				'<table><tr>' +
-					'<td>polidesp.: ' + marker.toGeoJSON().properties.quadraspol + '</td>' +
-					'<td>calistenia: ' + marker.toGeoJSON().properties.calistenia + '</td>' +
-					'<td>mesa de jogos: ' + marker.toGeoJSON().properties.mesajogos + '</td>' +
-				'</tr></table>' +
-
-				'<table><tr>' +
-					'<td>tenis: ' + marker.toGeoJSON().properties.quadrateni + '</td>' +
-					'<td>basquete: ' + marker.toGeoJSON().properties.tabelabasq + '</td>' +
-					'<td>bicicross: ' + marker.toGeoJSON().properties.bicicross + '</td>' +
-				'</tr></table>' +
-
-				'<table><tr>' +
-					'<td>estares: ' + marker.toGeoJSON().properties.estares + '</td>' +
-					'<td>cancha areia: ' + marker.toGeoJSON().properties.canchaarei + '</td>' +
-					'<td>área verde: ' + marker.toGeoJSON().properties.areaverde + '</td>' +
-				'</tr></table>'	 +
-
-				'<table><tr>' +
-					'<td>futebol: ' + marker.toGeoJSON().properties.campofuteb + '</td>' +
-				'</tr></table>'			
+					'<td>Equipamentos disponvíveis: ' + '<br/>' +
+					marker.toGeoJSON().properties.equip + '</td>' +
+				'</tr></table>'		
 			);
 
         });
