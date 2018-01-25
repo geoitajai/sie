@@ -194,7 +194,9 @@
 		//paradas ônibus
 		var paraonibusicon = L.icon({
 			iconUrl: 'images/ibus.png',
-			iconSize: [30,30]
+			iconAnchor:   [15,45],
+			popupAnchor:  [0,-30],
+			iconSize: [30,45]
 		});
 
 		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQyHcrT6fAZ_L81AMP-jU4Zsd0HyITl6RuAsntblxi0juoI3rZbq9G0SfYRvw81DBq-xw8zoDwtthta/pub?gid=0&single=true&output=csv')
