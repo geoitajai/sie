@@ -59,6 +59,17 @@
 			.leaflet-control-draw-measure {
 				background-image: url(images/measure-control.png);
 			}
+			
+			.leaflet-control-layers-toggle {
+				background-image: url(../images/layers.png);
+				width: 36px;
+				height: 36px;
+			}
+		
+			.leaflet-retina .leaflet-control-layers-toggle {
+				background-image: url(../images/layers-2x.png);
+				background-size: 26px 26px;
+			}			
 		</style>
 	</head>
 
@@ -78,7 +89,7 @@
 		
 		//div do mapa
 		var map = new L.Map('map', {
-			zoom: 12,
+			zoom: 14,
 			minZoom: 11,
 			maxZoom: 18,
 			maxBounds: [
@@ -87,7 +98,7 @@
 				//north east
 				[-26.8074, -48.5845]
 			],
-			center: new L.latLng([-26.95513, -48.73741]),			
+			center: new L.latLng([-26.91549, -48.6866]),			
 			measureControl: true
 		});
 
@@ -474,10 +485,10 @@
 	
 	//Controle de camadas
 	var overlayMaps = {
-		"Portaria nº 957/GC3 - julho/2015" : aerogab,
+		"<a href='http://servicos.decea.gov.br/aga/' target='_blank' >Portaria nº957/GC3-7/2015</a>" : aerogab,
 		"Corredores de comércio e serviços" : ccs
 	};
-	L.control.layers(null, overlayMaps,{collapsed:false, position: 'topleft'}).addTo(map);
+	L.control.layers(null, overlayMaps,{position: 'topleft'}).addTo(map);
 	
 	//legenda
 	function getColour(d) {
