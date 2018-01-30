@@ -9,5 +9,5 @@
 
 Secretaria Municipal de Urbanismo
 
-* [pooblicao](https://geoitajai.github.io/sie/smupooblicao.html)
+* [Pooblicao](https://geoitajai.github.io/sie/smupooblicao.html)
 * [Estudo unidades básicas de educação x praças](https://geoitajai.github.io/sie/smuestudopracaseduca.html)
