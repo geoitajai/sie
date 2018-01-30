@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Arborização, Itajaí-SC</title>
+		<title>Sistema viário, Itajaí-SC</title>
 		<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
 		<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
 		<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
@@ -76,10 +76,13 @@
 		<script src="lib/leaflet.measurecontrol.min.js"></script>
 		<script>		
 
+		var ciclog = L.layerGroup();
+		var pontes = new L.LayerGroup();		
+		
 		//div do mapa
 		var map = new L.Map('map', {
-			zoom: 14,
-			minZoom: 12,
+			zoom: 12,
+			minZoom: 10,
 			maxZoom: 18,
 			maxBounds: [
 				//south west
@@ -87,7 +90,7 @@
 				//north east
 				[-26.8074, -48.5845]
 			],
-			center: new L.latLng([-26.906960, -48.685425]),			
+			center: new L.latLng([-26.95513, -48.73741]),			
 			measureControl: true
 		});
 
@@ -102,7 +105,7 @@
 			onAdd: function(map) {
 				var img = L.DomUtil.create('img');
 
-				img.src = 'images/brasaoseosem.png';
+				img.src = 'images/brasaosmu.png';
 				img.style.width = '150px';
 
 				return img;
@@ -126,21 +129,21 @@
 
 		//1718a
 		map.addLayer(new L.TileLayer('tiles/basemap/1718a/{z}/{x}/{y}.png', {
-			opacity: 0.6,
+			opacity: 0.8,
 			minZoom: 17,
 			maxZoom: 18
 		}));
 
 		//1718b
 		map.addLayer(new L.TileLayer('tiles/basemap/1718b/{z}/{x}/{y}.png', {
-			opacity: 0.6,
+			opacity: 0.8,
 			minZoom: 17,
 			maxZoom: 18
 		}));
 
 		//10a16
 		map.addLayer(new L.TileLayer('tiles/basemap/10a16/{z}/{x}/{y}.png', {
-			opacity: 0.6,
+			opacity: 0.8,
 			minZoom: 10,
 			maxZoom: 16
 		}));
@@ -190,35 +193,87 @@
 		});
 
 		map.addControl(searchControl);
+		
+	//ciclovias
+	var ciclovias = L.geoJson(false, {		
+			style: function(feature){
+			var corlinha,
+				corl = feature.properties.tipo;
+			if ( corl == 'ciclofaixa' ) corlinha = "#8c63de";
+			else if ( corl == 'ciclovia' ) corlinha = "#e200df";
+			else if ( corl == 'compartilhado' ) corlinha = "#e4b04e";
+			else corlinha = "#ffff9b";
+			return { color: corlinha, weight: 8 };
+		},
+		
+		onEachFeature: function(feature, layer){
+			layer.bindPopup(
+				'<strong>' + feature.properties.tipo + '</strong>' + '<br/>' +
+				'Via: ' + feature.properties.nome + '<br/>' +
+				'Largura: ' + feature.properties.largura + '<br/>' +
+				'Pavimentação: ' + feature.properties.pavimento + '<br/>'		
+			);
+		}
+	});
+	
+	$.getJSON("data/viewcicloviario2.geojson", function (data) {
+		ciclovias.addData(data).addTo(ciclog);
+	});	
+	
+		
+	//pontes
+	var educaicona = L.icon({
+		iconUrl: 'images/ponte.png',
+		iconSize: [30,30]
+	});
+	
+	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vRv4zc9nsq8vTdV7-X0rLq9Qm9bE29dwzQ_vf7VY2Xyt63C1gr1Jl-r9Dzdri5qqWgGH9gIo_FheFIv/pub?gid=0&single=true&output=csv')
+    .on('ready', function(layer) {
 
-		//Arbozização
-		var arvicon = L.icon({
-			iconUrl: 'images/trees.png',
-			iconAnchor:   [10,25],
-			popupAnchor:  [0,-12],
-			iconSize: [21,25]
-		});
+        this.eachLayer(function(marker) {
 
-		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vS0fEllRmJL7dyImYGrsgeoWPNvHNOmZGq04q6ldJFJj7Grfr8Pi5j886j1sjsLbFEiIeoAh82V6jlR/pub?gid=0&single=true&output=csv')
-		.on('ready', function(layer) {
+			marker.setIcon(educaicona);			
+            marker.bindPopup(
+				'<strong>' + '<u>' + marker.toGeoJSON().properties.tipo + ' ' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
+				marker.toGeoJSON().properties.endereco + ', ' + marker.toGeoJSON().properties.bairro + '<br/>' +
+				' ' + '<br/>' +
+				'Material: ' + marker.toGeoJSON().properties.material + '<br/>' +				
+				'Lei: ' + marker.toGeoJSON().properties.lei
+			);
+        });
+    })
+    .addTo(pontes);
+	
+	//legenda
+	function getColour(d) {
+		switch (d) {
+			case 'Ciclofaixa': return '#8c63de';
+			case 'Ciclovia': return '#e200df';
+			case 'Compartilhado': return '#e4b04e';
+			default: return '#fff';
+		}
+	};
 
-			this.eachLayer(function(marker) {
-				marker.setIcon(arvicon);			
-				marker.bindPopup(			
-				'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
-				'nome científico.: ' + marker.toGeoJSON().properties.nomecient + '<br/>' +			
-				'origem: ' + marker.toGeoJSON().properties.origem + '<br/>' +
-				'local: ' + marker.toGeoJSON().properties.local + '<br/>' +
-				'Coordenadas WGS84(4326): long' + marker.toGeoJSON().properties.longitude + ', lat' + marker.toGeoJSON().properties.latitude
-				);
-			});
+	var legend = L.control({position: 'bottomright'});
 
-			var clusterGroup = new L.MarkerClusterGroup({ disableClusteringAtZoom: 18 });
-			this.eachLayer(function(layer) {
-				clusterGroup.addLayer(layer);
-			});
-			map.addLayer(clusterGroup);		
-		});
+	legend.onAdd = function (map) {
+		var div = L.DomUtil.create('div', 'info legend');
+			faultstatus = ['Ciclofaixa', 'Ciclovia', 'Compartilhado'];		
+		for (var i = 0; i < faultstatus.length; i++) {
+			div.innerHTML +=
+				'<i class="circle" style="background:' + getColour(faultstatus[i]) + '"></i> ' + (faultstatus[i] ? faultstatus[i] + '<br>' : '+');
+		}
+		return div;
+	};
+	legend.addTo(map);
+	
+	//Controle de camadas
+	var overlayMaps = {
+		"Cicloviário" : ciclog,
+		"Pontes" : pontes
+	};
+	L.control.layers(null, overlayMaps,{collapsed:false, position: 'topleft'}).addTo(map);	
+
 		</script>
 	</body>
 </html>
