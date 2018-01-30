@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Arborização, Itajaí-SC</title>
+		<title>Praças, Itajaí-SC</title>
 		<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
 		<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
 		<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
@@ -124,101 +124,11 @@
 			subdomains:['mt0','mt1','mt2','mt3']
 		}));
 
-		//1718a
-		map.addLayer(new L.TileLayer('tiles/basemap/1718a/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 17,
-			maxZoom: 18
-		}));
-
-		//1718b
-		map.addLayer(new L.TileLayer('tiles/basemap/1718b/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 17,
-			maxZoom: 18
-		}));
-
-		//10a16
-		map.addLayer(new L.TileLayer('tiles/basemap/10a16/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 10,
-			maxZoom: 16
-		}));
-
-		//bairros
-		map.addLayer(new L.TileLayer('tiles/bairros/{z}/{x}/{y}.png', {
-			opacity: 0.5,
-			minZoom: 10,
-			maxZoom: 14
-		}));
-
-		//sistema viário com pesquisa - viewsistviarioweb
-		var sistviarioweb = L.geoJson(false, {
-			style: {
-				weight: 14,
-				opacity: 0.0
-			},
-
-			onEachFeature: function(feature, layer){			
-				layer.bindPopup(
-					'<strong>' + feature.properties.nomevia + '</strong>' + '<br/>' +
-					'Lei/data: ' + feature.properties.leidata + '<br/>' +
-					'<table><tr>' +
-					'<td>Caixa da via: ' + feature.properties.caixatotal + '<br/>' +
-					'Pista: ' + feature.properties.caixavia + '<br/>' +
-					'Passeios: ' + feature.properties.passeionl + ' - ' + feature.properties.passeioso + '</td>' +				
-					'</tr></table>'
-				);
-			}
+		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vS0fEllRmJL7dyImYGrsgeoWPNvHNOmZGq04q6ldJFJj7Grfr8Pi5j886j1sjsLbFEiIeoAh82V6jlR/pub?gid=0&single=true&output=csv', null, L.mapbox.featureLayer()).addTo(map)
+		  .on('error', function(error) {
+			console.log(error);
 		});
-
-		$.getJSON("data/viewsistviarioweb.geojson", function (data) {
-			sistviarioweb.addData(data).addTo(map);
-		});	
-
-		var searchControl = new L.Control.Search({
-			layer: sistviarioweb,
-			propertyName: 'nomevia',
-			circleLocation: false,
-			hideMarkerOnCollapse: true,
-			textPlaceholder: "Pesquisa logradouro",
-			textErr: "Não localizado",
-			textCancel: "Cancelar",
-			zoom: 18,
-			openPopup: true,
-			initial: false
-		});
-
-		map.addControl(searchControl);
-
-		//Arbozização
-		var arvicon = L.icon({
-			iconUrl: 'images/trees.png',
-			iconAnchor:   [20,50],
-			popupAnchor:  [0,-35],
-			iconSize: [42,50]
-		});
-
-		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vS0fEllRmJL7dyImYGrsgeoWPNvHNOmZGq04q6ldJFJj7Grfr8Pi5j886j1sjsLbFEiIeoAh82V6jlR/pub?gid=0&single=true&output=csv')
-		.on('ready', function(layer) {
-
-			this.eachLayer(function(marker) {
-				marker.setIcon(arvicon);			
-				marker.bindPopup(			
-				'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
-				'nome científico.: ' + marker.toGeoJSON().properties.nomecient + '<br/>' +			
-				'origem: ' + marker.toGeoJSON().properties.origem + '<br/>' +
-				'local: ' + marker.toGeoJSON().properties.local + '<br/>' +
-				'Coordenadas WGS84(4326): long' + marker.toGeoJSON().properties.longitude + ', lat' + marker.toGeoJSON().properties.latitude
-				);
-			});
-
-			var clusterGroup = new L.MarkerClusterGroup({ disableClusteringAtZoom: 18 });
-			this.eachLayer(function(layer) {
-				clusterGroup.addLayer(layer);
-			});
-			map.addLayer(clusterGroup);		
-		});
+		
 		</script>
 	</body>
 </html>
