@@ -6,8 +6,4 @@
 * [Paradas de ônibus](https://geoitajai.github.io/sie/paradasonibusitajai.html)
 * [Sistema viário](https://geoitajai.github.io/sie/sviario.html)
 * [Zoneamento, Lei complementar nº 215/2012](https://geoitajai.github.io/sie/zon215.html)
-
-Secretaria Municipal de Urbanismo
-
-* [Pooblicao](https://geoitajai.github.io/sie/smupooblicao.html)
-* [Estudo unidades básicas de educação x praças](https://geoitajai.github.io/sie/smuestudopracaseduca.html)
+* [Defesa Civil de Itajaí, inundações](https://geoitajai.github.io/sie/dcitajai.html)
