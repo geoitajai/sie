@@ -154,18 +154,6 @@
 		style: {
 			weight: 14,
 			opacity: 0.0
-		},
-		
-		onEachFeature: function(feature, layer){			
-			layer.bindPopup(
-				'<strong>' + feature.properties.nomevia + '</strong>' + '<br/>' +
-				'Lei/data: ' + feature.properties.leidata + '<br/>' +
-				'<table><tr>' +
-				'<td>Caixa da via: ' + feature.properties.caixatotal + '<br/>' +
-				'Pista: ' + feature.properties.caixavia + '<br/>' +
-				'Passeios: ' + feature.properties.passeionl + ' - ' + feature.properties.passeioso + '</td>' +				
-				'</tr></table>'
-			);
 		}
 	});
 
