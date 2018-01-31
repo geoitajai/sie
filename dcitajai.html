@@ -152,6 +152,13 @@
 				minZoom: 10,
 				maxZoom: 16
 			}));
+			
+			//bairros
+			map.addLayer(new L.TileLayer('tiles/bairros/{z}/{x}/{y}.png', {
+				opacity: 0.5,
+				minZoom: 10,
+				maxZoom: 14
+			}));
 		
 			//sistema viário com pesquisa		
 			var sistviarioweb = L.geoJson(false, {		
