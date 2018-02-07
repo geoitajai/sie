@@ -82,6 +82,7 @@
 			var inundajulho2013 = L.layerGroup();
 			var inundasetembro2013 = L.layerGroup();
 			var inundajunho2014 = L.layerGroup();
+			var inundaoutubro2015 = L.layerGroup();
 			var tilegoogle = L.layerGroup();
 			var tilesmu = new L.LayerGroup();
 
@@ -364,6 +365,26 @@
 				}
 			}).addTo(inundajunho2014);
 			});
+			
+			//Cotas 2015 (outubro)
+			$.getJSON("data/inundaoutubro2015.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+					var corlinha,
+					corl = feature.properties.situa;
+					if ( corl == 'baixo médio' ) corlinha = "#46f6d7";
+					else if ( corl == 'médio' ) corlinha = "#46f6d7";
+					else corlinha = "#fff";
+					return { weight: 1, fillColor: corlinha, fillOpacity: 0.8 };
+				},
+
+				onEachFeature: function(feature, layer){
+					layer.bindPopup(
+						feature.properties.situa
+					);
+				}
+			}).addTo(inundaoutubro2015);
+			});		
 
 			//Controle de camadas, manchas enchente
 			var baseMaps = {
@@ -375,7 +396,8 @@
 				"Cotas 2011 (setembro)" : inundasetembro2011,
 				"Cotas 2013 (julho)" : inundajulho2013,
 				"Cotas 2013 (setembro)" : inundasetembro2013,
-				"Cotas 2014 (junho)" : inundajunho2014
+				"Cotas 2014 (junho)" : inundajunho2014,
+				"Cotas 2015 (outubro)" : inundaoutubro2015
 			};
 
 			L.control.layers(baseMaps, null,{collapsed:false, position: 'bottomleft'}).addTo(map);
@@ -385,7 +407,7 @@
 				"Sistema viário" : tilesmu,
 				"Imagem, Google maps" : tilegoogle
 			};
-			L.control.layers(baseMaps, null,{position: 'bottomleft'}).addTo(map);
+			L.control.layers(baseMaps, null,{collapsed:false, position: 'bottomleft'}).addTo(map);
 
 
 			//legenda
