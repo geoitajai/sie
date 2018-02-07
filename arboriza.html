@@ -181,7 +181,7 @@
 			textPlaceholder: "Pesquisa logradouro",
 			textErr: "Não localizado",
 			textCancel: "Cancelar",
-			zoom: 18,
+			zoom: 17,
 			openPopup: true,
 			initial: false
 		});
@@ -224,6 +224,16 @@
 		};
 		L.control.layers(baseMaps, null,{position: 'topleft'}).addTo(map);
 
+		//google no zoom 18 em diante, sem conflito com o controle de layers
+		map.on('zoomend', function() {
+			if (map.getZoom() < 18){
+					map.removeLayer(tilegoogle);
+			}
+			else {
+					map.addLayer(tilegoogle);
+				}
+		});
+		
 		</script>
 	</body>
 </html>
