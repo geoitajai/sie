@@ -7,17 +7,17 @@
 		<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
 		<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
 		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-		<link rel="stylesheet" href="lib/leaflet.css" />	
+		<link rel="stylesheet" href="lib/leaflet.css" />
 		<link rel="stylesheet" href="lib/leaflet-search.min.css" />
-		<link rel="stylesheet" href="lib/leaflet.draw.css" />	
-		<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />		
+		<link rel="stylesheet" href="lib/leaflet.draw.css" />
+		<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
 
 		<style>
 			body {
 				margin: 0;
 				padding: 0;
 			}
-			
+
 			#map {
 				position: absolute;
 				top: 0;
@@ -58,7 +58,7 @@
 
 			.leaflet-control-draw-measure {
 				background-image: url(images/measure-control.png);
-			}			
+			}
 		</style>
 	</head>
 
@@ -70,7 +70,7 @@
 		<script src="lib/L.Control.MousePosition.js"></script>
 		<script src="lib/leaflet.draw.js"></script>
 		<script src="lib/leaflet.measurecontrol.min.js"></script>
-		<script>		
+		<script>
 
 			//Controle de layers
 			var enchente1983 = L.layerGroup();
@@ -82,7 +82,9 @@
 			var inundajulho2013 = L.layerGroup();
 			var inundasetembro2013 = L.layerGroup();
 			var inundajunho2014 = L.layerGroup();
-			
+			var tilegoogle = L.layerGroup();
+			var tilesmu = new L.LayerGroup();
+
 			//div do mapa
 			var map = new L.Map('map', {
 				zoom: 14,
@@ -94,13 +96,13 @@
 					//north east
 					[-26.8074, -48.5845]
 				],
-				center: new L.latLng([-26.91549, -48.6866]),			
+				center: new L.latLng([-26.91549, -48.6866]),
 				measureControl: true,
-				layers: [enchente1983]
+				layers: [enchente1983, tilesmu]
 			});
 
 			//coordenadas
-			L.control.mousePosition().addTo(map);	
+			L.control.mousePosition().addTo(map);
 
 			//barra escala
 			L.control.scale({imperial: false}).addTo(map);
@@ -124,73 +126,66 @@
 			L.control.watermark({ position: 'bottomleft' }).addTo(map);
 
 			//Mapa base, google
-			map.addLayer(new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+			new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
 				opacity: 0.6,
 				maxZoom: 19,
 				transparent: false,
-				attribution: 'Defesa Civil de Itajaí, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+				attribution: 'Secretaria Municipal de Obras e Serviços Municipais, desenvolvido por SMU com o apoio do CTIMA, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
 				subdomains:['mt0','mt1','mt2','mt3']
-			}));
+			}).addTo(tilegoogle);
 
-			//1718a
-			map.addLayer(new L.TileLayer('tiles/basemap/1718a/{z}/{x}/{y}.png', {
-				opacity: 0.8,
-				minZoom: 17,
-				maxZoom: 18
-			}));
-
-			//1718b
-			map.addLayer(new L.TileLayer('tiles/basemap/1718b/{z}/{x}/{y}.png', {
-				opacity: 0.8,
-				minZoom: 17,
-				maxZoom: 18
-			}));
-
-			//10a16
-			map.addLayer(new L.TileLayer('tiles/basemap/10a16/{z}/{x}/{y}.png', {
-				opacity: 0.8,
+			//zona urbana e geral
+			new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
+				opacity: 0.6,
 				minZoom: 10,
-				maxZoom: 16
-			}));
-			
+				maxZoom: 17
+			}).addTo(tilesmu);
+
+			//zona rural, zoom 17
+			new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
+				opacity: 0.6,
+				minZoom: 17,
+				maxZoom: 17
+			}).addTo(tilesmu);
+
 			//bairros
 			map.addLayer(new L.TileLayer('tiles/bairros/{z}/{x}/{y}.png', {
 				opacity: 0.5,
 				minZoom: 10,
 				maxZoom: 14
 			}));
-		
-			//sistema viário com pesquisa		
-			var sistviarioweb = L.geoJson(false, {		
-				style: {		
+
+			//sistema viário com pesquisa
+			var sistviarioweb = L.geoJson(false, {
+				style: {
 				weight: 18,
 				opacity: 0.0
-				},	
-					
+				},
+
 				onEachFeature: function(feature, layer){
-				
+
 				var poprecuo;
 				var poprecuo = feature.properties.recuo;
 				if (poprecuo == null) poprecuo = "2 metros";
 				else poprecuo = feature.properties.recuo;
-				
+
 				layer.bindPopup(
 					'<strong>' + feature.properties.nome + '</strong>' + '<br/>' +
 					'Lei/data: ' + feature.properties.leidata + '<br/>' +
-					'<a href="http://leismunicipa.is/vecgt" target="_blank">Decreto 11.060/17(incorporação recuo): </a>' + '<br/>' + poprecuo +			
-					'<table><tr>' + 
+					'<a href="http://leismunicipa.is/vecgt" target="_blank">Decreto 11.060/17(incorporação recuo): </a>' + '<br/>' + poprecuo +
+					'<table><tr>' +
 					'<td>Caixa da via: ' + feature.properties.caixatotal + '<br/>' +
 					'Pista: ' + feature.properties.caixavia + '<br/>' +
-					'Passeios: ' + feature.properties.passeionl + ' - ' + feature.properties.passeioso + '</td>' +			
+					'Passeios: ' + feature.properties.passeionl + ' - ' + feature.properties.passeioso + '</td>' +
 					'</tr></table>'
 				);
-				}	
+				}
 			}).addTo(map);
 
 			$.getJSON("data/viewviasdecretorecuos.geojson", function (data) {
 				sistviarioweb.addData(data);
 			});
-			
+
 			var searchControl = new L.Control.Search({
 				layer: sistviarioweb,
 				propertyName: 'nome',
@@ -370,7 +365,7 @@
 			}).addTo(inundajunho2014);
 			});
 
-			//Controle de camadas
+			//Controle de camadas, manchas enchente
 			var baseMaps = {
 				"Área atingida 1983" : enchente1983,
 				"Área atingida 1984" : enchente1984,
@@ -384,6 +379,14 @@
 			};
 
 			L.control.layers(baseMaps, null,{collapsed:false, position: 'bottomleft'}).addTo(map);
+
+			//Controle de camadas mapas fundo
+			var baseMaps = {
+				"Sistema viário" : tilesmu,
+				"Imagem, Google maps" : tilegoogle
+			};
+			L.control.layers(baseMaps, null,{position: 'bottomleft'}).addTo(map);
+
 
 			//legenda
 			function getColour(d) {
@@ -413,7 +416,7 @@
 				return div;
 			};
 			legend.addTo(map);
-		
+
 		</script>
 	</body>
 </html>
