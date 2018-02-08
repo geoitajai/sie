@@ -372,8 +372,14 @@
 					style: function(feature){
 					var corlinha,
 					corl = feature.properties.situa;
-					if ( corl == 'baixo médio' ) corlinha = "#46f6d7";
-					else if ( corl == 'médio' ) corlinha = "#46f6d7";
+					if ( corl == '0,20' ) corlinha = "#ffffcc";
+					else if ( corl == '0,21 a 0,40' ) corlinha = "#ffeda0";
+					else if ( corl == '0,41 a 0,60' ) corlinha = "#fed976";
+					else if ( corl == '0,50' ) corlinha = "#feb24c";
+					else if ( corl == '0,51 a 1' ) corlinha = "#fd8d3c";
+					else if ( corl == '1,01 a 1,50' ) corlinha = "#fc4e2a";
+					else if ( corl == '1,51 a 2' ) corlinha = "#e31a1c";
+					else if ( corl == '2,01 a 3' ) corlinha = "#b10026";
 					else corlinha = "#fff";
 					return { weight: 1, fillColor: corlinha, fillOpacity: 0.8 };
 				},
