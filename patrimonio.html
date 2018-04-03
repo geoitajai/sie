@@ -73,6 +73,7 @@
 		<script src="lib/L.Control.MousePosition.js"></script>
 		<script src="lib/leaflet.draw.js"></script>
 		<script src="lib/leaflet.measurecontrol.min.js"></script>
+		<script src="lib/leaflet.markercluster.layersupport.js"></script>
 		<script>
 
 		var tilegoogle = L.layerGroup();
@@ -98,7 +99,7 @@
 				[-26.8074, -48.5845]
 			],
 			center: new L.latLng([-26.906960, -48.685425]),
-			layers:[ tilesmu, sau, ppubl, educa, dsocial, cessuso, esportiv, pracas ],
+			layers:[ tilesmu ],
 			measureControl: true
 		});
 
@@ -114,7 +115,7 @@
 				var img = L.DomUtil.create('img');
 
 				img.src = 'images/brasaoadm.png';
-				img.style.width = '190px';
+				img.style.width = '250px';
 
 				return img;
 			},
@@ -323,7 +324,7 @@
 		
 		//#Praças#
 		var pracasicon = L.icon({
-			iconUrl: 'images/park.png',
+			iconUrl: 'images/ppracas.png',
 			iconAnchor:   [16,60],
 			popupAnchor:  [0,-50],
 			iconSize: [33,60]
@@ -348,6 +349,16 @@
 			});
 		}).addTo(pracas);		
 		
+		//marker clustering com suporte para layers
+		var mcg = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 17 }).addTo(map);
+		mcg.checkIn([ sau, ppubl, educa, dsocial, cessuso, esportiv, pracas	]);
+		sau.addTo(map);
+		ppubl.addTo(map);
+		educa.addTo(map);
+		dsocial.addTo(map);
+		cessuso.addTo(map);
+		esportiv.addTo(map);
+		pracas.addTo(map);
 		
 		//Controle de camadas
 		var overlayMaps = {
@@ -364,7 +375,8 @@
 			"Sistema viário" : tilesmu,
 			"Imagem, Google maps" : tilegoogle
 		};
-		L.control.layers(baseMaps, overlayMaps,{position: 'topleft'}).addTo(map);
+		L.control.layers(null, overlayMaps,{collapsed:false, position: 'topleft'}).addTo(map);
+		L.control.layers(baseMaps, null,{position: 'topleft'}).addTo(map);
 
 		//coordenadas no click
 		var popup = L.popup();
@@ -375,7 +387,6 @@
 			.setContent(e.latlng.toString())
 			.openOn(map);
 		}
-
 		map.on('click', onMapClick);
 
 		</script>
