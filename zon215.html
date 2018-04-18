@@ -76,6 +76,7 @@
 		var tilegoogle = L.layerGroup();
 		var tilesmu = new L.LayerGroup();
 		var sdcsc = new L.LayerGroup();
+		var sviariob = new L.LayerGroup();
 
 		//div do mapa
 		var map = new L.Map('map', {
@@ -293,7 +294,7 @@
 			'</tr></table>'
 		);
 		}
-	}).addTo(map);
+	}).addTo(sviariob);
 
 	$.getJSON("data/viasdecretorecuos.geojson", function (data) {
 		sistviarioweb.addData(data);
@@ -313,6 +314,7 @@
 	});
 
 	map.addControl(searchControl);
+	map.removeLayer(sistviarioweb);
 
 	//ZPA3
 	$.getJSON("data/viewzonzpa3.geojson",function(data){
@@ -478,7 +480,7 @@
 
 		onEachFeature: function(feature, layer){			
 			layer.bindPopup(
-				'<strong> Área de segurança e recuperação ambiental - sob responsabilidade da Secretaria de Estado da Defesa Civil SDC/SC </strong> <br/> Obras de melhoramentos fluvial no canal retificado e calha do rio Itajaí-Mirim <br/> Construção de comportas de regulação.'
+				'<strong> Área de segurança e recuperação ambiental <br/> Sob responsabilidade da Secretaria de Estado da Defesa Civil SDC/SC </strong> <br/> Obras de melhoramentos fluvial no canal retificado e calha do rio Itajaí-Mirim <br/> Construção de comportas de regulação.'
 			);			
 		}
 	}).addTo(sdcsc);
@@ -486,12 +488,12 @@
 
 	//Controle de camadas
 	var overlayMaps = {
-		"<a href='http://servicos.decea.gov.br/aga/' target='_blank' >Portaria nº957/GC3-7/2015</a>" : aerogab,
-		"Corredores de comércio e serviços" : ccs
+		"<a href='http://servicos.decea.gov.br/aga/' target='_blank' > DECEA <br/> Portaria nº957/GC3-7/2015</a>" : aerogab,
+		"Corredores de <br/> comércio e serviços" : ccs
 	};
 	var baseMaps = {
-			"Sistema viário" : tilesmu,
-			"Imagem, Google maps" : tilegoogle
+			"Vias" : tilesmu,
+			"Google maps" : tilegoogle
 		};
 	L.control.layers(baseMaps, overlayMaps,{position: 'topleft'}).addTo(map);
 
@@ -518,6 +520,26 @@
 	};
 	legend.addTo(map);
 
+	//Controle camada SDS on zoom 16+		
+	map.on('zoomend', function() {
+		if (map.getZoom() < 16){
+				map.removeLayer(sdcsc);
+		}
+		else {
+				map.addLayer(sdcsc);
+			}
+	});
+	
+	//Controle camada vias on zoom 16+		
+	map.on('zoomend', function() {
+		if (map.getZoom() < 16){
+				map.removeLayer(sviariob);
+		}
+		else {
+				map.addLayer(sviariob);
+			}
+	});
+	
 		</script>
 	</body>
 </html>
