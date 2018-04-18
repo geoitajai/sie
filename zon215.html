@@ -75,6 +75,7 @@
 
 		var tilegoogle = L.layerGroup();
 		var tilesmu = new L.LayerGroup();
+		var sdcsc = new L.LayerGroup();
 
 		//div do mapa
 		var map = new L.Map('map', {
@@ -466,6 +467,21 @@
 			);
 		}
 	}).addTo(ccs);
+	});
+			
+	//Área de segurança pública - SDC/SC
+	$.getJSON("data/sdssc.geojson",function(data){
+		L.geoJson(data, {
+			style: function(feature){
+				return { color: "#006600", fillColor: "#00ff00", fillOpacity: 0.4 };
+			},
+
+		onEachFeature: function(feature, layer){			
+			layer.bindPopup(
+				'<strong> Área de segurança e recuperação ambiental - sob responsabilidade da Secretaria de Estado da Defesa Civil SDC/SC </strong> <br/> Obras de melhoramentos fluvial no canal retificado e calha do rio Itajaí-Mirim <br/> Construção de comportas de regulação.'
+			);			
+		}
+	}).addTo(sdcsc);
 	});
 
 	//Controle de camadas
