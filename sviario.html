@@ -78,12 +78,19 @@
 		<script src="lib/L.Control.MousePosition.js"></script>
 		<script src="lib/leaflet.draw.js"></script>
 		<script src="lib/leaflet.measurecontrol.min.js"></script>
+		<script src="lib/leaflet.markercluster.layersupport.js"></script>
 		<script>
 
 		var ciclog = L.layerGroup();
 		var pontes = new L.LayerGroup();
 		var tilegoogle = L.layerGroup();
 		var tilesmu = new L.LayerGroup();
+		var sau = new L.LayerGroup();
+		var ppubl = new L.LayerGroup();
+		var educa = new L.LayerGroup();
+		var dsocial = new L.LayerGroup();		
+		var esportiv = new L.LayerGroup();
+		var pracas = new L.LayerGroup();		
 
 		//div do mapa
 		var map = new L.Map('map', {
@@ -245,6 +252,146 @@
     })
     .addTo(pontes);
 
+	//#Saúde#
+	var sauicon = L.icon({
+		iconUrl: 'images/pesaude.png',
+		iconAnchor:   [16,60],
+		popupAnchor:  [0,-50],
+		iconSize: [33,60]
+	});
+
+	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=819421971&single=true&output=csv')
+	.on('ready', function(layer) {
+
+		this.eachLayer(function(marker) {
+			marker.setIcon(sauicon);
+			marker.bindPopup(
+				'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +				
+				'Endereço: ' + marker.toGeoJSON().properties.end + '<br/>' +
+				'Telefone: ' + marker.toGeoJSON().properties.tel
+			);
+		});
+	}).addTo(sau);
+		
+	//#Prédios públicos#
+	var ppublicon = L.icon({
+		iconUrl: 'images/peedifpublic.png',
+		iconAnchor:   [16,60],
+		popupAnchor:  [0,-50],
+		iconSize: [33,60]
+	});
+
+	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=158398429&single=true&output=csv')
+	.on('ready', function(layer) {
+
+		this.eachLayer(function(marker) {
+			marker.setIcon(ppublicon);
+			marker.bindPopup(
+				'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +				
+				'Endereço: ' + marker.toGeoJSON().properties.end + '<br/>' +
+				'Telefone: ' + marker.toGeoJSON().properties.tel
+			);
+		});
+	}).addTo(ppubl);
+	
+	//#Educação#
+	var educaicon = L.icon({
+		iconUrl: 'images/paeduca.png',
+		iconAnchor:   [16,60],
+		popupAnchor:  [0,-50],
+		iconSize: [33,60]
+	});
+
+	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=40098444&single=true&output=csv')
+	.on('ready', function(layer) {
+
+		this.eachLayer(function(marker) {
+			marker.setIcon(educaicon);
+			marker.bindPopup(
+				'<strong>' + '<u>' + marker.toGeoJSON().properties.tipo + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +				
+				'Endereço: ' + marker.toGeoJSON().properties.end + '<br/>' +
+				'Telefone: ' + marker.toGeoJSON().properties.tel
+			);
+		});
+	}).addTo(educa);
+
+	//#Desenvolvimento Social#
+	var dsocialicon = L.icon({
+		iconUrl: 'images/pedesenvsocial.png',
+		iconAnchor:   [16,60],
+		popupAnchor:  [0,-50],
+		iconSize: [33,60]
+	});
+
+	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=1965667184&single=true&output=csv')
+	.on('ready', function(layer) {
+
+		this.eachLayer(function(marker) {
+			marker.setIcon(dsocialicon);
+			marker.bindPopup(
+				'<strong>' + '<u>' + marker.toGeoJSON().properties.tipo + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +				
+				'Endereço: ' + marker.toGeoJSON().properties.end + '<br/>' +
+				'Telefone: ' + marker.toGeoJSON().properties.tel
+			);
+		});
+	}).addTo(dsocial);
+	
+	//#Áreas esportivas#
+	var esportivicon = L.icon({
+		iconUrl: 'images/paareasesportivas.png',
+		iconAnchor:   [16,60],
+		popupAnchor:  [0,-50],
+		iconSize: [33,60]
+	});
+
+	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=407582443&single=true&output=csv')
+	.on('ready', function(layer) {
+
+		this.eachLayer(function(marker) {
+			marker.setIcon(esportivicon);
+			marker.bindPopup(
+				'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +				
+				'Endereço: ' + marker.toGeoJSON().properties.end + '<br/>' +
+				'Telefone: ' + marker.toGeoJSON().properties.tel
+			);
+		});
+	}).addTo(esportiv);
+	
+	//#Praças#
+	var pracasicon = L.icon({
+		iconUrl: 'images/ppracas.png',
+		iconAnchor:   [16,60],
+		popupAnchor:  [0,-50],
+		iconSize: [33,60]
+	});
+
+	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=1559994691&single=true&output=csv')
+	.on('ready', function(layer) {
+
+		this.eachLayer(function(marker) {
+			marker.setIcon(pracasicon);
+			marker.bindPopup(
+				'<strong>' + '<u>' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
+				'Endereço: ' + marker.toGeoJSON().properties.endereco + ', ' + marker.toGeoJSON().properties.bairro + '<br/>' +
+				'Lei: ' + marker.toGeoJSON().properties.lei + '<br/>' +				
+				'<table><tr>' +
+					'<td>Equipamentos disponvíveis: ' + '<br/>' +
+					marker.toGeoJSON().properties.equip + '</td>' +
+				'</tr></table>'
+			);
+		});
+	}).addTo(pracas);		
+	
+	//marker clustering com suporte para layers
+	var mcg = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 16 }).addTo(map);
+	mcg.checkIn([ sau, ppubl, educa, dsocial, esportiv, pracas	]);
+	sau.addTo(map);
+	ppubl.addTo(map);
+	educa.addTo(map);
+	dsocial.addTo(map);		
+	esportiv.addTo(map);
+	pracas.addTo(map);
+
 	//legenda
 	function getColour(d) {
 		switch (d) {
@@ -271,7 +418,13 @@
 	//Controle de camadas
 	var overlayMaps = {
 		"Cicloviário" : ciclog,
-		"Pontes" : pontes
+		"Pontes" : pontes,
+		"<img src='images/pesaude.png' height='25' />Saúde</a>" : sau,
+		"<img src='images/peedifpublic.png' height='25' />Edif.públicos</a>" : ppubl,
+		"<img src='images/paeduca.png' height='25' />Educação</a>" : educa,
+		"<img src='images/pedesenvsocial.png' height='25' />Desenv.Social</a>" : dsocial,		
+		"<img src='images/paareasesportivas.png' height='25' />Esporte</a>" : esportiv,
+		"<img src='images/park.png' height='25' />Praças</a>" : pracas
 	};
 	var baseMaps = {
 			"Sistema viário" : tilesmu,
