@@ -77,472 +77,434 @@
 		<script src="lib/leaflet.measurecontrol.min.js"></script>
 		<script>
 
-		var tilegoogle = L.layerGroup();
-		var tilesmu = new L.LayerGroup();
-		var sdcsc = new L.LayerGroup();
-		var sviariob = new L.LayerGroup();
+			var tilegoogle = L.layerGroup();
+			var tilesmu = new L.LayerGroup();
+			var sdcsc = new L.LayerGroup();		
 
-		//div do mapa
-		var map = new L.Map('map', {
-			zoom: 14,
-			minZoom: 11,
-			maxZoom: 17,
-			maxBounds: [
-				//south west
-				[-27.1279, -48.8954],
-				//north east
-				[-26.8074, -48.5845]
-			],
-			center: new L.latLng([-26.91549, -48.6866]),
-			layers:[ tilesmu ],
-			measureControl: true
-		});
+			//div do mapa
+			var map = new L.Map('map', {
+				zoom: 14,
+				minZoom: 11,
+				maxZoom: 17,
+				maxBounds: [
+					//south west
+					[-27.1279, -48.8954],
+					//north east
+					[-26.8074, -48.5845]
+				],
+				center: new L.latLng([-26.91549, -48.6866]),
+				layers:[ tilesmu ],
+				measureControl: true
+			});
 
-		//coordenadas
-		L.control.mousePosition().addTo(map);
+			//coordenadas
+			L.control.mousePosition().addTo(map);
 
-		//barra escala
-		L.control.scale({imperial: false}).addTo(map);
+			//barra escala
+			L.control.scale({imperial: false}).addTo(map);
 
-		//marca d´água
-		L.Control.Watermark = L.Control.extend({
-			onAdd: function(map) {
-				var img = L.DomUtil.create('img');
+			//marca d´água
+			L.Control.Watermark = L.Control.extend({
+				onAdd: function(map) {
+					var img = L.DomUtil.create('img');
 
-				img.src = 'images/brasaosmu.png';
-				img.style.width = '150px';
+					img.src = 'images/brasaosmu.png';
+					img.style.width = '150px';
 
-				return img;
-			},
-			onRemove: function(map) {}
-		});
+					return img;
+				},
+				onRemove: function(map) {}
+			});
 
-		L.control.watermark = function(opts) {
-			return new L.Control.Watermark(opts);
-		}
-		L.control.watermark({ position: 'bottomleft' }).addTo(map);
+			L.control.watermark = function(opts) {
+				return new L.Control.Watermark(opts);
+			}
+			L.control.watermark({ position: 'bottomleft' }).addTo(map);
 
-		//Mapa base, google
-		new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-			opacity: 0.6,
-			maxZoom: 19,
-			transparent: false,
-			attribution: '©2018 Google, Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI COMPLEMENTAR Nº 215, DE 31 DE DEZEMBRO DE 2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-			subdomains:['mt0','mt1','mt2','mt3']
-		}).addTo(tilegoogle);
+			//Mapa base, google
+			new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+				opacity: 0.6,
+				maxZoom: 19,
+				transparent: false,
+				attribution: '©2018 Google, Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI COMPLEMENTAR Nº 215, DE 31 DE DEZEMBRO DE 2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+				subdomains:['mt0','mt1','mt2','mt3']
+			}).addTo(tilegoogle);
 
-		//zona urbana e geral
-		new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 10,
-			attribution: 'Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI COMPLEMENTAR Nº 215, DE 31 DE DEZEMBRO DE 2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-			maxZoom: 17
-		}).addTo(tilesmu);
+			//zona urbana e geral
+			new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
+				opacity: 0.6,
+				minZoom: 10,
+				attribution: 'Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI COMPLEMENTAR Nº 215, DE 31 DE DEZEMBRO DE 2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+				maxZoom: 17
+			}).addTo(tilesmu);
 
-		//zona rural, zoom 17
-		new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 17,
-			maxZoom: 17
-		}).addTo(tilesmu);
+			//zona rural, zoom 17
+			new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
+				opacity: 0.6,
+				minZoom: 17,
+				maxZoom: 17
+			}).addTo(tilesmu);
 
-	//Manchas zoneamento
-	$.getJSON("data/viewzoneamentoclegenda.geojson",function(data){
-		L.geoJson(data, {
-			style: function(feature){
-			var corzona,
-			cormz = feature.properties.legenda;
-			if ( cormz == 'ZAP' ) corzona = "#ffc821";
-			else if ( cormz == 'ZC 1' ) corzona = "#917951";
-			else if ( cormz == 'ZC 2' ) corzona = "#ff5765";
-			else if ( cormz == 'ZEA' ) corzona = "#7cc5ab";
-			else if ( cormz == 'ZEU' ) corzona = "#d4d4bc";
-			else if ( cormz == 'ZIP' ) corzona = "#c82d2d";
-			else if ( cormz == 'ZIT' ) corzona = "#caf5f5";
-			else if ( cormz == 'ZPA 1' ) corzona = "#468e57";
-			else if ( cormz == 'ZPA 2' ) corzona = "#11cd00";
-			else if ( cormz == 'ZPN' ) corzona = "#83cada";
-			else if ( cormz == 'ZR' ) corzona = "#96b7ab";
-			else if ( cormz == 'ZR 1' ) corzona = "#7090d0";
-			else if ( cormz == 'ZR 2' ) corzona = "#b599da";
-			else if ( cormz == 'ZR 3' ) corzona = "#da89bc";
-			else if ( cormz == 'ZSI' ) corzona = "#ff721b";
-			else if ( cormz == 'ZTRA' ) corzona = "#fdf5b0";
-			else if ( cormz == 'ZTRU' ) corzona = "#bfdb99";
-			else if ( cormz == 'ZU 1' ) corzona = "#ef8242";
-			else if ( cormz == 'ZU 2' ) corzona = "#e9e9a8";
-			else if ( cormz == 'ZU 3' ) corzona = "#ffff00";
-			else if ( cormz == 'ZU 4' ) corzona = "#deb239";
-			else if ( cormz == 'ZU 5' ) corzona = "#8c8a23";
-			else corzona = "#fff";
-			return { stroke: false, fillColor: corzona, fillOpacity: 0.4 };
-		},
+			//Manchas zoneamento
+			$.getJSON("data/viewzoneamentoclegenda.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+						var corzona;
+						cormz = feature.properties.legenda;
+						if ( cormz == 'ZAP' ) corzona = "#ffc821";
+						else if ( cormz == 'ZC 1' ) corzona = "#917951";
+						else if ( cormz == 'ZC 2' ) corzona = "#ff5765";
+						else if ( cormz == 'ZEA' ) corzona = "#7cc5ab";
+						else if ( cormz == 'ZEU' ) corzona = "#d4d4bc";
+						else if ( cormz == 'ZIP' ) corzona = "#c82d2d";
+						else if ( cormz == 'ZIT' ) corzona = "#caf5f5";
+						else if ( cormz == 'ZPA 1' ) corzona = "#468e57";
+						else if ( cormz == 'ZPA 2' ) corzona = "#11cd00";
+						else if ( cormz == 'ZPN' ) corzona = "#83cada";
+						else if ( cormz == 'ZR' ) corzona = "#96b7ab";
+						else if ( cormz == 'ZR 1' ) corzona = "#7090d0";
+						else if ( cormz == 'ZR 2' ) corzona = "#b599da";
+						else if ( cormz == 'ZR 3' ) corzona = "#da89bc";
+						else if ( cormz == 'ZSI' ) corzona = "#ff721b";
+						else if ( cormz == 'ZTRA' ) corzona = "#fdf5b0";
+						else if ( cormz == 'ZTRU' ) corzona = "#bfdb99";
+						else if ( cormz == 'ZU 1' ) corzona = "#ef8242";
+						else if ( cormz == 'ZU 2' ) corzona = "#e9e9a8";
+						else if ( cormz == 'ZU 3' ) corzona = "#ffff00";
+						else if ( cormz == 'ZU 4' ) corzona = "#deb239";
+						else if ( cormz == 'ZU 5' ) corzona = "#8c8a23";
+						else corzona = "#fff";
+						return { stroke: false, fillColor: corzona, fillOpacity: 0.4 };
+					},
 
-		onEachFeature: function(feature, layer){
-			layer.bindPopup(
-				'<strong>' + 'Zona: ' + feature.properties.legenda + '</strong>' + '<br/>' +
-				'<table>' +
-				'<tr>' +
-				'<td>' +
-				'Usos permitidos: ' + feature.properties.permitidos + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Usos permissíveis: ' + feature.properties.permissiv + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Altura máxima: ' + feature.properties.alturamax + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Altura máxima do embasamento: ' + feature.properties.alturaemb + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Coeficiente de aproveitamento: ' + feature.properties.coefaprov + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Taxa de ocupação embasamento: ' + feature.properties.toemb + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Taxa de ocupação torre: ' + feature.properties.totorre + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Taxa de permeabilidade: ' + feature.properties.permeab + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Recuo frontal: ' + feature.properties.embrecfron + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Recuos laterais e fundos: ' + feature.properties.embreclat + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Recuos laterais e fundos com aberturas: ' + feature.properties.embreclatc + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Área mínima do lote: ' + feature.properties.lotemaxare + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Testada mínima do lote: ' + feature.properties.lotemaxtes + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Profundidade mínima do lote: ' + feature.properties.lotemaxpro +
-				'</td>' +
-				'</tr>' +
-				'</table>'
-			);
-		}
-	}).addTo(map).bringToBack();
-	});
+					onEachFeature: function(feature, layer){
+						layer.bindPopup(
+							'<strong>' + 'Zona: ' + feature.properties.legenda + '</strong>' + '<br/>' +
+							'<table>' +
+							'<tr>' +
+							'<td>' +
+							'Usos permitidos: ' + feature.properties.permitidos + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Usos permissíveis: ' + feature.properties.permissiv + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Altura máxima: ' + feature.properties.alturamax + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Altura máxima do embasamento: ' + feature.properties.alturaemb + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Coeficiente de aproveitamento: ' + feature.properties.coefaprov + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Taxa de ocupação embasamento: ' + feature.properties.toemb + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Taxa de ocupação torre: ' + feature.properties.totorre + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Taxa de permeabilidade: ' + feature.properties.permeab + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Recuo frontal: ' + feature.properties.embrecfron + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Recuos laterais e fundos: ' + feature.properties.embreclat + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Recuos laterais e fundos com aberturas: ' + feature.properties.embreclatc + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Área mínima do lote: ' + feature.properties.lotemaxare + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Testada mínima do lote: ' + feature.properties.lotemaxtes + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Profundidade mínima do lote: ' + feature.properties.lotemaxpro +
+							'</td>' +
+							'</tr>' +
+							'</table>'
+						)
+					}
+				}).addTo(map).bringToBack();
+			});
 
-	//perímetro urbano
-	$.getJSON("data/perimetrourbano79.geojson",function(data){
-		L.geoJson(data, {
-			style: function(feature){
-			return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8 };
-		},
+			//perímetro urbano
+			$.getJSON("data/perimetrourbano79.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+					return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8 };
+					},
 
-		onEachFeature: function(feature, layer){
-			layer.bindPopup(
-				'Perímetro urbano, leis 1764/79 e 4157/04'
-			);
-		}
-	}).addTo(map);
-	});
-
-	//sistema viário com pesquisa
-	var sistviarioweb = L.geoJson(false, {
-		style: {
-		weight: 18,
-		opacity: 0.0
-		},
-
-		onEachFeature: function(feature, layer){
-
-		var poprecuo;
-		var poprecuo = feature.properties.recuo;
-		if (poprecuo == null) poprecuo = "2 metros";
-		else poprecuo = feature.properties.recuo;
-
-		layer.bindPopup(
-			'<strong>' + feature.properties.nome + '</strong>' + '<br/>' +
-			'Lei/data: ' + feature.properties.leidata + '<br/>' +
-			'<a href="http://leismunicipa.is/vecgt" target="_blank">Decreto 11.060/17(incorporação recuo): </a>' + '<br/>' + poprecuo +
-			'<table><tr>' +
-			'<td>Caixa da via: ' + feature.properties.caixatotal + '<br/>' +
-			'Pista: ' + feature.properties.caixavia + '<br/>' +
-			'Passeios: ' + feature.properties.passeionl + ' - ' + feature.properties.passeioso + '</td>' +
-			'</tr></table>'
-		);
-		}
-	}).addTo(sviariob);
-
-	$.getJSON("data/viasdecretorecuos.geojson", function (data) {
-		sistviarioweb.addData(data);
-	});
-
-	var searchControl = new L.Control.Search({
-		layer: sistviarioweb,
-		propertyName: 'nome',
-		circleLocation: false,
-		hideMarkerOnCollapse: true,
-		textPlaceholder: "Pesquisa logradouro",
-		textErr: "Não localizado",
-		textCancel: "Cancelar",
-		zoom: 17,
-		openPopup: true,
-		initial: false
-	});
-
-	map.addControl(searchControl);
-	map.removeLayer(sistviarioweb);
-
-	//ZPA3
-	$.getJSON("data/viewzonzpa3.geojson",function(data){
-		L.geoJson(data, {
-			style: function(feature){
-			return { stroke: false, fillColor: "#71b580", fillOpacity: 0.4 };
-		},
-
-		onEachFeature: function(feature, layer){
-			layer.bindPopup(
-				'<strong>' + 'Zona: ' + feature.properties.nome + '</strong>' + '<br/>' +
-				'<table>' +
-				'<tr>' +
-				'<td>' +
-				'Usos permitidos: ' + feature.properties.permitidos + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Usos permissíveis: ' + feature.properties.permissiv + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Altura máxima: ' + feature.properties.alturamax + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Altura máxima do embasamento: ' + feature.properties.alturaemb + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Coeficiente de aproveitamento: ' + feature.properties.coefaprov + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Taxa de ocupação embasamento: ' + feature.properties.toemb + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Taxa de ocupação torre: ' + feature.properties.totorre + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Taxa de permeabilidade: ' + feature.properties.permeab + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Recuo frontal: ' + feature.properties.embrecfron + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Recuos laterais e fundos: ' + feature.properties.embreclat + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Recuos laterais e fundos com aberturas: ' + feature.properties.embreclatc + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Área mínima do lote: ' + feature.properties.lotemaxare + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Testada mínima do lote: ' + feature.properties.lotemaxtes + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Profundidade mínima do lote: ' + feature.properties.lotemaxpro +
-				'</td>' +
-				'</tr>' +
-				'</table>'
-			);
-		}
-	}).addTo(map);
-	});
-
-	//Controle de layers
-	var aerogab = L.layerGroup();
-	var ccs = L.layerGroup();
-
-	//Gabarito aeroporto
-	$.getJSON("data/aeroportogabarito.geojson",function(data){
-		L.geoJson(data, {
-			style: function(feature){
-			var coraero,
-			corae = feature.properties.descr;
-			if ( corae == 'área de aproximação 1' ) coraero = "#b14ee9";
-			else if ( corae == 'superfície horizontal interna' ) coraero = "#926de8";
-			else if ( corae == 'superfície cônica' ) coraero = "#629de8";
-			else if ( corae == 'área de aproximação 2' ) coraero = "#1ce3e6";
-			else coraero = "#fff";
-			return { stroke: false, fillColor: coraero, fillOpacity: 0.4 };
-		},
-
-		onEachFeature: function(feature, layer){
-			layer.bindPopup(
-				'Altura=' + feature.properties.altmax + 'm'
-			);
-		}
-	}).addTo(aerogab);
-	});
-
-	//Linhas aeroporto
-	$.getJSON("data/aeroportoconelinhas.geojson",function(data){
-		L.geoJson(data, {
-			style: function(feature){
-			return { color: "#4d4d4d", dashArray: "30 10", Opacity: 0.6 };
-		}
-	}).addTo(aerogab);
-	});
-
-	//CCS
-	$.getJSON("data/viewzonccs.geojson",function(data){
-		L.geoJson(data, {
-			style: function(feature){
-			var corlinhaccs,
-			corcss = feature.properties.tipo;
-			if ( corcss == 'CCS1' ) corlinhaccs = "#ff0000";
-			else if ( corcss == 'CCS2' ) corlinhaccs = "#723900";
-			else if ( corcss == 'CCS3' ) corlinhaccs = "#b82e00";
-			else corlinhaccs = "#fff";
-			return { color: corlinhaccs, weight: 5, Opacity: 0.4 };
-		},
-
-		onEachFeature: function(feature, layer){
-			layer.bindPopup(
-				'<strong>' + 'Zona: ' + feature.properties.tipo + '</strong>' + '<br/>' +
-				'<table>' +
-				'<tr>' +
-				'<td>' +
-				'Usos permitidos: ' + feature.properties.permitidos + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'<tr>' +
-				'<td>' +
-				'Usos permissíveis: ' + feature.properties.permissiv + '<br/>' +
-				'</td>' +
-				'</tr>' +
-				'</table>'
-			);
-		}
-	}).addTo(ccs);
-	});
+					onEachFeature: function(feature, layer){
+						layer.bindPopup(
+							'Perímetro urbano, leis 1764/79 e 4157/04'
+						);
+					}
+				}).addTo(map);
+			});
 			
-	//Área de segurança pública - SDC/SC
-	$.getJSON("data/sdssc.geojson",function(data){
-		L.geoJson(data, {
-			style: function(feature){
-				return { color: "#006600", fillColor: "#00ff00", fillOpacity: 0.4 };
-			},
+			//pesquisa, sistema viário
+			var pesquisa = new L.LayerGroup();			
+			omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pub?gid=828218726&single=true&output=csv').addTo(pesquisa);
 
-		onEachFeature: function(feature, layer){			
-			layer.bindPopup(
-				'<strong> Área de segurança e recuperação ambiental <br/> Sob responsabilidade da Secretaria de Estado da Defesa Civil SDC/SC </strong> <br/> Obras de melhoramentos fluvial no canal retificado e calha do rio Itajaí-Mirim <br/> Construção de comportas de regulação.'
-			);			
-		}
-	}).addTo(sdcsc);
-	});
+			var searchControl = new L.Control.Search({
+				layer: pesquisa,
+				propertyName: 'nome',
+				circleLocation: false,
+				hideMarkerOnCollapse: true,
+				textPlaceholder: "Pesquisa logradouro ou nº licença",
+				textErr: "Não localizado",
+				textCancel: "Cancelar",
+				zoom: 17,
+				openPopup: false,
+				initial: false
+			});
 
-	//Controle de camadas
-	var overlayMaps = {
-		"<a href='http://servicos.decea.gov.br/aga/' target='_blank' > DECEA <br/> Portaria nº957/GC3-7/2015</a>" : aerogab,
-		"Corredores de <br/> comércio e serviços" : ccs
-	};
-	var baseMaps = {
-			"Vias" : tilesmu,
-			"Google maps" : tilegoogle
-		};
-	L.control.layers(baseMaps, overlayMaps,{position: 'topleft'}).addTo(map);
+			map.addControl(searchControl);
+			//camada não precisa ser visível, apenas para searchcontrol
+			map.removeLayer(pesquisa);
+			
+			//ZPA3
+			$.getJSON("data/viewzonzpa3.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+						return { stroke: false, fillColor: "#71b580", fillOpacity: 0.4 };
+					},
 
-	//legenda
-	function getColour(d) {
-		switch (d) {
-			case 'CCS1': return '#ff0000';
-			case 'CCS2': return '#723900';
-			case 'CCS3': return '#b82e00';
-			default: return '#fff';
-		}
-	};
+					onEachFeature: function(feature, layer){
+						layer.bindPopup(
+							'<strong>' + 'Zona: ' + feature.properties.nome + '</strong>' + '<br/>' +
+							'<table>' +
+							'<tr>' +
+							'<td>' +
+							'Usos permitidos: ' + feature.properties.permitidos + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Usos permissíveis: ' + feature.properties.permissiv + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Altura máxima: ' + feature.properties.alturamax + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Altura máxima do embasamento: ' + feature.properties.alturaemb + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Coeficiente de aproveitamento: ' + feature.properties.coefaprov + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Taxa de ocupação embasamento: ' + feature.properties.toemb + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Taxa de ocupação torre: ' + feature.properties.totorre + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Taxa de permeabilidade: ' + feature.properties.permeab + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Recuo frontal: ' + feature.properties.embrecfron + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Recuos laterais e fundos: ' + feature.properties.embreclat + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Recuos laterais e fundos com aberturas: ' + feature.properties.embreclatc + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Área mínima do lote: ' + feature.properties.lotemaxare + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Testada mínima do lote: ' + feature.properties.lotemaxtes + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Profundidade mínima do lote: ' + feature.properties.lotemaxpro +
+							'</td>' +
+							'</tr>' +
+							'</table>'
+						);
+					}
+				}).addTo(map);
+			});
 
-	var legend = L.control({position: 'bottomright'});
+			//Controle de layers
+			var aerogab = L.layerGroup();
+			var ccs = L.layerGroup();
 
-	legend.onAdd = function (map) {
-		var div = L.DomUtil.create('div', 'info legend');
-			faultstatus = ['CCS1', 'CCS2', 'CCS3'];
-		for (var i = 0; i < faultstatus.length; i++) {
-			div.innerHTML +=
-				'<i class="circle" style="background:' + getColour(faultstatus[i]) + '"></i> ' + (faultstatus[i] ? faultstatus[i] + '<br>' : '+');
-		}
-		return div;
-	};
-	legend.addTo(map);
+			//Gabarito aeroporto
+			$.getJSON("data/aeroportogabarito.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+						var coraero,
+						corae = feature.properties.descr;
+						if ( corae == 'área de aproximação 1' ) coraero = "#b14ee9";
+						else if ( corae == 'superfície horizontal interna' ) coraero = "#926de8";
+						else if ( corae == 'superfície cônica' ) coraero = "#629de8";
+						else if ( corae == 'área de aproximação 2' ) coraero = "#1ce3e6";
+						else coraero = "#fff";
+						return { stroke: false, fillColor: coraero, fillOpacity: 0.4 };
+					},
 
-	//Controle camada SDS on zoom 15+		
-	map.on('zoomend', function() {
-		if (map.getZoom() < 15){
-				map.removeLayer(sdcsc);
-		}
-		else {
-				map.addLayer(sdcsc);
-			}
-	});
-	
-	//Controle camada vias on zoom 16+		
-	map.on('zoomend', function() {
-		if (map.getZoom() < 16){
-				map.removeLayer(sviariob);
-		}
-		else {
-				map.addLayer(sviariob);
-			}
-	});
+					onEachFeature: function(feature, layer){
+						layer.bindPopup(
+							'Altura=' + feature.properties.altmax + 'm'
+						);
+					}
+				}).addTo(aerogab);
+			});
+
+			//Linhas aeroporto
+			$.getJSON("data/aeroportoconelinhas.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+						return { color: "#4d4d4d", dashArray: "30 10", Opacity: 0.6 };
+					}
+				}).addTo(aerogab);
+			});
+
+			//CCS
+			$.getJSON("data/viewzonccs.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+						var corlinhaccs,
+						corcss = feature.properties.tipo;
+						if ( corcss == 'CCS1' ) corlinhaccs = "#ff0000";
+						else if ( corcss == 'CCS2' ) corlinhaccs = "#723900";
+						else if ( corcss == 'CCS3' ) corlinhaccs = "#b82e00";
+						else corlinhaccs = "#fff";
+						return { color: corlinhaccs, weight: 5, Opacity: 0.4 };
+					},
+
+					onEachFeature: function(feature, layer){
+						layer.bindPopup(
+							'<strong>' + 'Zona: ' + feature.properties.tipo + '</strong>' + '<br/>' +
+							'<table>' +
+							'<tr>' +
+							'<td>' +
+							'Usos permitidos: ' + feature.properties.permitidos + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'<tr>' +
+							'<td>' +
+							'Usos permissíveis: ' + feature.properties.permissiv + '<br/>' +
+							'</td>' +
+							'</tr>' +
+							'</table>'
+						);
+					}
+				}).addTo(ccs);
+			});
+					
+			//Área de segurança pública - SDC/SC
+			$.getJSON("data/sdssc.geojson",function(data){
+				L.geoJson(data, {
+					style: function(feature){
+						return { color: "#006600", fillColor: "#00ff00", fillOpacity: 0.4 };
+					},
+
+					onEachFeature: function(feature, layer){			
+						layer.bindPopup(
+							'<strong> Área de segurança e recuperação ambiental <br/> Sob responsabilidade da Secretaria de Estado da Defesa Civil SDC/SC </strong> <br/> Obras de melhoramentos fluvial no canal retificado e calha do rio Itajaí-Mirim <br/> Construção de comportas de regulação.'
+						);			
+					}
+				}).addTo(sdcsc);
+			});
+
+			//Controle de camadas
+			var overlayMaps = {
+				"<a href='http://servicos.decea.gov.br/aga/' target='_blank' > DECEA <br/> Portaria nº957/GC3-7/2015</a>" : aerogab,
+				"Corredores de <br/> comércio e serviços" : ccs
+			};
+			var baseMaps = {
+					"Vias" : tilesmu,
+					"Google maps" : tilegoogle
+			};
+			L.control.layers(baseMaps, overlayMaps,{position: 'topleft', collapsed: false}).addTo(map);
+
+			//legenda
+			function getColour(d) {
+				switch (d) {
+					case 'CCS1': return '#ff0000';
+					case 'CCS2': return '#723900';
+					case 'CCS3': return '#b82e00';
+					default: return '#fff';
+				};
+			};
+
+			var legend = L.control({position: 'bottomright'});
+
+			legend.onAdd = function (map) {
+				var div = L.DomUtil.create('div', 'info legend');
+				faultstatus = ['CCS1', 'CCS2', 'CCS3'];
+				for (var i = 0; i < faultstatus.length; i++) {
+					div.innerHTML += '<i class="circle" style="background:' + getColour(faultstatus[i]) + '"></i> ' + (faultstatus[i] ? faultstatus[i] + '<br>' : '+');
+				};
+				return div;
+			};
+			legend.addTo(map);
+
+			//Controle camada SDS on zoom 15+		
+			map.on('zoomend', function() {
+				if (map.getZoom() < 15){
+						map.removeLayer(sdcsc);
+				}
+				else {
+						map.addLayer(sdcsc);
+					};
+			});
 	
 		</script>
 	</body>
