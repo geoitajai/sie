@@ -75,6 +75,7 @@
 		<script src="lib/L.Control.MousePosition.js"></script>
 		<script src="lib/leaflet.draw.js"></script>
 		<script src="lib/leaflet.measurecontrol.min.js"></script>
+		<script src="lib/leaflet-hash.js"></script>
 		<script>
 
 			var tilegoogle = L.layerGroup();
@@ -96,6 +97,9 @@
 				layers:[ tilesmu ],
 				measureControl: true
 			});
+			
+			//hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
+			var hash = new L.Hash(map);
 
 			//coordenadas
 			L.control.mousePosition().addTo(map);
