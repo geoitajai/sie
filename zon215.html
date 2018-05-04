@@ -256,7 +256,8 @@
 							'</td>' +
 							'</tr>' +
 							'</table>'
-						)
+						),
+						layer.bindTooltip(feature.properties.legenda, {sticky: true, direction: 'center'})
 					}
 				}).addTo(map).bringToBack();
 			});
@@ -379,7 +380,8 @@
 							'</td>' +
 							'</tr>' +
 							'</table>'
-						);
+						),
+						layer.bindTooltip(feature.properties.nome, {sticky: true, direction: 'center'})
 					}
 				}).addTo(map);
 			});
@@ -458,11 +460,11 @@
 					style: function(feature){
 						return { color: "#006600", fillColor: "#00ff00", fillOpacity: 0.4 };
 					},
-
 					onEachFeature: function(feature, layer){			
 						layer.bindPopup(
 							'<strong> Área de segurança e recuperação ambiental <br/> Sob responsabilidade da Secretaria de Estado da Defesa Civil SDC/SC </strong> <br/> Obras de melhoramentos fluvial no canal retificado e calha do rio Itajaí-Mirim <br/> Construção de comportas de regulação.'
-						);			
+						),
+						layer.bindTooltip('Área de segurança<br/>e recuperação ambiental', {sticky: true, direction: 'center'})
 					}
 				}).addTo(sdcsc);
 			});
