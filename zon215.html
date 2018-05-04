@@ -112,8 +112,8 @@
 				onAdd: function(map) {
 					var img = L.DomUtil.create('img');
 
-					img.src = 'images/brasaosmu.png';
-					img.style.width = '150px';
+					img.src = 'images/brasaosmuzoneamento.png';
+					img.style.width = '170px';
 
 					return img;
 				},
@@ -123,7 +123,7 @@
 			L.control.watermark = function(opts) {
 				return new L.Control.Watermark(opts);
 			}
-			L.control.watermark({ position: 'bottomleft' }).addTo(map);
+			L.control.watermark({ position: 'bottomright' }).addTo(map);
 
 			//Mapa base, google
 			new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
@@ -286,12 +286,14 @@
 				propertyName: 'nome',
 				circleLocation: false,
 				hideMarkerOnCollapse: true,
-				textPlaceholder: "Pesquisa logradouro ou nº licença",
+				textPlaceholder: "Pesquisa nome logradouro",
 				textErr: "Não localizado",
 				textCancel: "Cancelar",
 				zoom: 17,
 				openPopup: false,
-				initial: false
+				initial: false,
+				collapsed: false,
+				position: 'topright'
 			});
 
 			map.addControl(searchControl);
@@ -436,7 +438,7 @@
 
 					onEachFeature: function(feature, layer){
 						layer.bindPopup(
-							'<strong>' + 'Zona: ' + feature.properties.tipo + '</strong>' + '<br/>' +
+							'<strong>' + 'Nome: ' + feature.properties.tipo + '</strong>' + '<br/>' +
 							'<table>' +
 							'<tr>' +
 							'<td>' +
@@ -479,28 +481,6 @@
 					"Imagem Google maps" : tilegoogle
 			};
 			L.control.layers(baseMaps, overlayMaps,{position: 'bottomleft', collapsed: false}).addTo(map);
-
-			//legenda
-			function getColour(d) {
-				switch (d) {
-					case 'CCS1': return '#ff0000';
-					case 'CCS2': return '#723900';
-					case 'CCS3': return '#b82e00';
-					default: return '#fff';
-				};
-			};
-
-			var legend = L.control({position: 'bottomright'});
-
-			legend.onAdd = function (map) {
-				var div = L.DomUtil.create('div', 'info legend');
-				faultstatus = ['CCS1', 'CCS2', 'CCS3'];
-				for (var i = 0; i < faultstatus.length; i++) {
-					div.innerHTML += '<i class="circle" style="background:' + getColour(faultstatus[i]) + '"></i> ' + (faultstatus[i] ? faultstatus[i] + '<br>' : '+');
-				};
-				return div;
-			};
-			legend.addTo(map);
 
 			//Controle camada SDS on zoom 15+		
 			map.on('zoomend', function() {
