@@ -59,10 +59,10 @@
 			.leaflet-control-draw-measure {
 				background-image: url(images/measure-control.png);
 			}
-			
-			.leaflet-container .leaflet-control-search {				
+
+			.leaflet-container .leaflet-control-search {
 				left: 2px;
-			}			
+			}
 		</style>
 	</head>
 
@@ -80,7 +80,7 @@
 
 			var tilegoogle = L.layerGroup();
 			var tilesmu = new L.LayerGroup();
-			var sdcsc = new L.LayerGroup();		
+			var sdcsc = new L.LayerGroup();
 
 			//div do mapa
 			var map = new L.Map('map', {
@@ -97,15 +97,9 @@
 				layers:[ tilesmu ],
 				measureControl: true
 			});
-			
+
 			//hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
 			var hash = new L.Hash(map);
-
-			//coordenadas
-			L.control.mousePosition().addTo(map);
-
-			//barra escala
-			L.control.scale({imperial: false}).addTo(map);
 
 			//marca d´água
 			L.Control.Watermark = L.Control.extend({
@@ -124,6 +118,12 @@
 				return new L.Control.Watermark(opts);
 			}
 			L.control.watermark({ position: 'bottomright' }).addTo(map);
+
+			//coordenadas
+			L.control.mousePosition({prefix: 'EPSG:4326:', position:'bottomright'}).addTo(map);
+
+			//barra escala
+			L.control.scale({imperial: false, position:'bottomright'}).addTo(map);
 
 			//Mapa base, google
 			new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
@@ -276,9 +276,9 @@
 					}
 				}).addTo(map);
 			});
-			
+
 			//pesquisa, sistema viário
-			var pesquisa = new L.LayerGroup();			
+			var pesquisa = new L.LayerGroup();
 			omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pub?gid=828218726&single=true&output=csv').addTo(pesquisa);
 
 			var searchControl = new L.Control.Search({
@@ -299,7 +299,7 @@
 			map.addControl(searchControl);
 			//camada não precisa ser visível, apenas para searchcontrol
 			map.removeLayer(pesquisa);
-			
+
 			//ZPA3
 			$.getJSON("data/viewzonzpa3.geojson",function(data){
 				L.geoJson(data, {
@@ -455,14 +455,14 @@
 					}
 				}).addTo(ccs);
 			});
-					
+
 			//Área de segurança pública - SDC/SC
 			$.getJSON("data/sdssc.geojson",function(data){
 				L.geoJson(data, {
 					style: function(feature){
 						return { color: "#006600", fillColor: "#00ff00", fillOpacity: 0.4 };
 					},
-					onEachFeature: function(feature, layer){			
+					onEachFeature: function(feature, layer){
 						layer.bindPopup(
 							'<strong> Área de segurança e recuperação ambiental <br/> Sob responsabilidade da Secretaria de Estado da Defesa Civil SDC/SC </strong> <br/> Obras de melhoramentos fluvial no canal retificado e calha do rio Itajaí-Mirim <br/> Construção de comportas de regulação.'
 						),
@@ -482,7 +482,7 @@
 			};
 			L.control.layers(baseMaps, overlayMaps,{position: 'bottomleft', collapsed: false}).addTo(map);
 
-			//Controle camada SDS on zoom 15+		
+			//Controle camada SDS on zoom 15+
 			map.on('zoomend', function() {
 				if (map.getZoom() < 15){
 						map.removeLayer(sdcsc);
@@ -491,7 +491,7 @@
 						map.addLayer(sdcsc);
 					};
 			});
-			
+
 		</script>
 	</body>
 </html>
