@@ -34,30 +34,7 @@
 			td, th {
 				border: 1px solid #dddddd;
 			}
-
-			.legend {
-				padding: 6px 8px;
-				text-align: left;
-				line-height: 18px;
-				color: #555;
-				background : white;
-				box-shadow: 0 0 15px rgba(0,0,0,0.2);
-				border-radius: 5px;
-			}
-
-			.legend i {
-				width: 18px;
-				height: 18px;
-				float: left;
-				margin-right: 20px;
-			}
-
-				.legend .circle {
-				border-radius: 20%;
-				width: 15px;
-				height: 15px;
-			}
-
+			
 			.leaflet-control-draw-measure {
 				background-image: url(images/measure-control.png);
 			}
@@ -81,6 +58,7 @@
 		<script src="lib/leaflet.markercluster.layersupport.js"></script>
 		<script src="lib/leaflet-hash.js"></script>
 		<script src="lib/leaflet-heat.js"></script>
+		<script src="lib/jquery-3.3.1.min.js"></script>
 
 		<script>
 		var tilegoogle = new L.layerGroup();
@@ -120,7 +98,7 @@
 				var img = L.DomUtil.create('img');
 
 				img.src = 'images/logoico.png';
-				img.style.width = '150px';
+				img.style.width = '120px';
 
 				return img;
 			},
@@ -130,7 +108,7 @@
 		L.control.watermark = function(opts) {
 			return new L.Control.Watermark(opts);
 		};
-		L.control.watermark({ position: 'bottomleft' }).addTo(map);
+		L.control.watermark({ position: 'bottomright' }).addTo(map);
 
 		//Mapa base, google
 		new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
@@ -205,26 +183,47 @@
 		mcg.checkIn([ ocorr	]);
 		ocorr.addTo(map);
 
-		//legenda
-		var legend = L.control({position: 'bottomright'});
+		//opcoes a partir de um arquivo externo csv
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRCoaRgsophVs1tjdmstnz_xm2VPwAwwdZmi-4vkP0UlC7qrSTxqmNOOZkIMBpUY14VbKQDEXmlyvCi/pub?gid=611251390&single=true&output=csv",
+			dataType: "text",
+			success: function (data) {
+				var opcoes = data.split(',');
+				//heatmap
+				var raiob = opcoes["3"];
+				var raio = parseInt(raiob);
+				var heatMap = new L.heatLayer(ocorrcoord,{blur:20, radius: raio});
+				map.addLayer(heatMap);
+				
+				//legenda
+				var legend = L.control({position: 'topright'});
+				var ldatainicio = opcoes["1"];
+				var ldatafim = opcoes["2"];
+				var lpmotivo = opcoes["4"];
+				var ltipo = opcoes["5"];
+				legend.onAdd = function (map) {
+					var div = L.DomUtil.create('div');
+					div.innerHTML = 
+					'<strong><p style="text-align:right;background-color: #ffffff;opacity: 0.6;">' + 
+					'Raio da mancha de calor: ' + raio + '<br/>' +
+					'Filtro por período, data inicial: ' + ldatainicio + '<br/>' +
+					'Filtro por período, data final: ' + ldatafim + '<br/>' +
+					'Filtro por motivo do acidente: ' + lpmotivo + '<br/>' +
+					'Filtro por tipo de acidente: ' + ltipo +
+					'</p></strong>';
+					return div;
+				};
+				legend.addTo(map);
+			 }
+		});
 
-		legend.onAdd = function (map) {
-			var div = L.DomUtil.create('div');
-			div.innerHTML = '<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRdjqjBnRBuBR-OwQ0f10S5-wri8eDakuKSgYodGFIF2m5N6MuCNtnGwRyVi2HgyL0viUHf6CuhavGe/pubhtml?gid=1199396381&amp;single=true&amp;widget=false&amp;headers=false" width="470" height="145" frameborder="0" marginheight="0" marginwidth="0"></iframe>';
-			return div;
-		};
-		legend.addTo(map);
-
-		//mapa de calor
-		var heatMap = new L.heatLayer(ocorrcoord,{blur:20, radius: 50});
-		map.addLayer(heatMap);
-		
 		//controle camadas
 		var baseMaps = {
 			"Sistema viário" : tilesmu,
-			"Imagem, Google maps" : tilegoogle
+			"Imagem Google" : tilegoogle
 		};		
-		L.control.layers(baseMaps, null,{position: 'topleft'}).addTo(map);
+		L.control.layers(baseMaps, null,{position:'bottomleft', collapsed:false}).addTo(map);
 		
 		//coordenadas no click
 		var popup = L.popup();
