@@ -1,66 +1,68 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Diretoria de Fiscalização e Controle de Trânsito</title>
-		<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
-		<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
-		<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
-		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-		<link rel="stylesheet" href="lib/leaflet.css" />
-		<link rel="stylesheet" href="lib/leaflet-search.min.css" />
-		<link rel="stylesheet" href="lib/leaflet.draw.css" />
-		<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
-		<link rel="stylesheet" href="lib/MarkerCluster.css" />
-		<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
 
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-			}
+<head>
+	<meta charset="utf-8" />
+	<title>Diretoria de Fiscalização e Controle de Trânsito</title>
+	<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+	<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" href="lib/leaflet.css" />
+	<link rel="stylesheet" href="lib/leaflet-search.min.css" />
+	<link rel="stylesheet" href="lib/leaflet.draw.css" />
+	<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
 
-			#map {
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				width: 100%;
-			}
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
 
-			.leaflet-container {
-				background: #ffffff;
-			}
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
 
-			td, th {
-				border: 1px solid #dddddd;
-			}
-			
-			.leaflet-control-draw-measure {
-				background-image: url(images/measure-control.png);
-			}
+		.leaflet-container {
+			background: #ffffff;
+		}
 
-			.leaflet-container .leaflet-control-search {
-				left: 2px;
-			}
-		</style>
-	</head>
+		td,
+		th {
+			border: 1px solid #dddddd;
+		}
 
-	<body>
-		<div id="map"></div>
+		.leaflet-control-draw-measure {
+			background-image: url(images/measure-control.png);
+		}
 
-		<script src="lib/leaflet.js"></script>
-		<script src="lib/leaflet-search.min.js"></script>
-		<script src="lib/leaflet-omnivore.min.js"></script>
-		<script src="lib/leaflet.markercluster.js"></script>
-		<script src="lib/L.Control.MousePosition.js"></script>
-		<script src="lib/leaflet.draw.js"></script>
-		<script src="lib/leaflet.measurecontrol.min.js"></script>
-		<script src="lib/leaflet.markercluster.layersupport.js"></script>
-		<script src="lib/leaflet-hash.js"></script>
-		<script src="lib/leaflet-heat.js"></script>
-		<script src="lib/jquery-3.3.1.min.js"></script>
+		.leaflet-container .leaflet-control-search {
+			left: 2px;
+		}
+	</style>
+</head>
 
-		<script>
+<body>
+	<div id="map"></div>
+
+	<script src="lib/leaflet.js"></script>
+	<script src="lib/leaflet-search.min.js"></script>
+	<script src="lib/leaflet-omnivore.min.js"></script>
+	<script src="lib/leaflet.markercluster.js"></script>
+	<script src="lib/L.Control.MousePosition.js"></script>
+	<script src="lib/leaflet.draw.js"></script>
+	<script src="lib/leaflet.measurecontrol.min.js"></script>
+	<script src="lib/leaflet.markercluster.layersupport.js"></script>
+	<script src="lib/leaflet-hash.js"></script>
+	<script src="lib/leaflet-heat.js"></script>
+	<script src="lib/jquery-3.3.1.min.js"></script>
+
+	<script>
 		var tilegoogle = new L.layerGroup();
 		var tilesmu = new L.LayerGroup();
 		var pesquisa = new L.LayerGroup();
@@ -79,7 +81,7 @@
 				[-26.8074, -48.5845]
 			],
 			center: new L.latLng([-26.91189, -48.69535]),
-			layers:[ tilesmu ],
+			layers: [tilesmu],
 			measureControl: true
 		});
 
@@ -90,11 +92,11 @@
 		L.control.mousePosition().addTo(map);
 
 		//barra escala
-		L.control.scale({imperial: false}).addTo(map);
+		L.control.scale({ imperial: false }).addTo(map);
 
 		//marca d´água
 		L.Control.Watermark = L.Control.extend({
-			onAdd: function(map) {
+			onAdd: function (map) {
 				var img = L.DomUtil.create('img');
 
 				img.src = 'images/logoico.png';
@@ -102,21 +104,21 @@
 
 				return img;
 			},
-			onRemove: function(map) {}
+			onRemove: function (map) { }
 		});
 
-		L.control.watermark = function(opts) {
+		L.control.watermark = function (opts) {
 			return new L.Control.Watermark(opts);
 		};
 		L.control.watermark({ position: 'bottomright' }).addTo(map);
 
 		//Mapa base, google
-		new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+		new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
 			opacity: 0.6,
 			maxZoom: 19,
 			transparent: false,
 			attribution: '©2018 Google, Diretoria de Fiscalização e Controle de Trânsito, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-			subdomains:['mt0','mt1','mt2','mt3']
+			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 		}).addTo(tilegoogle);
 
 		//zona urbana e geral
@@ -164,23 +166,23 @@
 		//#Ocorrências#
 		var sauicon = L.icon({
 			iconUrl: 'images/dot.png',
-			iconAnchor:   [10,10],
-			popupAnchor:  [-10,-10],
-			iconSize: [20,20]
+			iconAnchor: [10, 10],
+			popupAnchor: [-10, -10],
+			iconSize: [20, 20]
 		});
 
 		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vRCoaRgsophVs1tjdmstnz_xm2VPwAwwdZmi-4vkP0UlC7qrSTxqmNOOZkIMBpUY14VbKQDEXmlyvCi/pub?gid=660204247&single=true&output=csv')
-		.on('ready', function(layer) {
-			this.eachLayer(function(marker) {
-				marker.setIcon(sauicon);
-				//formatação para o Leaflet.heat, insere cada ponto no array, o último elemento é a intensidade
-				ocorrcoord.push([marker.toGeoJSON().geometry.coordinates[1],marker.toGeoJSON().geometry.coordinates[0],0.4]);
-			});
-		}).addTo(ocorr);
+			.on('ready', function (layer) {
+				this.eachLayer(function (marker) {
+					marker.setIcon(sauicon);
+					//formatação para o Leaflet.heat, insere cada ponto no array, o último elemento é a intensidade
+					ocorrcoord.push([marker.toGeoJSON().geometry.coordinates[1], marker.toGeoJSON().geometry.coordinates[0], 0.4]);
+				});
+			}).addTo(ocorr);
 
 		//marker clustering com suporte para layers
-		var mcg = L.markerClusterGroup.layerSupport({ }).addTo(map);
-		mcg.checkIn([ ocorr	]);
+		var mcg = L.markerClusterGroup.layerSupport({}).addTo(map);
+		mcg.checkIn([ocorr]);
 		ocorr.addTo(map);
 
 		//opcoes a partir de um arquivo externo csv
@@ -193,48 +195,49 @@
 				//heatmap
 				var raiob = opcoes["3"];
 				var raio = parseInt(raiob);
-				var heatMap = new L.heatLayer(ocorrcoord,{blur:20, radius: raio});
+				var heatMap = new L.heatLayer(ocorrcoord, { blur: 20, radius: raio });
 				map.addLayer(heatMap);
-				
+
 				//legenda
-				var legend = L.control({position: 'topright'});
+				var legend = L.control({ position: 'topright' });
 				var ldatainicio = opcoes["1"];
 				var ldatafim = opcoes["2"];
 				var lpmotivo = opcoes["4"];
 				var ltipo = opcoes["5"];
 				legend.onAdd = function (map) {
 					var div = L.DomUtil.create('div');
-					div.innerHTML = 
-					'<strong><p style="text-align:right;background-color: #ffffff;opacity: 0.6;">' + 
-					'Raio da mancha de calor: ' + raio + '<br/>' +
-					'Filtro por período, data inicial: ' + ldatainicio + '<br/>' +
-					'Filtro por período, data final: ' + ldatafim + '<br/>' +
-					'Filtro por motivo do acidente: ' + lpmotivo + '<br/>' +
-					'Filtro por tipo de acidente: ' + ltipo +
-					'</p></strong>';
+					div.innerHTML =
+						'<strong><p style="text-align:right;background-color: #ffffff;opacity: 0.6;">' +
+						'Raio da mancha de calor: ' + raio + '<br/>' +
+						'Filtro por período, data inicial: ' + ldatainicio + '<br/>' +
+						'Filtro por período, data final: ' + ldatafim + '<br/>' +
+						'Filtro por motivo do acidente: ' + lpmotivo + '<br/>' +
+						'Filtro por tipo de acidente: ' + ltipo +
+						'</p></strong>';
 					return div;
 				};
 				legend.addTo(map);
-			 }
+			}
 		});
 
 		//controle camadas
 		var baseMaps = {
-			"Sistema viário" : tilesmu,
-			"Imagem Google" : tilegoogle
-		};		
-		L.control.layers(baseMaps, null,{position:'bottomleft', collapsed:false}).addTo(map);
-		
+			"Sistema viário": tilesmu,
+			"Imagem Google": tilegoogle
+		};
+		L.control.layers(baseMaps, null, { position: 'bottomleft', collapsed: false }).addTo(map);
+
 		//coordenadas no click
 		var popup = L.popup();
 		function onMapClick(e) {
-		popup
-			.setLatLng(e.latlng)
-			.setContent(e.latlng.toString())
-			.openOn(map);
+			popup
+				.setLatLng(e.latlng)
+				.setContent(e.latlng.toString())
+				.openOn(map);
 		}
-		map.on('click', onMapClick);		
-		
-		</script>
-	</body>
+		map.on('click', onMapClick);
+
+	</script>
+</body>
+
 </html>
