@@ -57,13 +57,8 @@
                     delimiter: '\t'
                 },
                 function(err, dados) {
-                    function onEachFeature(feature, layer){
-                        //layer.bindPopup('teste');
-                    };
-                    L.geoJSON(dados, {
-                        onEachFeature: onEachFeature
-                    }).addTo(map);
-                    console.log(dados);
+                    let geodata = L.geoJSON(dados)addTo(map);
+                    console.log(geodata);
                 });
             }
         });
