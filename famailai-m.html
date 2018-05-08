@@ -83,11 +83,9 @@
 	<script src="lib/proj4leaflet.js"></script>
 	<script>
 
-		var tilegoogle = L.layerGroup();
+		var tilegoogle = new L.layerGroup();
 		var tilesmu = new L.LayerGroup();
 		var pesquisa = new L.LayerGroup();
-		//var laivalidos = new L.LayerGroup();
-		//var laivencidos = new L.LayerGroup();
 
 		//div do mapa
 		var map = new L.Map('map', {
@@ -157,20 +155,33 @@
 			maxZoom: 14
 		}));
 
+		//------------- data famai
+		var famailai = L.geoJSON();
 		proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
+		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=0&single=true&output=csv').addTo(famailai);
 
-		/* ------------- data famai
-		var geojson = L.geoJSON();
-		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vQX0lq-pp7xVvu89vfuwpCSwuVNA_TmzQ4FJhGHwY58BPjzJ414OE9NpMyw2UWUw3B81RATYH_ImiXY/pub?gid=394865370&single=true&output=csv').addTo(geojson);
+		console.log(famailai);
+		/*
+		var sirgas = {
+			'crs': {
+				'type': 'name',
+				'properties': {
+					'name': 'urn:ogc:def:crs:EPSG::31982'
+				}
+			}
+		};
 
-		L.Proj.geoJson(geojson, {
-		  'pointToLayer': function(feature, latlng) {
-			return L.marker(latlng).bindPopup(feature.properties.nome);
-		  }
+		L.geoJSON(sirgas).addTo(famailai);
+		*/
+		/*
+		L.Proj.geoJson(famailai, {
+			'pointToLayer': function (feature, latlng) {
+				return L.marker(latlng);
+			}
 		}).addTo(map);
 		*/
 
-		// ---------------exemplo
+		/* ---------------exemplo
 		var geojson = [
 			{//01
 				'type': 'Feature',
@@ -196,13 +207,14 @@
 
 		var teste = geojson["0"].properties.name;
 		console.log(teste);
-
+		*/
+		/*
 		L.Proj.geoJson(geojson, {
 			'pointToLayer': function (feature, latlng) {
 				return L.marker(latlng).bindPopup(feature.properties.name);
 			}
 		}).addTo(map);
-		//
+		*/
 
 	</script>
 </body>
