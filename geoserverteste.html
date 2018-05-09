@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Sistema viário, Itajaí-SC</title>
+	<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+	<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" href="lib/leaflet.css" />
+	<link rel="stylesheet" href="lib/leaflet-search.min.css" />
+	<link rel="stylesheet" href="lib/leaflet.draw.css" />
+	<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+
+		.leaflet-container {
+			background: #ffffff;
+		}
+
+		td,
+		th {
+			border: 1px solid #dddddd;
+		}
+
+		.legend {
+			padding: 6px 8px;
+			text-align: left;
+			line-height: 18px;
+			color: #555;
+			background: white;
+			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+			border-radius: 5px;
+		}
+
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 20px;
+		}
+
+		.legend .circle {
+			border-radius: 20%;
+			width: 15px;
+			height: 15px;
+		}
+
+		.leaflet-control-draw-measure {
+			background-image: url(images/measure-control.png);
+		}
+
+		.leaflet-container .leaflet-control-search {
+			left: 2px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="map"></div>
+	<script src="lib/jquery-3.3.1.min.js"></script>
+	<script src="lib/leaflet.js"></script>
+	<script src="lib/leaflet.wms.js"></script>
+
+	<script>
+
+		//div do mapa
+		var map = new L.Map('map', {
+			zoom: 14,
+			minZoom: 11,
+			maxZoom: 17,
+			maxBounds: [
+				//south west
+				[-27.1279, -48.8954],
+				//north east
+				[-26.8074, -48.5845]
+			],
+			center: new L.latLng([-26.9046, -48.6874]),
+		});
+
+		/*
+		//zona urbana e geral
+		new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
+			opacity: 0.6,
+			minZoom: 10,
+			attribution: 'Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			maxZoom: 17
+		}).addTo(map);
+
+		//zona rural, zoom 17
+		new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
+			opacity: 0.6,
+			minZoom: 17,
+			maxZoom: 17
+		}).addTo(map);
+		*/
+
+		//get wms
+		/*
+		var overlay = L.WMS.overlay("http://10.10.1.158:8080/geoserver/geoitj/wms", {
+			'layers': 'geoitj:viewsistemaviario',
+			'transparent': true
+		});
+		overlay.addTo(map);
+		*/
+
+		//estudo 1
+
+		var CleanInfoSource = L.WMS.Source.extend({
+			'showFeatureInfo': function(latlng, info){
+				if (!this._map){return};
+				let nome = info.split(/\n|=/);
+				console.log(nome);
+				//let cod = info.split('\n')[4];
+				//info = cod + "</br>" + nome;
+				this._map.openPopup(info, latlng);
+			}
+		});
+		var options = {'transparent': true, 'info_format': 'text/plain', 'format': 'image/png', 'tiled': true};
+		var source = new CleanInfoSource("http://10.10.1.158:8080/geoserver/geoitj/wms", options);
+		source.addSubLayer('geoitj:viewsistemaviario');
+		source.addTo(map);
+
+		/*
+		var CleanInfoSource = L.WMS.Source.extend({
+			'showFeatureInfo': function(latlng, info){
+				if (!this._map){return;}
+				tipo = info.split(/'/)[21];
+				legenda = info.split(/'/)[27];
+				info = tipo + ":<br/>PERICOLOSITÀ " + legenda;
+				this._map.openPopup(info, latlng);
+			}
+		});
+
+		var minambPAI = new CleanInfoSource("http://10.10.1.158:8080/geoserver/geoitj/wms",{
+				layers: 'geoitj:viewsistemaviario',
+				format: "image/png",
+				transparent: true,
+				info_format: "text/plain"
+			}
+		);
+		*/
+
+	</script>
+</body>
+
+</html>
