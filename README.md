@@ -1,1 +1,1 @@
-## Desenvolvimento de mapas, Secretaria Municipal de Urbanismo, Itajaí - SC.
+## Estudos para o desenvolvimento de mapas.
