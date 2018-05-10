@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>Sistema viário, Itajaí-SC</title>
+	<title>Planta Cadastral, Itajaí-SC</title>
 	<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
 	<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
 	<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
@@ -11,9 +11,6 @@
 	<link rel="stylesheet" href="lib/leaflet.css" />
 	<link rel="stylesheet" href="lib/leaflet-search.min.css" />
 	<link rel="stylesheet" href="lib/leaflet.draw.css" />
-	<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
-	<link rel="stylesheet" href="lib/MarkerCluster.css" />
-	<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
 
 	<style>
 		body {
@@ -30,34 +27,6 @@
 
 		.leaflet-container {
 			background: #ffffff;
-		}
-
-		td,
-		th {
-			border: 1px solid #dddddd;
-		}
-
-		.legend {
-			padding: 6px 8px;
-			text-align: left;
-			line-height: 18px;
-			color: #555;
-			background: white;
-			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-			border-radius: 5px;
-		}
-
-		.legend i {
-			width: 18px;
-			height: 18px;
-			float: left;
-			margin-right: 20px;
-		}
-
-		.legend .circle {
-			border-radius: 20%;
-			width: 15px;
-			height: 15px;
 		}
 
 		.leaflet-control-draw-measure {
@@ -77,6 +46,8 @@
 	<script src="lib/leaflet.wms.js"></script>
 
 	<script>
+		var googleimg = new L.LayerGroup();
+		var orto2013 = new L.LayerGroup();
 
 		//div do mapa
 		var map = new L.Map('map', {
@@ -85,17 +56,71 @@
 			maxZoom: 20,
 			maxBounds: [
 				//south west
-				[-27.1279, -48.8954],
+				[-27.215341, -49.020370],
 				//north east
-				[-26.8074, -48.5845]
+				[-26.701009, -48.397961]
 			],
 			center: new L.latLng([-26.9046, -48.6874]),
+			layers: [orto2013],
+			zoomControl: false
 		});
 
-		//estudo 1
+		//marca d´água
+		L.Control.Watermark = L.Control.extend({
+			onAdd: function (map) {
+				let img = L.DomUtil.create('img');
+
+				img.src = 'images/cadastro.png';
+				img.style.width = '250px';
+
+				return img;
+			},
+			onRemove: function (map) { }
+		});
+
+		L.control.watermark = function (opts) {
+			return new L.Control.Watermark(opts);
+		}
+		L.control.watermark({ position: 'topleft' }).addTo(map);
+
+		//Mapa base, google
+		new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+			opacity: 0.5,
+			maxZoom: 20,
+			transparent: false,
+			attribution: '©2018 Google, Secretaria Municipal da Fazenda - Cadastro, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+		}).addTo(googleimg);
+
+		//imagem aérea 2013
+		new L.tileLayer.wms('https://geo.itajai.sc.gov.br/geoserver/gwc/service/wms', {
+			layers: 'gm_itajai:ortofoto_1',
+			format: 'image/jpeg',
+			opacity: 0.5,
+			attribution: 'Secretaria Municipal da Fazenda - Cadastro, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			minZoom: 10,
+			maxZoom: 20
+		}).addTo(orto2013);
+
+		//barra escala
+		L.control.scale({ imperial: false }).addTo(map);
+
+		//Limites Município
+		$.getJSON("data/limitesmunicipais.geojson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return {
+						color: '#000000',
+						fill: false
+					};
+				},
+			}).addTo(map);
+		});
+
+		//Cadastro
 		var CleanInfoSource = L.WMS.Source.extend({
-			'showFeatureInfo': function(latlng, info){
-				if (!this._map){return};
+			'showFeatureInfo': function (latlng, info) {
+				if (!this._map) { return };
 				//let nome = info.split(/\n|=/);
 				//console.log(nome);
 				let nadaencontrado = info.split(/\n|=/)[0];
@@ -113,55 +138,70 @@
 				let lotenum = info.split(/\n|=/)[11];
 				let lotefacechk = info.split(/\n|=/)[8];
 				let loteface = info.split(/\n|=/)[9];
+				let lotedatachk = info.split(/\n|=/)[12];
+				let lotedata = info.split(/\n|=/)[13];
 				//campos
 				let legendaA;
 				let legendaB;
 				let legendaC;
 				//abastecer os campos'';
-				if (nadaencontrado == 'no features were found'){
+				if (nadaencontrado == 'no features were found') {
 					legendaA = 'clique sobre um elemento';
 					legendaB = '';
 					legendaC = '';
+					legendaD = '';
 				};
 				//legenda sistema viário
-				if (vianomechk == 'nome '){legendaA = '<strong>' + vianome + '</strong>'};
-				if (vialeichk == 'leidata '){legendaB = 'Lei' + vialei};
-				if (viaptotalchk == 'ptotalvia '){legendaC = 'Cx.da via' + viaptotal + ' - Passeios:' + passeioa + '/' + passeiob};
+				if (vianomechk == 'nome ') { legendaA = '<strong>' + vianome + '</strong>' };
+				if (vialeichk == 'leidata ') { legendaB = 'Lei' + vialei };
+				if (viaptotalchk == 'ptotalvia ') {
+					legendaC = 'Cx.da via: ' + viaptotal + 'm';
+					legendaD = 'Passeios:' + passeioa + '/' + passeiob + 'm';
+				};
 				//legenda lote
-				if (loteinscrchk == 'inscr '){legendaA = 'Inscr.Imob.: ' + '<strong>' + loteinscr + '</strong>'};
-				if (lotenumchk == 'numero '){legendaB = 'Número: ' + lotenum};
-				if (lotefacechk == 'face '){legendaC = 'Face: ' + loteface};
+				if (loteinscrchk == 'inscr ') { legendaA = 'Inscr.Imob.: ' + '<strong>' + loteinscr + '</strong>' };
+				if (lotenumchk == 'numero ') { legendaB = 'Número: ' + lotenum };
+				if (lotefacechk == 'face ') { legendaC = 'Face: ' + loteface };
+				if (lotedatachk == 'data ' && lotedata == ' null') { legendaD = 'Conferência pendente' };
+				if (lotedatachk == 'data ' && lotedata != ' null') { legendaD = 'Atualizado: ' + lotedata };
 				//legenda
-				info = legendaA + '<br/>' +	legendaB + '<br/>' + legendaC;
+				info = legendaA + '<br/>' + legendaB + '<br/>' + legendaC + '<br/>' + legendaD;
 				//popup
 				this._map.openPopup(info, latlng);
 			}
 		});
-		var options = {'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20};
+		var options = { 'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20, opacity: 0.7 };
 		var source = new CleanInfoSource("http://10.10.1.158:8080/geoserver/geoitj/wms", options);
 		source.addSubLayer('geoitj:viewsistemaviarioestilosempauta');
-		source.addSubLayer('geoitj:viewcadastroinscr');
+		source.addSubLayer('geoitj:viewcadastroconfe');
 		source.addTo(map);
 
-		/*
-		var CleanInfoSource = L.WMS.Source.extend({
-			'showFeatureInfo': function(latlng, info){
-				if (!this._map){return;}
-				tipo = info.split(/'/)[21];
-				legenda = info.split(/'/)[27];
-				info = tipo + ":<br/>PERICOLOSITÀ " + legenda;
-				this._map.openPopup(info, latlng);
-			}
+		//perímetro urbano
+		$.getJSON("http://geo-smu.itajai.sc.gov.br:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:perimetrourbano79&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8 };
+				},
+				onEachFeature: function (feature, layer) {
+					layer.bindPopup(
+						'Perímetro urbano, leis 1764/79 e 4157/04'
+					);
+				}
+			}).addTo(map);
 		});
 
-		var minambPAI = new CleanInfoSource("http://10.10.1.158:8080/geoserver/geoitj/wms",{
-				layers: 'geoitj:viewsistemaviario',
-				format: "image/png",
-				transparent: true,
-				info_format: "text/plain"
-			}
-		);
-		*/
+        //Botão zoom posicionado
+        L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+
+		//Controle de camadas
+		var overlay2 = {};
+		var baseMaps = {
+			"Ortofoto, ano 2013": orto2013,
+			"Imagem, Google maps": googleimg
+		};
+		L.control.layers(baseMaps, null, { collapsed: false, position: 'bottomleft' }).addTo(map);
 
 	</script>
 </body>
