@@ -82,7 +82,7 @@
 		var map = new L.Map('map', {
 			zoom: 14,
 			minZoom: 11,
-			maxZoom: 17,
+			maxZoom: 20,
 			maxBounds: [
 				//south west
 				[-27.1279, -48.8954],
@@ -92,47 +92,55 @@
 			center: new L.latLng([-26.9046, -48.6874]),
 		});
 
-		/*
-		//zona urbana e geral
-		new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 10,
-			attribution: 'Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-			maxZoom: 17
-		}).addTo(map);
-
-		//zona rural, zoom 17
-		new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 17,
-			maxZoom: 17
-		}).addTo(map);
-		*/
-
-		//get wms
-		/*
-		var overlay = L.WMS.overlay("http://10.10.1.158:8080/geoserver/geoitj/wms", {
-			'layers': 'geoitj:viewsistemaviario',
-			'transparent': true
-		});
-		overlay.addTo(map);
-		*/
-
 		//estudo 1
-
 		var CleanInfoSource = L.WMS.Source.extend({
 			'showFeatureInfo': function(latlng, info){
 				if (!this._map){return};
-				let nome = info.split(/\n|=/);
-				console.log(nome);
-				//let cod = info.split('\n')[4];
-				//info = cod + "</br>" + nome;
+				//let nome = info.split(/\n|=/);
+				//console.log(nome);
+				let nadaencontrado = info.split(/\n|=/)[0];
+				let vianomechk = info.split(/\n|=/)[16];
+				let vianome = info.split(/\n|=/)[17];
+				let vialeichk = info.split(/\n|=/)[14];
+				let vialei = info.split(/\n|=/)[15];
+				let viaptotalchk = info.split(/\n|=/)[8];
+				let viaptotal = info.split(/\n|=/)[9];
+				let passeioa = info.split(/\n|=/)[11];
+				let passeiob = info.split(/\n|=/)[13];
+				let loteinscrchk = info.split(/\n|=/)[6];
+				let loteinscr = info.split(/\n|=/)[7];
+				let lotenumchk = info.split(/\n|=/)[10];
+				let lotenum = info.split(/\n|=/)[11];
+				let lotefacechk = info.split(/\n|=/)[8];
+				let loteface = info.split(/\n|=/)[9];
+				//campos
+				let legendaA;
+				let legendaB;
+				let legendaC;
+				//abastecer os campos'';
+				if (nadaencontrado == 'no features were found'){
+					legendaA = 'clique sobre um elemento';
+					legendaB = '';
+					legendaC = '';
+				};
+				//legenda sistema viário
+				if (vianomechk == 'nome '){legendaA = '<strong>' + vianome + '</strong>'};
+				if (vialeichk == 'leidata '){legendaB = 'Lei' + vialei};
+				if (viaptotalchk == 'ptotalvia '){legendaC = 'Cx.da via' + viaptotal + ' - Passeios:' + passeioa + '/' + passeiob};
+				//legenda lote
+				if (loteinscrchk == 'inscr '){legendaA = 'Inscr.Imob.: ' + '<strong>' + loteinscr + '</strong>'};
+				if (lotenumchk == 'numero '){legendaB = 'Número: ' + lotenum};
+				if (lotefacechk == 'face '){legendaC = 'Face: ' + loteface};
+				//legenda
+				info = legendaA + '<br/>' +	legendaB + '<br/>' + legendaC;
+				//popup
 				this._map.openPopup(info, latlng);
 			}
 		});
-		var options = {'transparent': true, 'info_format': 'text/plain', 'format': 'image/png', 'tiled': true};
+		var options = {'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20};
 		var source = new CleanInfoSource("http://10.10.1.158:8080/geoserver/geoitj/wms", options);
-		source.addSubLayer('geoitj:viewsistemaviario');
+		source.addSubLayer('geoitj:viewsistemaviarioestilosempauta');
+		source.addSubLayer('geoitj:viewcadastroinscr');
 		source.addTo(map);
 
 		/*
