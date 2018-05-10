@@ -225,7 +225,7 @@
 		L.control.layers(baseMaps, null, { position: 'bottomleft', collapsed: false }).addTo(map);
 
 		//coordenadas no click
-		var c = new L.Control.Coordinates();
+		var c = new L.Control.Coordinates({promptText: 'Coordenadas para a área de transferência, utilize Ctrl+C'});
 		c.addTo(map);
 		map.on('click', function(e) {
 			c.setCoordinates(e);
