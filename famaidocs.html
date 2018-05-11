@@ -801,6 +801,8 @@
                         delimiter: '\t'
                     },
                     function (err, data) {
+                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
+                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
                         L.geoJSON(data).addTo(pesquisa);
                     });
             }
