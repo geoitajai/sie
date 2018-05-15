@@ -832,7 +832,7 @@
             layer: pesquisa,
             propertyName: 'nome',
             circleLocation: false,
-            hideMarkerOnCollapse: true,
+            marker: false,
             textPlaceholder: "Pesquisa logradouro ou nº licença",
             textErr: "Não localizado",
             textCancel: "Cancelar",
@@ -840,7 +840,8 @@
             openPopup: false,
             collapsed: false,
             initial: false,
-            position: 'topleft'
+            position: 'topleft',
+            minLength: 2
         });
         map.addControl(searchControl);
         //camada não precisa ser visível, apenas para searchcontrol
