@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="formteste.css" />
+
+</head>
+
+<body>
+    <div id="map"></div>
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/leaflet.js"></script>
+    <script>
+        var map = new L.Map('map', {
+            zoom: 14,
+            minZoom: 11,
+            maxZoom: 20,
+            maxBounds: [
+                //south west
+                [-27.215341, -49.020370],
+                //north east
+                [-26.701009, -48.397961]
+            ],
+            center: new L.latLng([-26.9046, -48.6874]),
+        });
+
+        //Mapa base, google
+        var googleimg = new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.5,
+            maxZoom: 20,
+            transparent: false,
+            attribution: '©2018 Google, Secretaria Municipal da Fazenda - Cadastro, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        //pesquisa por setor.quadra.lote
+        var pesquisa = L.layerGroup().addTo(map);
+        function elementoNav() {
+            let subdub = document.forms["pesquisalote"]["setorQuadraLote"].value;
+            pesquisa.clearLayers();
+            $.getJSON("http://10.10.1.158:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:viewcadastroptspesqu&outputFormat=application%2Fjson&CQL_FILTER=inscr='" + subdub + "'",
+            function (data) {
+                let error = data.totalFeatures;
+                console.log(error);
+                if (error == 0) {
+                    alert('não encontrado');
+                }
+                else {
+                    let latitude = data.features["0"].geometry.coordinates[1];
+                    let longitude = data.features["0"].geometry.coordinates[0];
+                    map.flyTo (L.latLng(latitude, longitude),18);
+                    L.geoJson(data).addTo(pesquisa);
+                };
+            });
+        };
+
+    </script>
+    <!-- formulário pesquisa -->
+    <form name="pesquisalote" action="" onsubmit="elementoNav(); return false;" method="post">
+        Name:
+        <input type="text" name="setorQuadraLote">
+        <input type="submit" value="Pesquisa, setor.quadra.lote: 000.000.0000">
+    </form>
+</body>
+
+</html>

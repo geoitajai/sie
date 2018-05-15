@@ -45,6 +45,7 @@
     <script src="lib/leaflet.markercluster.layersupport.js"></script>
     <script src="lib/styledLayerControl.js"></script>
     <script src="lib/leaflet-search.min.js"></script>
+    <script src="lib/leaflet.tilelayer.fallback.js"></script>
 
     <script>
         //camadas a serem manipuladas
@@ -72,7 +73,7 @@
         var map = new L.Map('map', {
             zoom: 14,
             minZoom: 12,
-            maxZoom: 17,
+            maxZoom: 18,
             maxBounds: [
                 //south west
                 [-27.215341, -49.020370],
@@ -115,18 +116,18 @@
         }).addTo(tilegoogle);
 
         //zona urbana e geral
-        new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
+        L.tileLayer.fallback('tiles/basemap/10-17/{z}/{x}/{y}.png', {
             opacity: 0.6,
             minZoom: 10,
             attribution: '<a href="https://famai.itajai.sc.gov.br/" target="_blank">FAMAI</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-            maxZoom: 17
+            maxZoom: 19
         }).addTo(tilesmu);
 
         //zona rural, zoom 17
-        new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
+        L.tileLayer.fallback('tiles/basemap/17rural/{z}/{x}/{y}.png', {
             opacity: 0.6,
             minZoom: 17,
-            maxZoom: 17
+            maxZoom: 19
         }).addTo(tilesmu);
 
         //bairros
@@ -801,8 +802,6 @@
                         delimiter: '\t'
                     },
                     function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
                         L.geoJSON(data).addTo(pesquisa);
                     });
             }
@@ -821,7 +820,9 @@
                         delimiter: '\t'
                     },
                     function (err, data) {
-                        L.geoJSON(data).addTo(pesquisa);
+                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
+                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
+                        L.Proj.geoJson(data).addTo(pesquisa);
                     });
             }
         });
