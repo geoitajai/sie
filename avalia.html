@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="lib/leaflet.css" />
     <link rel="stylesheet" href="lib/MarkerCluster.css" />
     <link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="lib/styledLayerControlcss/styledLayerControl.css" />
     <link rel="stylesheet" href="lib/leaflet-search.min.css" />
 </head>
 
@@ -39,11 +38,8 @@
     <script src="lib/leaflet.js"></script>
     <script src="lib/jquery-3.3.1.min.js"></script>
     <script src="lib/csv2geojson.js"></script>
-    <script src="lib/proj4-compressed.js"></script>
-    <script src="lib/proj4leaflet.js"></script>
     <script src="lib/leaflet.markercluster.js"></script>
     <script src="lib/leaflet.markercluster.layersupport.js"></script>
-    <script src="lib/styledLayerControl.js"></script>
     <script src="lib/leaflet-search.min.js"></script>
     <script src="lib/leaflet.tilelayer.fallback.js"></script>
 
@@ -52,22 +48,7 @@
         var tilesmu = new L.LayerGroup();
         var tilegoogle = new L.LayerGroup();
         var pesquisa = new L.LayerGroup();
-        var laivalidos = new L.LayerGroup();
-        var laivencidos = new L.LayerGroup();
-        var lapvalidos = new L.LayerGroup();
-        var lapvencidos = new L.LayerGroup();
-        var auavalidos = new L.LayerGroup();
-        var auavencidos = new L.LayerGroup();
-        var aucvalidos = new L.LayerGroup();
-        var aucvencidos = new L.LayerGroup();
-        var laovalidos = new L.LayerGroup();
-        var laovencidos = new L.LayerGroup();
-        var lmvalidos = new L.LayerGroup();
-        var lmvencidos = new L.LayerGroup();
-        var dancvalidos = new L.LayerGroup();
-        var dancvencidos = new L.LayerGroup();
-        var certivalidos = new L.LayerGroup();
-        var certivencidos = new L.LayerGroup();
+        var avaliacoes = new L.LayerGroup();
 
         //div do mapa
         var map = new L.Map('map', {
@@ -90,7 +71,7 @@
             onAdd: function (map) {
                 var img = L.DomUtil.create('img');
 
-                img.src = 'images/brasaofamai.png';
+                img.src = 'images/brasa.png';
                 img.style.width = '320px';
 
                 return img;
@@ -139,60 +120,13 @@
 
         //Clustering com suporte a camadas
         var mcg = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 15 }).addTo(map);
-        mcg.checkIn([laivalidos, laivencidos, lapvalidos, lapvencidos, auavalidos, auavencidos, aucvalidos, aucvencidos, laovalidos, laovencidos, lmvalidos, lmvencidos, dancvalidos, dancvencidos, certivalidos, certivencidos]);
-        laivalidos.addTo(map);
-        lapvalidos.addTo(map);
-        auavalidos.addTo(map);
-        aucvalidos.addTo(map);
-        laovalidos.addTo(map);
-        lmvalidos.addTo(map);
-        dancvalidos.addTo(map);
-        certivalidos.addTo(map);
+        mcg.checkIn([avaliacoes]);
+        avaliacoes.addTo(map);
 
-        //LAI válidos
+        //Avaliações
         $.ajax({
             type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=0&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',//opções csv2geojson
-                        lonfield: 'longitude',
-                        delimiter: '\t'//delimitador para o arquivo .tsv(TAB)
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');//Sirgas 2000 UTM 22S
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };//É suficiente adicionar a projeção apenas a primeira feição.
-                        let markicon = L.icon({
-                            iconUrl: 'images/laib.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });//ícone utilizado
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da LAI: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(laivalidos);//L.Proj e adiciona ao mapa
-                    });
-            }
-        });
-
-        //LAI vencidos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=1195483124&single=true&output=tsv",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfmnhu6-ia1AQmoO5eKO3cuwyReuRnqXwShzz0CcDI7SZ7SeNmbzt6JfXjXuXsbYngjSQE99Gzu10g/pub?gid=0&single=true&output=tsv",
             dataType: "text",
             success: function (data) {
                 csv2geojson.csv2geojson(data,
@@ -202,589 +136,20 @@
                         delimiter: '\t'
                     },
                     function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/lavenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da LAI: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(laivencidos);
-                    });
-            }
-        });
-
-        //LAP validos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=2129722034&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/lapb.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da LAP: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(lapvalidos);
-                    });
-            }
-        });
-
-        //LAP vencidos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=2009334585&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/lapvenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da LAP: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(lapvencidos);
-                    });
-            }
-        });
-
-        //AUA validos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=1955613010&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/aua.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da AUA: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(auavalidos);
-                    });
-            }
-        });
-
-        //AUA vencidos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=461970980&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/auavenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da AUA: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(auavencidos);
-                    });
-            }
-        });
-
-        //AuC validos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=85257342&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/auc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da AuC: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(aucvalidos);
-                    });
-            }
-        });
-
-        //AuC vencidos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=2047278649&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/aucvenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da AuC: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(aucvencidos);
-                    });
-            }
-        });
-
-        //LAO validos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=484159935&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/lao.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da LAO: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(laovalidos);
-                    });
-            }
-        });
-
-        //LAO vencidos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=40575908&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/laovenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da LAO: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(laovencidos);
-                    });
-            }
-        });
-
-        //LM validos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=919024806&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/lm.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da Licença: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(lmvalidos);
-                    });
-            }
-        });
-
-        //LM vencidos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=2036656347&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/lmvenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da Licença: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(lmvencidos);
-                    });
-            }
-        });
-
-        //DANC validos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=2071119926&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/danc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da DANC: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(dancvalidos);
-                    });
-            }
-        });
-
-        //DANC vencidos
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=1480466282&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/dancvenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da DANC: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(dancvencidos);
-                    });
-            }
-        });
-
-        //Cerdidões válidas
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=1564447277&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/certi.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da Certidão: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(certivalidos);
-                    });
-            }
-        });
-
-        //Cerdidões vencidas
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=967381028&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        proj4.defs('EPSG:31982', '+proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
-                        data.features["0"].crs = { 'type': 'name', 'properties': { 'name': 'urn:ogc:def:crs:EPSG::31982' } };
-                        let markicon = L.icon({
-                            iconUrl: 'images/certivenc.png',
-                            iconAnchor: [16, 60],
-                            popupAnchor: [0, -50],
-                            iconSize: [33, 60]
-                        });
-                        L.Proj.geoJson(data, {
-                            'pointToLayer': function (feature, latlng) {
-                                return L.marker(latlng)
-                                    .bindPopup(
-                                        '<strong> Número da Certidão: ' + feature.properties.num + ', processo: ' + feature.properties.nproc + '</strong></br>' +
-                                        'Analista: ' + feature.properties.analista + '</br>' +
-                                        'Emissão: ' + feature.properties.dataemi + '</br>' +
-                                        'Validade: ' + feature.properties.datavali + '</br>' +
-                                        'Atividade: ' + feature.properties.ativdescr + '</br>' +
-                                        'Requerente: ' + feature.properties.req + '</br>' +
-                                        'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro
-                                    )
-                                    .setIcon(markicon);
-                            }
-                        }).addTo(certivencidos);
+                        L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let marker = L.marker(latlng);
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'Endereço: ' + feature.properties.end + '<br/>' +
+									'Área: ' + feature.properties.area + '<br/>' +
+									'Testada x Profundidade: ' + feature.properties.testadaxprof + '<br/>' +
+                                    'Valor: ' + feature.properties.valort + '<br/>' +
+									'Zoneamento: ' + feature.properties.zon + ' anexo: ' + feature.properties.zonanexo
+								);
+								return marker;
+							}
+                        }).addTo(avaliacoes).addTo(pesquisa);
                     });
             }
         });
@@ -807,31 +172,13 @@
             }
         });
 
-        //Documentos para pesquisa
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTZu8nTDZEz4Vk1Fp7m7m08qR3uh7pPmXfWv1LRT5fm5J1fmuCZFtRs0AuSiolnhm9S_UlBLvwFoC_h/pub?gid=1732993460&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        L.geoJSON(data).addTo(map);
-                    });
-            }
-        });
-
         //Barra pesquisa
         var searchControl = new L.Control.Search({
             layer: pesquisa,
             propertyName: 'nome',
             circleLocation: false,
             marker: false,
-            textPlaceholder: "Pesquisa logradouro ou nº licença",
+            textPlaceholder: "Pesquisa logradouro ou nome avaliação",
             textErr: "Não localizado",
             textCancel: "Cancelar",
             zoom: 17,
@@ -839,108 +186,23 @@
             collapsed: false,
             initial: false,
             position: 'topleft',
-            minLength: 2
+            minLength: 1
         });
         map.addControl(searchControl);
         //camada não precisa ser visível, apenas para searchcontrol
         map.removeLayer(pesquisa);
 
+		//Controle de camadas mapas fundo
+		var baseMaps = {
+			"Sistema viário": tilesmu,
+			"Imagem, Google maps": tilegoogle
+		};
+		L.control.layers(baseMaps, null, { collapsed: false, position: 'bottomleft' }).addTo(map);
+
         //Botão zoom posicionado
         L.control.zoom({
             position: 'bottomleft'
         }).addTo(map);
-
-        //Layers
-        var baseMaps = [
-            {
-                groupName: "Mapa base",
-                expanded: true,
-                layers: {
-                    "Sist.Viário": tilesmu,
-                    "Google Imagem": tilegoogle
-                }
-            }
-        ];
-        var overlays = [
-            {
-                groupName: "LAI",
-                expanded: true,
-                layers: {
-                    "LAI válidos": laivalidos,
-                    "LAI vencidos": laivencidos
-                }
-            },
-            {
-                groupName: "LAP",
-                expanded: true,
-                layers: {
-                    "LAP válidos": lapvalidos,
-                    "LAP vencidos": lapvencidos
-                }
-            },
-            {
-                groupName: "AUA",
-                expanded: true,
-                layers: {
-                    "AUA válidos": auavalidos,
-                    "AUA vencidos": auavencidos
-                }
-            },
-            {
-                groupName: "AuC",
-                expanded: true,
-                layers: {
-                    "AuC válidos": aucvalidos,
-                    "AuC vencidos": aucvencidos
-                }
-            },
-            {
-                groupName: "LAO",
-                expanded: true,
-                layers: {
-                    "LAO válidos": laovalidos,
-                    "LAO vencidos": laovencidos
-                }
-            },
-            {
-                groupName: "Lic.Municipal",
-                expanded: true,
-                layers: {
-                    "L.M.válidas": lmvalidos,
-                    "L.M.vencidas": lmvencidos
-                }
-            },
-            {
-                groupName: "DANC",
-                expanded: true,
-                layers: {
-                    "DANC válidas": dancvalidos,
-                    "DANC vencidas": dancvencidos
-                }
-            },
-            {
-                groupName: "Certidão",
-                expanded: true,
-                layers: {
-                    "Cert.válidas": certivalidos,
-                    "Cert.vencidas": certivencidos
-                }
-            }
-        ];
-
-        /*
-        laivalidos.StyledLayerControl = {
-		    removable : true
-		    visible : true
-	    };
-        */
-
-        var options = {
-            exclusive: false,
-            collapsed: false
-        };
-        var control = L.Control.styledLayerControl(baseMaps, overlays, options);
-        map.addControl(control);
 
     </script>
 </body>
