@@ -42,6 +42,7 @@
     <script src="lib/leaflet.markercluster.layersupport.js"></script>
     <script src="lib/leaflet-search.min.js"></script>
     <script src="lib/leaflet.tilelayer.fallback.js"></script>
+    <script src="lib/leaflet-hash.js"></script>
 
     <script>
         //camadas a serem manipuladas
@@ -65,6 +66,9 @@
             zoomControl: false,
             layers: [tilesmu]
         });
+
+        //hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
+		var hash = new L.Hash(map);
 
         //marca d´água
         L.Control.Watermark = L.Control.extend({
