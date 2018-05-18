@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>FAMAI, Processos georreferenciados</title>
+    <title> </title>
     <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
     <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
@@ -96,7 +96,7 @@
             opacity: 0.6,
             maxZoom: 19,
             transparent: false,
-            attribution: '©2018 Google, <a href="https://famai.itajai.sc.gov.br/" target="_blank">FAMAI</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            attribution: '©2018 Google, SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(tilegoogle);
 
@@ -104,7 +104,7 @@
         L.tileLayer.fallback('tiles/basemap/10-17/{z}/{x}/{y}.png', {
             opacity: 0.6,
             minZoom: 10,
-            attribution: '<a href="https://famai.itajai.sc.gov.br/" target="_blank">FAMAI</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            attribution: 'SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
             maxZoom: 19
         }).addTo(tilesmu);
 
@@ -201,11 +201,11 @@
 			"Sistema viário": tilesmu,
 			"Imagem, Google maps": tilegoogle
 		};
-		L.control.layers(baseMaps, null, { collapsed: false, position: 'bottomleft' }).addTo(map);
+		L.control.layers(baseMaps, null, { collapsed: false, position: 'topleft' }).addTo(map);
 
         //Botão zoom posicionado
         L.control.zoom({
-            position: 'bottomleft'
+            position: 'topleft'
         }).addTo(map);
 
     </script>
