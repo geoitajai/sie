@@ -97,7 +97,7 @@
 			],
 			center: new L.latLng([-26.91549, -48.6866]),
 			layers: [tilesmu],
-			measureControl: true
+			zoomControl: false
 		});
 
 		//hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
@@ -132,7 +132,7 @@
 			opacity: 0.6,
 			maxZoom: 19,
 			transparent: false,
-			attribution: '©2018 Google, Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI COMPLEMENTAR Nº 215, DE 31 DE DEZEMBRO DE 2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			attribution: '©2018 Google, SMU, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI Nº 215/2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
 			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 		}).addTo(tilegoogle);
 
@@ -140,7 +140,7 @@
 		new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
 			opacity: 0.6,
 			minZoom: 10,
-			attribution: 'Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI COMPLEMENTAR Nº 215, DE 31 DE DEZEMBRO DE 2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			attribution: 'SMU, <a href="http://leismunicipa.is/pfdkq" target="_blank">LEI Nº 215/2012</a>, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
 			maxZoom: 17
 		}).addTo(tilesmu);
 
@@ -295,7 +295,7 @@
 			openPopup: false,
 			initial: false,
 			collapsed: false,
-			position: 'topright'
+			position: 'topleft'
 		});
 
 		map.addControl(searchControl);
@@ -493,6 +493,14 @@
 				map.addLayer(sdcsc);
 			};
 		});
+
+        //Botão zoom posicionado
+        L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);		
+
+		//Medidas
+		L.Control.measureControl().addTo(map);
 
 	</script>
 </body>

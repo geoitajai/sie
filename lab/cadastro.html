@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Planta Cadastral, Itajaí-SC</title>
+	<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+	<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" href="lib/leaflet.css" />
+	<link rel="stylesheet" href="lib/leaflet.draw.css" />
+	<link rel="stylesheet" href="css/cadastro.css" />
+
+	<style>
+		.leaflet-control-draw-measure {
+			background-image: url(images/measure-control.png);
+		}
+	</style>
+
+</head>
+
+<body>
+	<div id="map"></div>
+	<script src="lib/jquery-3.3.1.min.js"></script>
+	<script src="lib/leaflet.js"></script>
+	<script src="lib/leaflet.wms.js"></script>
+	<script src="lib/leaflet.tilelayer.fallback.js"></script>
+	<script src="lib/leaflet.draw.js"></script>
+	<script src="lib/leaflet.measurecontrol.min.js"></script>
+
+	<script>
+		//div do mapa
+		var map = new L.Map('map', {
+			zoom: 14,
+			minZoom: 11,
+			maxZoom: 20,
+			maxBounds: [
+				//south west
+				[-27.215341, -49.020370],
+				//north east
+				[-26.701009, -48.397961]
+			],
+			center: new L.latLng([-26.9046, -48.6874]),
+			zoomControl: false,
+			measureControl: true
+		});
+
+		//marca d´água
+		L.Control.Watermark = L.Control.extend({
+			onAdd: function (map) {
+				let img = L.DomUtil.create('img');
+
+				img.src = 'images/cadastro.png';
+				img.style.width = '250px';
+
+				return img;
+			},
+			onRemove: function (map) { }
+		});
+
+		L.control.watermark = function (opts) {
+			return new L.Control.Watermark(opts);
+		}
+		L.control.watermark({ position: 'bottomright' }).addTo(map);
+
+		//Mapa base, google
+		//var googleimg = L.layerGroup();
+		var googleimg = new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+			opacity: 0.5,
+			maxZoom: 20,
+			transparent: false,
+			attribution: '©2018 Google, Secretaria Municipal da Fazenda - Cadastro, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+		}).addTo(map);
+
+		//imagem aérea 2013
+		var orto2013 = L.layerGroup();
+		new L.tileLayer.wms('https://geo.itajai.sc.gov.br/geoserver/gwc/service/wms', {
+			layers: 'gm_itajai:ortofoto_1',
+			format: 'image/jpeg',
+			opacity: 0.5,
+			attribution: 'Secretaria Municipal da Fazenda - Cadastro, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			minZoom: 10,
+			maxZoom: 20
+		}).addTo(orto2013);
+
+		//Mapa 1984, restituição
+		var agritec1984 = L.layerGroup();
+		//agritec1
+		L.tileLayer.fallback('ortoimagens/agritec1984/1/{z}/{x}/{y}.png', {
+			minZoom: 10,
+			maxZoom: 20
+		}).addTo(agritec1984);
+
+		//agritec2
+		L.tileLayer.fallback('ortoimagens/agritec1984/2/{z}/{x}/{y}.png', {
+			minZoom: 10,
+			maxZoom: 20
+		}).addTo(agritec1984);
+
+		//agritec3
+		L.tileLayer.fallback('ortoimagens/agritec1984/3/{z}/{x}/{y}.png', {
+			minZoom: 10,
+			maxZoom: 20
+		}).addTo(agritec1984);
+
+		//Aeroimagem 2007
+		var aeroimagem2007 = L.tileLayer.fallback('ortoimagens/aeroimagem2007/{z}/{x}/{y}.png', {
+			minZoom: 10,
+			maxZoom: 20
+		});
+
+		//IGBE 1981
+		var ibge1981 = L.tileLayer.fallback('ortoimagens/ibge1981/{z}/{x}/{y}.png', {
+			minZoom: 10,
+			maxZoom: 20
+		});
+
+		//barra escala
+		L.control.scale({ imperial: false }).addTo(map);
+
+		//Limites Município
+		$.getJSON("data/limitesmunicipais.geojson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return {
+						color: '#000000',
+						fill: false
+					};
+				},
+			}).addTo(map);
+		});
+
+		//Cadastro
+		var CleanInfoSource = L.WMS.Source.extend({
+			'showFeatureInfo': function (latlng, info) {
+				if (!this._map) { return };
+				//let nome = info.split(/\n|=/);
+				//console.log(nome);
+				let nadaencontrado = info.split(/\n|=/)[0];
+				let vianomechk = info.split(/\n|=/)[16];
+				let vianome = info.split(/\n|=/)[17];
+				let vialeichk = info.split(/\n|=/)[14];
+				let vialei = info.split(/\n|=/)[15];
+				let viaptotalchk = info.split(/\n|=/)[8];
+				let viaptotal = info.split(/\n|=/)[9];
+				let passeioa = info.split(/\n|=/)[11];
+				let passeiob = info.split(/\n|=/)[13];
+				let loteinscrchk = info.split(/\n|=/)[6];
+				let loteinscr = info.split(/\n|=/)[7];
+				//let lotequadracrchk = info.split(/\n|=/)[8];
+				//let lotequadra = info.split(/\n|=/)[9];
+				let lotenumchk = info.split(/\n|=/)[12];
+				let lotenum = info.split(/\n|=/)[13];
+				//let loteviachk = info.split(/\n|=/)[12];
+				let lotevia = info.split(/\n|=/)[17];
+				let lotefacechk = info.split(/\n|=/)[10];
+				let loteface = info.split(/\n|=/)[11];
+				let lotedatachk = info.split(/\n|=/)[14];
+				let lotedata = info.split(/\n|=/)[15];
+				//campos
+				let legendaA;
+				let legendaB;
+				let legendaC;
+				//abastecer os campos'';
+				if (nadaencontrado == 'no features were found') {
+					legendaA = 'clique sobre um elemento';
+					legendaB = '';
+					legendaC = '';
+					legendaD = '';
+				};
+				//legenda sistema viário
+				if (vianomechk == 'nome ') { legendaA = '<strong>' + vianome + '</strong>' };
+				if (vialeichk == 'leidata ') { legendaB = 'Lei' + vialei };
+				if (viaptotalchk == 'ptotalvia ') {
+					legendaC = 'Cx.da via: ' + viaptotal + 'm';
+					legendaD = 'Passeios:' + passeioa + '/' + passeiob + 'm';
+				};
+				//legenda lote
+				if (loteinscrchk == 'inscr ') { legendaA = 'Inscr.Imob.: ' + '<strong>' + loteinscr + '</strong>' };
+				if (lotenumchk == 'numero ' && lotevia == ' ') { legendaB = 'Número: ' + lotenum };
+				if (lotenumchk == 'numero ' && lotevia != ' ') { legendaB = 'End: ' + lotevia + ', nº: ' + lotenum };
+				if (lotefacechk == 'face ') { legendaC = 'Face: ' + loteface };
+				if (lotedatachk == 'data ' && lotedata == ' null') { legendaD = 'Conferência pendente' };
+				if (lotedatachk == 'data ' && lotedata != ' null') { legendaD = 'Atualizado: ' + lotedata };
+				//legenda
+				info = legendaA + '<br/>' + legendaB + '<br/>' + legendaC + '<br/>' + legendaD;
+				//popup
+				this._map.openPopup(info, latlng);
+			}
+		});
+		var options = { 'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20, opacity: 0.7 };
+		var source = new CleanInfoSource("http://10.10.1.158:8080/geoserver/geoitj/wms", options);
+		source.addSubLayer('geoitj:viewsistemaviarioestilosempauta');
+		source.addSubLayer('geoitj:viewcadastrovias');
+		source.addTo(map);
+
+		//perímetro urbano
+		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:perimetrourbano79&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8 };
+				},
+				onEachFeature: function (feature, layer) {
+					layer.bindPopup(
+						'Perímetro urbano, leis 1764/79 e 4157/04'
+					);
+				}
+			}).addTo(map);
+		});
+
+		//Botão zoom posicionado
+		L.control.zoom({
+			position: 'topleft'
+		}).addTo(map);
+
+		//Controle de camadas
+		var overlay2 = {};
+		var baseMaps = {
+			"Ortofoto, ano 2013": orto2013,
+			"Imagem, Google maps": googleimg,
+			"Agritec 1984": agritec1984,
+			"Aeroimagem 2007": aeroimagem2007,
+			"IBGE 1981": ibge1981
+		};
+		L.control.layers(baseMaps, null, { collapsed: false, position: 'bottomleft' }).addTo(map);
+
+		//pesquisa por setor.quadra.lote
+		var pesquisaL = L.layerGroup().addTo(map);
+		function elementoNavL() {
+			let inputpesquisaL = document.forms["pesquisalote"]["setorQuadraLote"].value;
+			pesquisaL.clearLayers();
+			pesquisaQ.clearLayers();
+			$.getJSON("http://10.10.1.158:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:viewcadastrovias&outputFormat=application%2Fjson&CQL_FILTER=inscr='" + inputpesquisaL + "'",
+				function (data) {
+					let error = data.totalFeatures;
+					console.log(error);
+					if (error == 0) {
+						alert('não encontrado');
+					}
+					else {
+						//console.log(data);
+						L.geoJson(data, {
+							onEachFeature: function (feature, layer) {
+								let pesquisabounds = layer.getBounds();//.toBBoxString()
+								map.flyToBounds(pesquisabounds);
+							}
+						}).addTo(pesquisaL);
+					};
+				});
+		};
+
+		//pesquisa por setor.quadra
+		var pesquisaQ = L.featureGroup().addTo(map);
+		function elementoNavQ() {
+			let inputpesquisaQ = document.forms["pesquisaquadra"]["setorQuadra"].value;
+			console.log(inputpesquisaQ);
+			pesquisaQ.clearLayers();
+			pesquisaL.clearLayers();
+			$.getJSON("http://10.10.1.158:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:viewcadastrovias&outputFormat=application%2Fjson&CQL_FILTER=quadra='" + inputpesquisaQ + "'",
+				function (data) {
+					let error = data.totalFeatures;
+					console.log(error);
+					if (error == 0) {
+						alert('não encontrado');
+					}
+					else {
+						console.log(data);
+						L.geoJson(data).addTo(pesquisaQ);
+						let dataq = pesquisaQ.getBounds();
+						map.flyToBounds(dataq);
+					};
+				});
+		};
+
+	</script>
+	<div id="pesquisalote">
+		<!-- formulário pesquisa lote -->
+		<form name="pesquisalote" action="" onsubmit="elementoNavL(); return false;" method="post">
+			<strong>Pesquisa setor.quadra.lote Ex:. 202.015.0685:</strong>
+			<input type="text" name="setorQuadraLote">
+			<input type="submit" value="Consultar Lote">
+		</form>
+	</div>
+
+	<div id="pesquisaquadra">
+		<!-- formulário pesquisa quadra -->
+		<form name="pesquisaquadra" action="" onsubmit="elementoNavQ(); return false;" method="post">
+			<strong>Pesquisa por setor.quadra Ex:. 202.015:</strong>
+			<input type="text" name="setorQuadra">
+			<input type="submit" value="Consultar Quadra">
+		</form>
+	</div>
+
+</body>
+
+</html>
