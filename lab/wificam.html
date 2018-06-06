@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>CTIMA- Rede e câmeras</title>
+	<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+	<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" href="lib/leaflet.css" />
+	<link rel="stylesheet" href="lib/leaflet-search.min.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
+	<link rel="stylesheet" href="lib/Control.Coordinates.css" />
+	<link rel="stylesheet" href="lib/leaflet.draw.css" />
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+
+		.leaflet-container {
+			background: #ffffff;
+		}
+
+		.leaflet-control-draw-measure {
+			background-image: url(images/measure-control.png);
+		}
+
+		.leaflet-container .leaflet-control-search {
+			left: 2px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="map"></div>
+	<script src="lib/jquery-3.3.1.min.js"></script>
+	<script src="lib/csv2geojson.js"></script>
+	<script src="lib/leaflet.js"></script>
+	<script src="lib/leaflet-search.min.js"></script>
+	<script src="lib/leaflet.markercluster.js"></script>
+	<script src="lib/Control.Coordinates.js"></script>
+	<script src="lib/leaflet.markercluster.layersupport.js"></script>
+	<script src="lib/leaflet-hash.js"></script>
+	<script src="lib/leaflet.draw.js"></script>
+	<script src="lib/leaflet.measurecontrol.min.js"></script>
+
+	<script>
+		var tilegoogle = new L.LayerGroup();
+		var tilesmu = new L.LayerGroup();
+		var pesquisa = new L.LayerGroup();
+		var sau = new L.LayerGroup();
+		var ppubl = new L.LayerGroup();
+		var educa = new L.LayerGroup();
+		var dsocial = new L.LayerGroup();
+		var esportiv = new L.LayerGroup();
+		var pracas = new L.LayerGroup();
+		var zonasadm = new L.LayerGroup();
+		var ctimaequip = new L.LayerGroup();
+
+		//div do mapa
+		var map = new L.Map('map', {
+			zoom: 14,
+			minZoom: 12,
+			maxZoom: 20,
+			maxBounds: [
+				//south west
+				[-27.215341, -49.020370],
+				//north east
+				[-26.701009, -48.397961]
+			],
+			center: new L.latLng([-26.906960, -48.685425]),
+			zoomControl: false
+		});
+
+		//Mapa base, google
+		let googleimg = new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+			opacity: 0.5,
+			maxZoom: 20,
+			transparent: false,
+			attribution: '©2018 Google, Itajaí-SC,<a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+		}).addTo(map);
+
+		//Mapa base, viário
+		let wmsLayer = L.tileLayer.wms('http://10.10.1.158:8080/geoserver/ows?', {
+			layers: 'geoitj:viewsistemaviarioestilosempauta',
+			format: 'image/png8',
+			opacity: 0.5,
+			minZoom: 12,
+			maxZoom: 20,
+			attribution: false,
+			transparent: true
+		}).addTo(map);
+
+		//hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
+		var hash = new L.Hash(map);
+
+		//barra escala
+		L.control.scale({ imperial: false }).addTo(map);
+
+		//marca d´água
+		L.Control.Watermark = L.Control.extend({
+			onAdd: function (map) {
+				var img = L.DomUtil.create('img');
+
+				img.src = 'images/brasa.png';
+				img.style.width = '250px';
+
+				return img;
+			},
+			onRemove: function (map) { }
+		});
+
+		L.control.watermark = function (opts) {
+			return new L.Control.Watermark(opts);
+		}
+		L.control.watermark({ position: 'topleft' }).addTo(map);
+
+		//Sistema viário para pesquisa
+		var pesquisa = new L.LayerGroup();
+		$.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewsistemaviariopts&outputFormat=application%2Fjson", function (data) { L.geoJson(data).addTo(pesquisa) });
+
+		//Barra pesquisa
+		var searchControl = new L.Control.Search({
+			layer: pesquisa,
+			propertyName: 'nome',
+			circleLocation: false,
+			marker: false,
+			textPlaceholder: "Pesquisa nome logradouro",
+			textErr: "Não localizado",
+			textCancel: "Cancelar",
+			zoom: 18,
+			openPopup: false,
+			collapsed: true,
+			initial: false,
+			position: 'topleft',
+			minLength: 2
+		});
+		map.addControl(searchControl);
+		//camada não precisa ser visível, apenas para searchcontrol
+		map.removeLayer(pesquisa);
+
+		//Botão zoom posicionado
+		L.control.zoom({
+			position: 'topleft'
+		}).addTo(map);
+
+		//#PATRIMONIO Saúde#
+		var sauicon = L.icon({
+			iconUrl: 'images/pesaude.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=0&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+				csv2geojson.csv2geojson(data,
+					{
+						latfield: 'latitude',
+						lonfield: 'longitude',
+						delimiter: '\t'
+					},
+					function (err, data) {
+						L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let marker = L.marker(latlng, { icon: sauicon });
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'Titularidade: ' + feature.properties.titula + '<br/>' +
+									'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro + '<br/>' +
+									'Telefone: ' + feature.properties.telefone + '<br/>' +
+									'nº Matrícula: ' + feature.properties.matriculan + '<br/>' +
+									'Inscr.Imobiliária: ' + feature.properties.inscrimob
+								);
+								return marker;
+							}
+						}).addTo(sau);
+					});
+			}
+		});
+
+		//#PATRIMONIO Prédios públicos#
+		var ppublicon = L.icon({
+			iconUrl: 'images/peedifpublic.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=1093102967&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+				csv2geojson.csv2geojson(data,
+					{
+						latfield: 'latitude',
+						lonfield: 'longitude',
+						delimiter: '\t'
+					},
+					function (err, data) {
+						L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let marker = L.marker(latlng, { icon: ppublicon });
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'Titularidade: ' + feature.properties.titula + '<br/>' +
+									'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro + '<br/>' +
+									'Telefone: ' + feature.properties.telefone + '<br/>' +
+									'nº Matrícula: ' + feature.properties.matriculan + '<br/>' +
+									'Inscr.Imobiliária: ' + feature.properties.inscrimob
+								);
+								return marker;
+							}
+						}).addTo(ppubl);
+					});
+			}
+		});
+
+		//#PATRIMONIO Educação#
+		var educaicon = L.icon({
+			iconUrl: 'images/paeduca.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=2142845276&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+				csv2geojson.csv2geojson(data,
+					{
+						latfield: 'latitude',
+						lonfield: 'longitude',
+						delimiter: '\t'
+					},
+					function (err, data) {
+						L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let marker = L.marker(latlng, { icon: educaicon });
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'Titularidade: ' + feature.properties.titula + '<br/>' +
+									'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro + '<br/>' +
+									'Telefone: ' + feature.properties.telefone + '<br/>' +
+									'nº Matrícula: ' + feature.properties.matriculan + '<br/>' +
+									'Inscr.Imobiliária: ' + feature.properties.inscrimob
+								);
+								return marker;
+							}
+						}).addTo(educa);
+					});
+			}
+		});
+
+		//#PATRIMONIO Desenvolvimento Social#
+		var dsocialicon = L.icon({
+			iconUrl: 'images/pedesenvsocial.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=176903385&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+				csv2geojson.csv2geojson(data,
+					{
+						latfield: 'latitude',
+						lonfield: 'longitude',
+						delimiter: '\t'
+					},
+					function (err, data) {
+						L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let marker = L.marker(latlng, { icon: dsocialicon });
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'Titularidade: ' + feature.properties.titula + '<br/>' +
+									'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro + '<br/>' +
+									'Telefone: ' + feature.properties.telefone + '<br/>' +
+									'nº Matrícula: ' + feature.properties.matriculan + '<br/>' +
+									'Inscr.Imobiliária: ' + feature.properties.inscrimob
+								);
+								return marker;
+							}
+						}).addTo(dsocial);
+					});
+			}
+		});
+
+		//#PATRIMONIO Áreas esportivas#
+		var esportivicon = L.icon({
+			iconUrl: 'images/paareasesportivas.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR8mVvyj07poY3l-BvOfX1UFx4EuuSWTP5972NUq0OUEoFy9woWSn85dgWJJX_x3wDc4MWswdxSq9Ad/pub?gid=1559994691&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+				csv2geojson.csv2geojson(data,
+					{
+						latfield: 'latitude',
+						lonfield: 'longitude',
+						delimiter: '\t'
+					},
+					function (err, data) {
+						L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let marker = L.marker(latlng, { icon: esportivicon });
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'Titularidade: ' + feature.properties.titula + '<br/>' +
+									'Endereço: ' + feature.properties.end + ', ' + feature.properties.bairro + '<br/>' +
+									'Telefone: ' + feature.properties.telefone + '<br/>' +
+									'nº Matrícula: ' + feature.properties.matriculan + '<br/>' +
+									'Inscr.Imobiliária: ' + feature.properties.inscrimob
+								);
+								return marker;
+							}
+						}).addTo(esportiv);
+					});
+			}
+		});
+
+		//#SMU Praças#
+		var pracasicon = L.icon({
+			iconUrl: 'images/ppracas.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSAtglsQJV1P7BdQuANWDe4dOquyObRwtWdej72gZfEUsMBrPJ14rFWcvjIipzbYsL-m_WtpifZHjoK/pub?gid=1489776326&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+				csv2geojson.csv2geojson(data,
+					{
+						latfield: 'latitude',
+						lonfield: 'longitude',
+						delimiter: '\t'
+					},
+					function (err, data) {
+						L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let marker = L.marker(latlng, { icon: pracasicon });
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'<img src="' + feature.properties.imgurl + '" alt="imagem" style="width:300px">' + '<br/>' +
+									'Titularidade: ' + feature.properties.titularida + '<br/>' +
+									'Lei: ' + feature.properties.lei + '<br/>' +
+									'Endereço: ' + feature.properties.endereco + ', ' + feature.properties.bairro + '<br/>' +
+									'Telefone: ' + feature.properties.telefone + '<br/>' +
+									'nº Matrícula: ' + feature.properties.matricula + '<br/>' +
+									'Inscr.Imobiliária: ' + feature.properties.inscr +
+									'Equipamentos: ' + feature.properties.equip
+								);
+								return marker;
+							}
+						}).addTo(pracas);
+					});
+			}
+		});
+
+		//#CTIMA#
+		//ícone educação
+		var ctptsedu = L.icon({
+			iconUrl: 'images/ctptsedu.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		//ícone Saúde
+		var ctptssms = L.icon({
+			iconUrl: 'images/ctptssms.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		//ícone Edifícios administração
+		var ctptsadm = L.icon({
+			iconUrl: 'images/ctptsadm.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		//ícone Câmeras Ativas
+		var ctptscamativa = L.icon({
+			iconUrl: 'images/ctptscamativa.png',
+			iconAnchor: [20, 20],
+			popupAnchor: [0, -20],
+			iconSize: [40, 40]
+		});
+
+		//ícone Câmeras Inativas
+		var ctptscaminativa = L.icon({
+			iconUrl: 'images/ctptscaminativa.png',
+			iconAnchor: [20, 20],
+			popupAnchor: [0, -20],
+			iconSize: [40, 40]
+		});
+
+		//ícone wifi
+		var ctptswifi = L.icon({
+			iconUrl: 'images/ctptswifi.png',
+			iconAnchor: [20, 20],
+			popupAnchor: [0, -20],
+			iconSize: [40, 40]
+		});
+
+		//Outras áreas
+		var paoutrosicon = L.icon({
+			iconUrl: 'images/paoutros.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT61CmutHXYjN_bqZFf6_zmCjaeYSLx6VKQYaANDoqOehz0wgBAuMbeR1q6uLPsZjsayQcmUQycLhtz/pub?gid=1602594219&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+				csv2geojson.csv2geojson(data,
+					{
+						latfield: 'latitude',
+						lonfield: 'longitude',
+						delimiter: '\t'
+					},
+					function (err, data) {
+						L.geoJSON(data, {
+							pointToLayer: function (feature, latlng) {
+								let iconeunidade;
+								iconeprop = feature.properties.unidade;
+								iconestatus = feature.properties.status;
+								if (iconeprop == 'ADM') {
+									iconeunidade = ctptsadm;
+								}
+								else if (iconeprop == 'EDU') {
+									iconeunidade = ctptsedu;
+								}
+								else if (iconeprop == 'SMS') {
+									iconeunidade = ctptssms;
+								}
+								else if (iconeprop == 'WFL') {
+									iconeunidade = ctptswifi;
+								}
+								else if (iconeprop == 'CAM' && iconestatus == "ATIVA") {
+									iconeunidade = ctptscamativa;
+								}
+								else if (iconeprop == 'CAM' && iconestatus != "ATIVA") {
+									iconeunidade = ctptscaminativa;
+								}
+								else {
+									iconeunidade = paoutrosicon;
+								};
+								let marker = L.marker(latlng, { icon: iconeunidade });
+								marker.bindPopup(
+									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
+									'Lote/unidade: ' + feature.properties.lote + feature.properties.unidade + '<br/>' +
+									'Endereço: ' + feature.properties.end + '<br/>' +
+									'<strong>' + 'Conexão/Velocidade: ' + feature.properties.conexao + ' / ' + feature.properties.velocidade + '</strong>'
+								);
+								return marker;
+							}
+						}).addTo(ctimaequip);
+					});
+			}
+		});
+
+		//marker clustering com suporte para layers
+		var mcg = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 16 }).addTo(map);
+		mcg.checkIn([sau, ppubl, educa, dsocial, esportiv, pracas, ctimaequip]);
+		ctimaequip.addTo(map);
+
+		//Limites Município
+		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:geo2007limitesmunicip&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return {
+						color: '#000000',
+						fill: false
+					};
+				},
+			}).addTo(map);
+		});
+
+
+		//Zonas administrativas
+		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:zonasadm98&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					let corzona;
+					cormz = feature.properties.nome;
+					if (cormz == 'VILA OPERÁRIA') corzona = "#e7e3fa";
+					else if (cormz == 'SÃO VICENTE') corzona = "#ffffbd";
+					else if (cormz == 'SÃO JUDAS') corzona = "#fff3e9";
+					else if (cormz == 'SÃO JOÃO') corzona = "#e1e1e1";
+					else if (cormz == 'SALSEIROS') corzona = "#f1e2cc";
+					else if (cormz == 'RESSACADA') corzona = "#f1e2cc";
+					else if (cormz == 'PRAIA BRAVA DE ITAJAÍ') corzona = "#f1e2cc";
+					else if (cormz == 'PACIÊNCIA') corzona = "#f1e2cc";
+					else if (cormz == 'LIMOEIRO') corzona = "#fff2ae";
+					else if (cormz == 'LARANJEIRAS') corzona = "#fff2ae";
+					else if (cormz == 'ITAIPAVA') corzona = "#fff2ae";
+					else if (cormz == 'FAZENDA') corzona = "#fff2ae";
+					else if (cormz == 'ESPINHEIROS') corzona = "#e6f5c9";
+					else if (cormz == 'DOM BOSCO') corzona = "#e6f5c9";
+					else if (cormz == 'CORDEIROS') corzona = "#f5daec";
+					else if (cormz == 'CIDADE NOVA') corzona = "#f2ddf5";
+					else if (cormz == 'CENTRO') corzona = "#f4daeb";
+					else if (cormz == 'CANHANDUBA') corzona = "#f4e6f0";
+					else if (cormz == 'CAMPECHE') corzona = "#f4e7f0";
+					else if (cormz == 'CABEÇUDAS') corzona = "#f4dbeb";
+					else if (cormz == 'BRILHANTE II') corzona = "#cbd5e8";
+					else if (cormz == 'BRILHANTE') corzona = "#dae8d9";
+					else if (cormz == 'BARRA DO RIO') corzona = "#e5f0e7";
+					else if (cormz == 'ARRAIAL DOS CUNHA') corzona = "#dce0e8";
+					else if (cormz == '(VOLTA DE CIMA)') corzona = "#fdcdac";
+					else if (cormz == '(SÃO ROQUE)') corzona = "#e1e1e1";
+					else if (cormz == '(RIO NOVO - COLÔNIA JAPONESA)') corzona = "#fdcdac";
+					else if (cormz == '(RIO DO MEIO)') corzona = "#fdcdac";
+					else if (cormz == '(MURTA)') corzona = "#b3e2cd";
+					else if (cormz == '(KM12)') corzona = "#e8d8eb";
+					else if (cormz == '(ESPINHEIRINHOS)') corzona = "#c7e2d6";
+					else if (cormz == '(BAIA)') corzona = "#c6e2d6";
+					else corzona = "#fff";
+					return { color: "#808080", fillColor: corzona, fillOpacity: 0.4, weight: 2 };
+				},
+
+				onEachFeature: function (feature, layer) {
+					layer.bindTooltip(
+						'<strong>' + feature.properties.nome + '</strong>',
+						{ permanent: true, direction: "center" }
+					);
+				}
+
+			}).addTo(zonasadm);
+		});
+
+		L.Control.measureControl().addTo(map);
+		//Controle de camadas, principal
+		var overlayMaps = {
+			"<img src='images/pesaude.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=456279987&single=true' target='_blank' >Saúde</a>": sau,
+			"<img src='images/peedifpublic.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=1984217895&single=true' target='_blank' >Prédios públicos</a>": ppubl,
+			"<img src='images/paeduca.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=1907272550&single=true' target='_blank' >Educação</a>": educa,
+			"<img src='images/pedesenvsocial.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=1655631918&single=true' target='_blank' >Desenvolvimento Social</a>": dsocial,
+			"<img src='images/paareasesportivas.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=1623303865&single=true' target='_blank' >Áreas esportivas</a>": esportiv,
+			"<img src='images/ppracas.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTrFlUSn1OrVYOZ0MORZzWUPHwfCpsioEx2Tk4UCdB9ugjlw9HTxYD1Qt-WV32iNQl_heCeqF6phJ-c/pubhtml?gid=0&single=true' target='_blank' >Praças</a>": pracas,
+			"- Zonas Administrativas": zonasadm
+		};
+		L.control.layers(null, overlayMaps, { position: 'topleft' }).addTo(map);
+
+		//coordenadas no click
+		var c = new L.Control.Coordinates({ promptText: 'Coordenadas para a área de transferência, utilize Ctrl+C' });
+		c.addTo(map);
+		map.on('click', function (e) {
+			c.setCoordinates(e);
+		});
+
+	</script>
+</body>
+
+</html>
