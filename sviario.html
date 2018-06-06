@@ -11,8 +11,6 @@
 	<link rel="stylesheet" href="lib/leaflet.css" />
 	<link rel="stylesheet" href="lib/leaflet-search.min.css" />
 	<link rel="stylesheet" href="lib/leaflet.draw.css" />
-	<link rel="stylesheet" href="lib/MarkerCluster.css" />
-	<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
 
 	<style>
 		body {
@@ -47,10 +45,8 @@
 	<script src="lib/leaflet.js"></script>
 	<script src="lib/csv2geojson.js"></script>
 	<script src="lib/leaflet-search.min.js"></script>
-	<script src="lib/leaflet.markercluster.js"></script>
 	<script src="lib/leaflet.draw.js"></script>
 	<script src="lib/leaflet.measurecontrol.min.js"></script>
-	<script src="lib/leaflet.markercluster.layersupport.js"></script>
 	<script src="lib/leaflet-hash.js"></script>
 	<script>
 
@@ -95,11 +91,11 @@
 		L.control.watermark({ position: 'bottomright' }).addTo(map);
 
 		//barra escala
-		L.control.scale({ position: "topright", imperial: false }).addTo(map);
+		L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
 
 		//Norte
-		var north = L.control({position: "topright"});
-		north.onAdd = function(map) {
+		var north = L.control({ position: "bottomright" });
+		north.onAdd = function (map) {
 			var div = L.DomUtil.create("div", "info legend");
 			div.innerHTML = '<img src="images/setanorte.png">';
 			return div;
@@ -136,12 +132,6 @@
 			minZoom: 10,
 			maxZoom: 16
 		}));
-
-		var baseMaps = {
-			"<a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pubhtml?gid=1271041860&single=true' target='_blank' >Sistema viário(Tabela)</a>": tilesmu,
-			"Imagem, Google maps": tilegoogle
-		};
-		L.control.layers(baseMaps, null, { collapsed: false, position: 'bottomleft' }).addTo(map);
 
 		//Sistema viário para pesquisa
 		var pesquisa = new L.LayerGroup();
@@ -181,6 +171,13 @@
 		map.addControl(searchControl);
 		//camada não precisa ser visível, apenas para searchcontrol
 		map.removeLayer(pesquisa);
+
+		//Camadas
+		var baseMaps = {
+			"<a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pubhtml?gid=1271041860&single=true' target='_blank' >Sistema viário(Tabela)</a>": tilesmu,
+			"Imagem, Google maps": tilegoogle
+		};
+		L.control.layers(baseMaps, null, { collapsed: false, position: 'topleft' }).addTo(map);
 
 		//Botão zoom posicionado
 		L.control.zoom({ position: 'topleft' }).addTo(map);
