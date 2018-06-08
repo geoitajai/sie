@@ -9,6 +9,7 @@
     <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/leaflet.draw.css" />
     <link rel="stylesheet" href="lib/MarkerCluster.css" />
     <link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="lib/leaflet-search.min.css" />
@@ -30,6 +31,10 @@
     .leaflet-container {
         background: #ffffff;
     }
+
+    .leaflet-control-draw-measure {
+        background-image: url(images/measure-control.png);
+    }
 </style>
 
 <body>
@@ -43,6 +48,8 @@
     <script src="lib/leaflet-search.min.js"></script>
     <script src="lib/leaflet.tilelayer.fallback.js"></script>
     <script src="lib/leaflet-hash.js"></script>
+    <script src="lib/leaflet.draw.js"></script>
+    <script src="lib/leaflet.measurecontrol.min.js"></script>
 
     <script>
         //camadas a serem manipuladas
@@ -146,15 +153,16 @@
 								marker.bindPopup(
 									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
 									'Endereço: ' + feature.properties.end + '<br/>' +
-									'Data: ' + feature.properties.data + '<br/>' +
+									'Data: ' + feature.properties.datava + '<br/>' +
 									'Área: ' + feature.properties.area + '<br/>' +
 									'Testada x Profundidade: ' + feature.properties.testadaxprof + '<br/>' +
                                     'Valor: ' + feature.properties.valort + '<br/>' +
+                                    'Valor m²: ' + feature.properties.valorm + '<br/>' +
 									'Zoneamento: ' + feature.properties.zon
 								);
 								return marker;
 							}
-                        }).addTo(avaliacoes).addTo(pesquisa);
+                        }).addTo(avaliacoes);
                     });
             }
         });
@@ -183,7 +191,7 @@
             propertyName: 'nome',
             circleLocation: false,
             marker: false,
-            textPlaceholder: "Pesquisa logradouro ou nome avaliação",
+            textPlaceholder: "Pesquisa logradouro",
             textErr: "Não localizado",
             textCancel: "Cancelar",
             zoom: 17,
@@ -208,6 +216,9 @@
         L.control.zoom({
             position: 'topleft'
         }).addTo(map);
+
+		//Ferramenta medidas
+		L.Control.measureControl().addTo(map);
 
     </script>
 </body>
