@@ -21,7 +21,7 @@
 
     #map {
         position: absolute;
-        top: 30%;
+        top: 50%;
         bottom: 0;
         width: 100%;
     }
@@ -36,6 +36,32 @@
 </style>
 
 <body>
+    <!-- Pesquisa pela tabela -->
+    <div class="table-controls">
+        <span>
+            <label>Field: </label>
+            <select id="filter-field">
+                <option></option>
+                <option value="nome">Nome</option>
+            </select>
+        </span>
+
+        <span>
+            <label>Tipo: </label>
+            <select id="filter-type">
+                <option value="=">=</option>
+                <option value="like">like</option>
+            </select>
+        </span>
+
+        <span>
+            <label>Value: </label>
+            <input id="filter-value" type="text" placeholder="Valor a ser pesquisado">
+        </span>
+
+        <button id="filter-clear">Clear Filter</button>
+    </div>
+    <!-- Tabela -->
     <div id="example-table"></div>
     <div id="map"></div>
 
@@ -79,52 +105,92 @@
             url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfmnhu6-ia1AQmoO5eKO3cuwyReuRnqXwShzz0CcDI7SZ7SeNmbzt6JfXjXuXsbYngjSQE99Gzu10g/pub?gid=0&single=true&output=tsv",
             dataType: "text",
             success: function (data) {
-                //let divlinhas = data.split(/\r\n|\n/);
-                //let cabecalho = divlinhas[0].split('\t');
-                //let dados = divlinhas[1].split('\t');//linha 1, a primeira depois do cabecalho
 
-                let geometria = data
-                .split('\n')
-                .map(linha => linha.split('\t'))
+                let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
+                let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
+                let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
 
-                .reduce((complet, linha) => {
-                    complet[linha[0]] = complet[linha[0]] || []
-                    complet[linha[0]].push({
-                        nome: linha[0],
-                        geometria: [linha[13] + ',' + linha[14]]
-                    })
-                    return complet
-                }, {});
-
-                console.log(geometria);
-            }
-        });
-
-        /*
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfmnhu6-ia1AQmoO5eKO3cuwyReuRnqXwShzz0CcDI7SZ7SeNmbzt6JfXjXuXsbYngjSQE99Gzu10g/pub?gid=0&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                let linhas = [];
-                let divlinhas = data.split(/\r\n|\n/);
-                let cabecalho = divlinhas[0].split('\t');
-
-                for (let i=1; i<divlinhas.length; i++) {
-                    let dados = divlinhas[i].split('\t');
-                    if (dados.length == cabecalho.length) {
-
-                        let tarr = [];
-                        for (let j=0; j<cabecalho.length; j++) {
-                            tarr.push(cabecalho[j]+':'+dados[j]);
-                        }
-                        linhas.push(tarr);
+                let objgeometria = tabelalinhas.map((feicoes) => {
+                    return {
+                        'features': [{
+                            'type': 'Feature',
+                            'properties': {
+                                'nome': feicoes[0],
+                                'id': feicoes[15]
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [
+                                    feicoes[14],
+                                    feicoes[13]
+                                ]
+                            }
+                        }]
                     }
+                });
+
+                L.geoJSON(objgeometria).addTo(map);
+
+                //Tabela map()
+                let objtabela = tabelalinhas.map((feicoes) => {
+                    return {
+                        'nome': feicoes[0],
+                        'id': feicoes[15]
+                    }
+                });
+
+                //Filtros para tabela
+                //Custom filter example
+                function customFilter(data) {
+                    return data.car && data.rating < 3;
                 }
-            console.log(linhas);
+
+                //Trigger setFilter function with correct parameters
+                function updateFilter() {
+
+                    var filter = $("#filter-field").val() == "function" ? customFilter : $("#filter-field").val();
+
+                    if ($("#filter-field").val() == "function") {
+                        $("#filter-type").prop("disabled", true);
+                        $("#filter-value").prop("disabled", true);
+                    } else {
+                        $("#filter-type").prop("disabled", false);
+                        $("#filter-value").prop("disabled", false);
+                    }
+
+                    $("#example-table").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
+                }
+
+                //Update filters on value change
+                $("#filter-field, #filter-type").change(updateFilter);
+                $("#filter-value").keyup(updateFilter);
+
+                //Clear filters on "Clear Filters" button click
+                $("#filter-clear").click(function () {
+                    $("#filter-field").val("");
+                    $("#filter-type").val("=");
+                    $("#filter-value").val("");
+
+                    $("#example-table").tabulator("clearFilter");
+                });
+
+                //Tabela
+                $("#example-table").tabulator({
+                    height: 205, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+                    layout: "fitColumns", //fit columns to width of table (optional)
+                    columns: [ //Define Table Columns
+                        { title: "Nome", field: "nome", width: 150 },
+                    ],
+                    rowClick: function (e, row) { //trigger an alert message when the row is clicked
+                        alert("Row " + row.getData().nome + " Clicked!!!!");
+                    },
+                });
+
+                //load sample data into the table
+                $("#example-table").tabulator("setData", objtabela);
             }
         });
-        */
+
 
     </script>
 

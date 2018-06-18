@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title> </title>
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/jquery-ui.min.css" />
+    <link rel="stylesheet" href="lib/tabulator.min.css" />
+</head>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #map {
+        position: absolute;
+        top: 30%;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .leaflet-container {
+        background: #ffffff;
+    }
+
+    .leaflet-control-draw-measure {
+        background-image: url(images/measure-control.png);
+    }
+</style>
+
+<body>
+    <div id="example-table"></div>
+    <div id="map"></div>
+
+    <script src="lib/leaflet.js"></script>
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/jquery-ui.min.js"></script>
+    <script src="lib/tabulator.min.js"></script>
+
+    <!-- Mapa -->
+    <script>
+
+        //div do mapa
+        var map = new L.Map('map', {
+            zoom: 14,
+            minZoom: 12,
+            maxZoom: 19,
+            maxBounds: [
+                //south west
+                [-27.215341, -49.020370],
+                //north east
+                [-26.701009, -48.397961]
+            ],
+            center: new L.latLng([-26.906960, -48.685425])
+        });
+
+        //barra escala
+        L.control.scale({ imperial: false }).addTo(map);
+
+        //google image
+        new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.6,
+            maxZoom: 19,
+            transparent: false,
+            attribution: '©2018 Google, SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        //Avaliações
+        $.ajax({
+            type: "GET",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfmnhu6-ia1AQmoO5eKO3cuwyReuRnqXwShzz0CcDI7SZ7SeNmbzt6JfXjXuXsbYngjSQE99Gzu10g/pub?gid=0&single=true&output=tsv",
+            dataType: "text",
+            success: function (data) {
+                //let divlinhas = data.split(/\r\n|\n/);
+                //let cabecalho = divlinhas[0].split('\t');
+                //let dados = divlinhas[1].split('\t');//linha 1, a primeira depois do cabecalho
+
+
+                let divlinhas = data.split(/\r\n|\n/);
+                let somentelinhas = (for (let i=1; i<divlinhas.length; i++) {
+                    let dados = divlinhas[i].split('\t');
+                    return
+                });
+
+                console.log(somentelinhas);
+            }
+        });
+
+        /*
+        $.ajax({
+            type: "GET",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfmnhu6-ia1AQmoO5eKO3cuwyReuRnqXwShzz0CcDI7SZ7SeNmbzt6JfXjXuXsbYngjSQE99Gzu10g/pub?gid=0&single=true&output=tsv",
+            dataType: "text",
+            success: function (data) {
+                let linhas = [];
+                let divlinhas = data.split(/\r\n|\n/);
+                let cabecalho = divlinhas[0].split('\t');
+
+                for (let i=1; i<divlinhas.length; i++) {
+                    let dados = divlinhas[i].split('\t');
+                    if (dados.length == cabecalho.length) {
+
+                        let tarr = [];
+                        for (let j=0; j<cabecalho.length; j++) {
+                            tarr.push(cabecalho[j]+':'+dados[j]);
+                        }
+                        linhas.push(tarr);
+                    }
+                }
+            console.log(linhas);
+            }
+        });
+        */
+
+    </script>
+
+</body>
+
+</html>
