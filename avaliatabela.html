@@ -21,7 +21,7 @@
 
     #map {
         position: absolute;
-        top: 50%;
+        top: 31%;
         bottom: 0;
         width: 100%;
     }
@@ -39,9 +39,8 @@
     <!-- Pesquisa pela tabela -->
     <div class="table-controls">
         <span>
-            <label>Field: </label>
+            <label>Campo: </label>
             <select id="filter-field">
-                <option></option>
                 <option value="nome">Nome</option>
             </select>
         </span>
@@ -49,27 +48,67 @@
         <span>
             <label>Tipo: </label>
             <select id="filter-type">
-                <option value="=">=</option>
                 <option value="like">like</option>
+                <option value="<=">&lt;=</option>
+                <option value=">=">&gt;=</option>
             </select>
         </span>
 
         <span>
-            <label>Value: </label>
+            <label>Valor: </label>
             <input id="filter-value" type="text" placeholder="Valor a ser pesquisado">
         </span>
 
-        <button id="filter-clear">Clear Filter</button>
+        <button id="filter-clear">Limpar Filtro</button>
     </div>
+
     <!-- Tabela -->
     <div id="example-table"></div>
+
+    <!-- Mapa -->
     <div id="map"></div>
 
+    <!-- Bibliotecas -->
     <script src="lib/leaflet.js"></script>
     <script src="lib/jquery-3.3.1.min.js"></script>
     <script src="lib/jquery-ui.min.js"></script>
     <script src="lib/tabulator.min.js"></script>
 
+    <!-- Filtros para a tabela -->
+    <script>
+        function customFilter(data) {
+            return data.car && data.rating < 3;
+        };
+
+        //Composição do filtro
+        function updateFilter() {
+
+            var filter = $("#filter-field").val() == "function" ? customFilter : $("#filter-field").val();
+
+            if ($("#filter-field").val() == "function") {
+                $("#filter-type").prop("disabled", true);
+                $("#filter-value").prop("disabled", true);
+            } else {
+                $("#filter-type").prop("disabled", false);
+                $("#filter-value").prop("disabled", false);
+            }
+
+            $("#example-table").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
+        };
+
+        //Atualiza o filtro ao mudar os valores
+        $("#filter-field, #filter-type").change(updateFilter);
+        $("#filter-value").keyup(updateFilter);
+
+        //Botão reiniciar os valores
+        $("#filter-clear").click(function () {
+            $("#filter-field").val("nome");
+            $("#filter-type").val("like");
+            $("#filter-value").val("");
+
+            $("#example-table").tabulator("clearFilter");
+        });
+    </script>
     <!-- Mapa -->
     <script>
 
@@ -110,6 +149,7 @@
                 let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
                 let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
 
+                //Pontos map()
                 let objgeometria = tabelalinhas.map((feicoes) => {
                     return {
                         'features': [{
@@ -128,8 +168,11 @@
                         }]
                     }
                 });
+                //console.log(objgeometria[1].features["0"].geometry.coordinates);
 
-                L.geoJSON(objgeometria).addTo(map);
+                L.geoJSON(objgeometria, {
+                    //onEachFeature: eachFeature
+                }).addTo(map);
 
                 //Tabela map()
                 let objtabela = tabelalinhas.map((feicoes) => {
@@ -139,54 +182,22 @@
                     }
                 });
 
-                //Filtros para tabela
-                //Custom filter example
-                function customFilter(data) {
-                    return data.car && data.rating < 3;
-                }
-
-                //Trigger setFilter function with correct parameters
-                function updateFilter() {
-
-                    var filter = $("#filter-field").val() == "function" ? customFilter : $("#filter-field").val();
-
-                    if ($("#filter-field").val() == "function") {
-                        $("#filter-type").prop("disabled", true);
-                        $("#filter-value").prop("disabled", true);
-                    } else {
-                        $("#filter-type").prop("disabled", false);
-                        $("#filter-value").prop("disabled", false);
-                    }
-
-                    $("#example-table").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
-                }
-
-                //Update filters on value change
-                $("#filter-field, #filter-type").change(updateFilter);
-                $("#filter-value").keyup(updateFilter);
-
-                //Clear filters on "Clear Filters" button click
-                $("#filter-clear").click(function () {
-                    $("#filter-field").val("");
-                    $("#filter-type").val("=");
-                    $("#filter-value").val("");
-
-                    $("#example-table").tabulator("clearFilter");
-                });
-
                 //Tabela
                 $("#example-table").tabulator({
                     height: 205, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
                     layout: "fitColumns", //fit columns to width of table (optional)
                     columns: [ //Define Table Columns
-                        { title: "Nome", field: "nome", width: 150 },
+                        { title: "Nome", field: "nome", width: 80 },
                     ],
                     rowClick: function (e, row) { //trigger an alert message when the row is clicked
-                        alert("Row " + row.getData().nome + " Clicked!!!!");
+                        let selecao = row.getIndex();
+                        //console.log(objgeometria[selecao].features["0"].geometry.coordinates[1]);
+                        let latelong = [parseFloat(objgeometria[selecao].features["0"].geometry.coordinates[1]), parseFloat(objgeometria[selecao].features["0"].geometry.coordinates[0])];
+                        console.log(latelong);
+                        map.flyTo(latelong, 18);
                     },
                 });
 
-                //load sample data into the table
                 $("#example-table").tabulator("setData", objtabela);
             }
         });
