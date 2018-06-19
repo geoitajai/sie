@@ -1,0 +1,22 @@
+BODY
+{
+	margin: 0;
+	padding: 0;
+}
+#tabeladados
+{
+	/*+placement: -25px 167px;*/
+	position: relative;
+	left: -25px;
+	top: 167px;
+}
+.table-controls
+{
+}
+#map
+{
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+	height: 75%;
+}

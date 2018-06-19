@@ -168,10 +168,30 @@
                         }]
                     }
                 });
-                //console.log(objgeometria[1].features["0"].geometry.coordinates);
+
+                //estilo ícone
+                let markicon = L.icon({
+                    iconUrl: 'images/dot.png',
+                    iconAnchor: [10, 10],
+                    popupAnchor: [0, -10],
+                    iconSize: [20, 20]
+                });
 
                 L.geoJSON(objgeometria, {
-                    //onEachFeature: eachFeature
+                    'pointToLayer': function (feature, latlng) {
+                        let rowid = feature.properties.id;
+                        return L.marker(latlng)
+                            .bindPopup(
+                                '<center>' + feature.properties.nome + '</center>'
+                            )
+                            .setIcon(markicon)
+                            .on('popupopen', function (popup) {
+                                //console.log("popup opened !", popup);
+                                $("#example-table").tabulator("deselectRow");
+                                $("#example-table").tabulator("scrollToRow", rowid, "center", false);
+                                $("#example-table").tabulator("selectRow", rowid);
+                            });
+                    }
                 }).addTo(map);
 
                 //Tabela map()
@@ -191,10 +211,18 @@
                     ],
                     rowClick: function (e, row) { //trigger an alert message when the row is clicked
                         let selecao = row.getIndex();
-                        //console.log(objgeometria[selecao].features["0"].geometry.coordinates[1]);
-                        let latelong = [parseFloat(objgeometria[selecao].features["0"].geometry.coordinates[1]), parseFloat(objgeometria[selecao].features["0"].geometry.coordinates[0])];
-                        console.log(latelong);
+                        let latelong = [objgeometria[selecao].features[0].geometry.coordinates[1], objgeometria[selecao].features[0].geometry.coordinates[0]];
+                        let popnome = objgeometria[selecao].features[0].properties.nome;
+
+                        $("#example-table").tabulator("deselectRow");
+                        $("#example-table").tabulator("selectRow", selecao);
+
                         map.flyTo(latelong, 18);
+
+                        L.popup({ maxWidth: 5 })
+                            .setLatLng(latelong)
+                            .setContent('<center>' + popnome + '</center>')
+                            .openOn(map);
                     },
                 });
 
