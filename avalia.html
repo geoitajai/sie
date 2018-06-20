@@ -221,10 +221,10 @@
 
                 //estilo ícone
                 let markicon = L.icon({
-                    iconUrl: 'images/dot.png',
-                    iconAnchor: [10, 10],
-                    popupAnchor: [0, -10],
-                    iconSize: [20, 20]
+                    iconUrl: 'images/dotb.png',
+                    iconAnchor: [8, 8],
+                    popupAnchor: [0, -8],
+                    iconSize: [14, 14]
                 });
 
                 //pontos para mapa
@@ -299,7 +299,7 @@
                         { title: "Contato", field: "contato", width: 110 },
                         { title: "Obs.", field: "obs", width: 150 },
                     ],
-                    rowClick: function (e, row) { //eventos quando apertamos sobre uma linha
+                    rowClick: function (e, row) { //eventos quando sobre uma linha
                         let selecao = row.getIndex();
                         let latelong = [objgeometria[selecao].features[0].geometry.coordinates[1], objgeometria[selecao].features[0].geometry.coordinates[0]];
                         let popnome = objgeometria[selecao].features[0].properties.nome;
