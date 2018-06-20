@@ -9,10 +9,11 @@
     <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/jquery-ui.min.css" />
+    <link rel="stylesheet" href="lib/tabulator.min.css" />
     <link rel="stylesheet" href="lib/leaflet.draw.css" />
     <link rel="stylesheet" href="lib/MarkerCluster.css" />
     <link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="lib/leaflet-search.min.css" />
 </head>
 
 <style>
@@ -24,8 +25,8 @@
     #map {
         position: absolute;
         top: 0;
-        bottom: 0;
         width: 100%;
+        height: 70%;
     }
 
     .leaflet-container {
@@ -35,68 +36,147 @@
     .leaflet-control-draw-measure {
         background-image: url(images/measure-control.png);
     }
+
+    .linhatabela {
+        position: absolute;
+        bottom: 0;
+        width: 99.5%;
+        height: 25%;
+    }
+
+    .botoestabela {
+        position: absolute;
+        bottom: 26%;
+        background-color: #ffffff;
+        z-index: 1000;
+    }
 </style>
 
 <body>
+    <!-- Mapa -->
     <div id="map"></div>
+    <!-- Botões de pesquisa -->
+    <div class="botoestabela table-controls">
+        <span>
+            <select id="filter-field">
+                <option value="nome">Nome</option>
+                <option value="end">End.</option>
+            </select>
+        </span>
 
+        <span>
+            <select id="filter-type">
+                <option value="like">=</option>
+                <option value="<=">&lt;=</option>
+                <option value=">=">&gt;=</option>
+            </select>
+        </span>
+
+        <span>
+            <input id="filter-value" type="text" placeholder="digite para filtrar">
+        </span>
+
+        <button id="filter-clear">Limpar</button>
+    </div>
+    <!-- Tabela -->
+    <div class="linhatabela" id="tabelatabulator"></div>
+
+    <!-- Bibliotecas -->
     <script src="lib/leaflet.js"></script>
     <script src="lib/jquery-3.3.1.min.js"></script>
-    <script src="lib/csv2geojson.js"></script>
-    <script src="lib/leaflet.markercluster.js"></script>
-    <script src="lib/leaflet.markercluster.layersupport.js"></script>
-    <script src="lib/leaflet-search.min.js"></script>
-    <script src="lib/leaflet.tilelayer.fallback.js"></script>
-    <script src="lib/leaflet-hash.js"></script>
+    <script src="lib/jquery-ui.min.js"></script>
+    <script src="lib/tabulator.min.js"></script>
     <script src="lib/leaflet.draw.js"></script>
     <script src="lib/leaflet.measurecontrol.min.js"></script>
+    <script src="lib/leaflet-hash.js"></script>
+    <script src="lib/leaflet-heat.js"></script>
+    <script src="lib/leaflet.markercluster.js"></script>
 
+    <!-- Filtros para a tabela -->
     <script>
-        //camadas a serem manipuladas
-        var tilesmu = new L.LayerGroup();
-        var tilegoogle = new L.LayerGroup();
-        var pesquisa = new L.LayerGroup();
-        var avaliacoes = new L.LayerGroup();
+        function customFilter(data) {
+            return data.car && data.rating < 3;
+        };
+
+        //Composição do filtro
+        function updateFilter() {
+
+            var filter = $("#filter-field").val() == "function" ? customFilter : $("#filter-field").val();
+
+            if ($("#filter-field").val() == "function") {
+                $("#filter-type").prop("disabled", true);
+                $("#filter-value").prop("disabled", true);
+            } else {
+                $("#filter-type").prop("disabled", false);
+                $("#filter-value").prop("disabled", false);
+            }
+
+            $("#tabelatabulator").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
+        };
+
+        //Atualiza o filtro ao mudar os valores
+        $("#filter-field, #filter-type").change(updateFilter);
+        $("#filter-value").keyup(updateFilter);
+
+        //Botão reiniciar os valores
+        $("#filter-clear").click(function () {
+            $("#filter-field").val("nome");
+            $("#filter-type").val("like");
+            $("#filter-value").val("");
+
+            $("#tabelatabulator").tabulator("clearFilter");
+        });
+    </script>
+
+    <!-- Mapa -->
+    <script>
 
         //div do mapa
         var map = new L.Map('map', {
             zoom: 14,
             minZoom: 12,
-            maxZoom: 18,
+            maxZoom: 19,
             maxBounds: [
                 //south west
                 [-27.215341, -49.020370],
                 //north east
                 [-26.701009, -48.397961]
             ],
-            center: new L.latLng([-26.906960, -48.685425]),
-            zoomControl: false,
-            layers: [tilesmu]
+            center: new L.latLng([-26.906960, -48.685425])
         });
 
         //hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
 		var hash = new L.Hash(map);
 
-        //marca d´água
-        L.Control.Watermark = L.Control.extend({
-            onAdd: function (map) {
-                var img = L.DomUtil.create('img');
+		//marca d´água
+		L.Control.Watermark = L.Control.extend({
+			onAdd: function (map) {
+				var img = L.DomUtil.create('img');
 
-                img.src = 'images/brasa.png';
-                img.style.width = '320px';
+				img.src = 'images/brasaoavaliacoes.png';
+				img.style.width = '150px';
 
-                return img;
-            },
-            onRemove: function (map) { }
-        });
+				return img;
+			},
+			onRemove: function (map) { }
+		});
 
-        L.control.watermark = function (opts) {
-            return new L.Control.Watermark(opts);
-        }
-        L.control.watermark({ position: 'topleft' }).addTo(map);
+		L.control.watermark = function (opts) {
+			return new L.Control.Watermark(opts);
+		}
+		L.control.watermark({ position: 'topright' }).addTo(map);
 
-        //barra escala
-        L.control.scale({ imperial: false }).addTo(map);
+		//barra escala
+		L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+
+		//Norte
+		var north = L.control({ position: "bottomright" });
+		north.onAdd = function (map) {
+			var div = L.DomUtil.create("div", "info legend");
+			div.innerHTML = '<img src="images/setanorte.png">';
+			return div;
+		}
+		north.addTo(map);
 
         //google image
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -105,34 +185,7 @@
             transparent: false,
             attribution: '©2018 Google, SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-        }).addTo(tilegoogle);
-
-        //zona urbana e geral
-        L.tileLayer.fallback('tiles/basemap/10-17/{z}/{x}/{y}.png', {
-            opacity: 0.6,
-            minZoom: 10,
-            attribution: 'SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-            maxZoom: 19
-        }).addTo(tilesmu);
-
-        //zona rural, zoom 17
-        L.tileLayer.fallback('tiles/basemap/17rural/{z}/{x}/{y}.png', {
-            opacity: 0.6,
-            minZoom: 17,
-            maxZoom: 19
-        }).addTo(tilesmu);
-
-        //bairros
-        map.addLayer(new L.TileLayer('tiles/bairros/{z}/{x}/{y}.png', {
-            opacity: 0.5,
-            minZoom: 10,
-            maxZoom: 14
-        }));
-
-        //Clustering com suporte a camadas
-        var mcg = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 15 }).addTo(map);
-        mcg.checkIn([avaliacoes]);
-        avaliacoes.addTo(map);
+        }).addTo(map);
 
         //Avaliações
         $.ajax({
@@ -140,87 +193,138 @@
             url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfmnhu6-ia1AQmoO5eKO3cuwyReuRnqXwShzz0CcDI7SZ7SeNmbzt6JfXjXuXsbYngjSQE99Gzu10g/pub?gid=0&single=true&output=tsv",
             dataType: "text",
             success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
+
+                let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
+                let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
+                let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
+                //console.log(tabelalinhas);
+                //Pontos map()
+                let objgeometria = tabelalinhas.map((feicoes) => {
+                    return {
+                        'features': [{
+                            'type': 'Feature',
+                            'properties': {
+                                'nome': feicoes[0],
+                                //'map': feicoes[7],
+                                'id': feicoes[17]
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [
+                                    feicoes[16],
+                                    feicoes[15]
+                                ]
+                            }
+                        }]
+                    }
+                });
+
+                //estilo ícone
+                let markicon = L.icon({
+                    iconUrl: 'images/dot.png',
+                    iconAnchor: [10, 10],
+                    popupAnchor: [0, -10],
+                    iconSize: [20, 20]
+                });
+
+                //pontos para mapa
+                let clustermarcadores = L.markerClusterGroup({ disableClusteringAtZoom: 18 });
+                L.geoJSON(objgeometria, {
+                    'pointToLayer': function (feature, latlng) {
+                        let rowid = feature.properties.id;
+                        return L.marker(latlng)
+                            .bindPopup(
+                                '<center>' + feature.properties.nome + '</center>'
+                            )
+                            .setIcon(markicon)
+                            .on('popupopen', function (popup) {
+                                $("#tabelatabulator").tabulator("deselectRow");
+                                $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
+                                $("#tabelatabulator").tabulator("selectRow", rowid);
+                            }).addTo(clustermarcadores);
+                    }
+                });
+                //adicionar o markerClusterGroup com os pontos inseridos
+                map.addLayer(clustermarcadores);
+
+                //mapa de calor
+                let mapacalor = tabelalinhas.map((feicoes) => {
+                    return [
+                        feicoes[15],
+                        feicoes[16],
+                        feicoes[7]
+                    ]
+                });
+                var heatMap = new L.heatLayer(mapacalor, { blur: 20, radius: 50 });
+				map.addLayer(heatMap);
+
+                //Tabela map()
+                let objtabela = tabelalinhas.map((feicoes) => {
+                    return {
+                        'nome': feicoes[0],
+                        'end': feicoes[1],
+                        'test': feicoes[2],
+                        'prof': feicoes[3],
+                        'area': feicoes[4],
+                        'areaav': feicoes[5],
+                        'valorm': feicoes[6],
+                        'porcento': feicoes[7]*100,
+                        'valortotal': feicoes[9],
+                        'zon': feicoes[10],
+                        'dataaval': feicoes[11],
+                        'inform': feicoes[12],
+                        'contato': feicoes[13],
+                        'obs': feicoes[14],
+                        'id': feicoes[17]
+                    }
+                });
+
+                //Tabela
+                $("#tabelatabulator").tabulator({
+                    height: "25%",
+                    layout: "fitColumns",
+                    columns: [
+                        { title: "N.", field: "nome", width: 40 },
+                        { title: "End.", field: "end", width: 150 },
+                        { title: "Testada", field: "test", width: 60 },
+                        { title: "Profundidade", field: "prof", width: 60 },
+                        { title: "Lote (Área m²)", field: "area", width: 100 },
+                        { title: "Área avaliada (m²)", field: "areaav", width: 90 },
+                        { title: "Valor(m²)", field: "valorm", width: 110 },
+                        { title:"% relacionado ao maior", field:"porcento", align:"left", formatter:"progress", width: 190 },
+                        { title: "Valor Total", field: "valortotal", width: 110 },
+                        { title: "Zoneamento", field: "zon", width: 110 },
+                        { title:"Data da avaliação", field:"dataaval", sorter:"date", align:"center", width: 110 },
+                        { title: "Informante", field: "inform", width: 120 },
+                        { title: "Contato", field: "contato", width: 110 },
+                        { title: "Obs.", field: "obs", width: 150 },
+                    ],
+                    rowClick: function (e, row) { //eventos quando apertamos sobre uma linha
+                        let selecao = row.getIndex();
+                        let latelong = [objgeometria[selecao].features[0].geometry.coordinates[1], objgeometria[selecao].features[0].geometry.coordinates[0]];
+                        let popnome = objgeometria[selecao].features[0].properties.nome;
+
+                        $("#tabelatabulator").tabulator("deselectRow");
+                        $("#tabelatabulator").tabulator("selectRow", selecao);
+
+                        map.flyTo(latelong, 17);
+
+                        L.popup({ maxWidth: 5 })
+                            .setLatLng(latelong)
+                            .setContent('<center>' + popnome + '</center>')
+                            .openOn(map);
                     },
-                    function (err, data) {
-                        L.geoJSON(data, {
-							pointToLayer: function (feature, latlng) {
-								let marker = L.marker(latlng);
-								marker.bindPopup(
-									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
-									'Endereço: ' + feature.properties.end + '<br/>' +
-									'Data: ' + feature.properties.datava + '<br/>' +
-									'Área: ' + feature.properties.area + '<br/>' +
-									'Testada x Profundidade: ' + feature.properties.testadaxprof + '<br/>' +
-                                    'Valor: ' + feature.properties.valort + '<br/>' +
-                                    'Valor m²: ' + feature.properties.valorm + '<br/>' +
-									'Zoneamento: ' + feature.properties.zon
-								);
-								return marker;
-							}
-                        }).addTo(avaliacoes);
-                    });
+                });
+
+                $("#tabelatabulator").tabulator("setData", objtabela);
             }
         });
 
-        //Sistema viário para pesquisa
-        $.ajax({
-            type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pub?gid=828218726&single=true&output=tsv",
-            dataType: "text",
-            success: function (data) {
-                csv2geojson.csv2geojson(data,
-                    {
-                        latfield: 'latitude',
-                        lonfield: 'longitude',
-                        delimiter: '\t'
-                    },
-                    function (err, data) {
-                        L.geoJSON(data).addTo(pesquisa);
-                    });
-            }
-        });
-
-        //Barra pesquisa
-        var searchControl = new L.Control.Search({
-            layer: pesquisa,
-            propertyName: 'nome',
-            circleLocation: false,
-            marker: false,
-            textPlaceholder: "Pesquisa logradouro",
-            textErr: "Não localizado",
-            textCancel: "Cancelar",
-            zoom: 17,
-            openPopup: false,
-            collapsed: false,
-            initial: false,
-            position: 'topleft',
-            minLength: 1
-        });
-        map.addControl(searchControl);
-        //camada não precisa ser visível, apenas para searchcontrol
-        map.removeLayer(pesquisa);
-
-		//Controle de camadas mapas fundo
-		var baseMaps = {
-			"Sistema viário": tilesmu,
-			"Imagem, Google maps": tilegoogle
-		};
-		L.control.layers(baseMaps, null, { collapsed: false, position: 'topleft' }).addTo(map);
-
-        //Botão zoom posicionado
-        L.control.zoom({
-            position: 'topleft'
-        }).addTo(map);
-
-		//Ferramenta medidas
+		//Medidas
 		L.Control.measureControl().addTo(map);
 
     </script>
+
 </body>
 
 </html>
