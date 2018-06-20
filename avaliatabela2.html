@@ -23,7 +23,7 @@
         position: absolute;
         top: 0;
         width: 100%;
-        height: 77%;
+        height: 70%;
     }
 
     .leaflet-container {
@@ -37,13 +37,15 @@
     .linhatabela {
         position: absolute;
         bottom: 0;
-        width: 99.9%;
-        height: 20%;
+        width: 99.5%;
+        height: 25%;
     }
 
     .botoestabela {
         position: absolute;
-        bottom: 20.5%;
+        bottom: 26%;
+        background-color: #ffffff;
+        z-index: 1000;
     }
 </style>
 
@@ -55,6 +57,7 @@
         <span>
             <select id="filter-field">
                 <option value="nome">Nome</option>
+                <option value="end">End.</option>
             </select>
         </span>
 
@@ -73,7 +76,7 @@
         <button id="filter-clear">Limpar</button>
     </div>
     <!-- Tabela -->
-    <div class="linhatabela" id="example-table"></div>
+    <div class="linhatabela" id="tabelatabulator"></div>
 
     <!-- Bibliotecas -->
     <script src="lib/leaflet.js"></script>
@@ -100,7 +103,7 @@
                 $("#filter-value").prop("disabled", false);
             }
 
-            $("#example-table").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
+            $("#tabelatabulator").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
         };
 
         //Atualiza o filtro ao mudar os valores
@@ -113,7 +116,7 @@
             $("#filter-type").val("like");
             $("#filter-value").val("");
 
-            $("#example-table").tabulator("clearFilter");
+            $("#tabelatabulator").tabulator("clearFilter");
         });
     </script>
 
@@ -135,7 +138,7 @@
         });
 
         //barra escala
-        L.control.scale({ imperial: false }).addTo(map);
+        L.control.scale({ imperial: false, position: 'topright' }).addTo(map);
 
         //google image
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -156,7 +159,7 @@
                 let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
                 let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
                 let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
-                console.log(tabelalinhas);
+                //console.log(tabelalinhas);
                 //Pontos map()
                 let objgeometria = tabelalinhas.map((feicoes) => {
                     return {
@@ -164,14 +167,14 @@
                             'type': 'Feature',
                             'properties': {
                                 'nome': feicoes[0],
-                                'map': feicoes[7],
-                                'id': feicoes[16]
+                                //'map': feicoes[7],
+                                'id': feicoes[17]
                             },
                             'geometry': {
                                 'type': 'Point',
                                 'coordinates': [
-                                    feicoes[15],
-                                    feicoes[14]
+                                    feicoes[16],
+                                    feicoes[15]
                                 ]
                             }
                         }]
@@ -196,9 +199,9 @@
                             .setIcon(markicon)
                             .on('popupopen', function (popup) {
                                 //console.log("popup opened !", popup);
-                                $("#example-table").tabulator("deselectRow");
-                                $("#example-table").tabulator("scrollToRow", rowid, "center", false);
-                                $("#example-table").tabulator("selectRow", rowid);
+                                $("#tabelatabulator").tabulator("deselectRow");
+                                $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
+                                $("#tabelatabulator").tabulator("selectRow", rowid);
                             });
                     }
                 }).addTo(map);
@@ -213,19 +216,20 @@
                         'area': feicoes[4],
                         'areaav': feicoes[5],
                         'valorm': feicoes[6],
-                        'valortotal': feicoes[8],
-                        'zon': feicoes[9],
-                        'dataaval': feicoes[10],
-                        'inform': feicoes[11],
-                        'contato': feicoes[12],
-                        'obs': feicoes[13],
-                        'id': feicoes[16]
+                        'porcento': feicoes[7]*100,
+                        'valortotal': feicoes[9],
+                        'zon': feicoes[10],
+                        'dataaval': feicoes[11],
+                        'inform': feicoes[12],
+                        'contato': feicoes[13],
+                        'obs': feicoes[14],
+                        'id': feicoes[17]
                     }
                 });
 
                 //Tabela
-                $("#example-table").tabulator({
-                    height: "20%",
+                $("#tabelatabulator").tabulator({
+                    height: "25%",
                     layout: "fitColumns",
                     columns: [
                         { title: "N.", field: "nome", width: 40 },
@@ -235,9 +239,10 @@
                         { title: "Lote (Área m²)", field: "area", width: 100 },
                         { title: "Área avaliada (m²)", field: "areaav", width: 90 },
                         { title: "Valor(m²)", field: "valorm", width: 110 },
+                        { title:"% relacionado ao maior", field:"porcento", align:"left", formatter:"progress", width: 190 },
                         { title: "Valor Total", field: "valortotal", width: 110 },
                         { title: "Zoneamento", field: "zon", width: 110 },
-                        {title:"Data da avaliação", field:"dataaval", sorter:"date", align:"center", width: 110},
+                        { title:"Data da avaliação", field:"dataaval", sorter:"date", align:"center", width: 110 },
                         { title: "Informante", field: "inform", width: 120 },
                         { title: "Contato", field: "contato", width: 110 },
                         { title: "Obs.", field: "obs", width: 150 },
@@ -247,8 +252,8 @@
                         let latelong = [objgeometria[selecao].features[0].geometry.coordinates[1], objgeometria[selecao].features[0].geometry.coordinates[0]];
                         let popnome = objgeometria[selecao].features[0].properties.nome;
 
-                        $("#example-table").tabulator("deselectRow");
-                        $("#example-table").tabulator("selectRow", selecao);
+                        $("#tabelatabulator").tabulator("deselectRow");
+                        $("#tabelatabulator").tabulator("selectRow", selecao);
 
                         map.flyTo(latelong, 18);
 
@@ -259,7 +264,7 @@
                     },
                 });
 
-                $("#example-table").tabulator("setData", objtabela);
+                $("#tabelatabulator").tabulator("setData", objtabela);
             }
         });
 
