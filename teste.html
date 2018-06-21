@@ -132,17 +132,17 @@
             center: new L.latLng([-26.906960, -48.685425])
         });
 
-		//barra escala
-		L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+        //barra escala
+        L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
 
-		//Norte
-		var north = L.control({ position: "bottomright" });
-		north.onAdd = function (map) {
-			var div = L.DomUtil.create("div", "info legend");
-			div.innerHTML = '<img src="images/setanorte.png">';
-			return div;
-		}
-		north.addTo(map);
+        //Norte
+        var north = L.control({ position: "bottomright" });
+        north.onAdd = function (map) {
+            var div = L.DomUtil.create("div", "info legend");
+            div.innerHTML = '<img src="images/setanorte.png">';
+            return div;
+        }
+        north.addTo(map);
 
         //google image
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -170,11 +170,12 @@
                         'features': [{
                             'type': 'Feature',
                             'properties': {
-                                'nome': feicoes[1]
+                                'nome': feicoes[1],
+                                'id': feicoes[2]
                             },
                             'geometry': {
                                 'type': 'Polygon',
-                                'coordinates': [feicoes[0]]
+                                'coordinates': [JSON.parse("[" + feicoes[0] + "]")]
                             }
                         }]
                     }
@@ -182,7 +183,7 @@
 
                 console.log(objgeometria);
                 //pontos para mapa
-                //L.geoJSON(objgeometria);
+                L.geoJSON(objgeometria).addTo(map);
 
                 //Tabela map()
                 let objtabela = tabelalinhas.map((feicoes) => {
@@ -199,6 +200,21 @@
                     columns: [
                         { title: "N.", field: "nome", width: 40 },
                     ],
+                    rowClick: function (e, row) { //eventos quando sobre uma linha
+                        let selecao = row.getIndex();
+                        let poligono = [objgeometria[selecao].features[0].geometry.coordinates[1]];
+                        let popnome = objgeometria[selecao].features[0].properties.nome;
+
+                        $("#tabelatabulator").tabulator("deselectRow");
+                        $("#tabelatabulator").tabulator("selectRow", selecao);
+
+                        map.flyTo(latelong, 17);
+
+                        L.popup({ maxWidth: 5 })
+                            .setLatLng(latelong)
+                            .setContent('<center>' + popnome + '</center>')
+                            .openOn(map);
+                    },
                 });
 
                 $("#tabelatabulator").tabulator("setData", objtabela);

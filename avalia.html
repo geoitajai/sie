@@ -197,7 +197,7 @@
                 let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
                 let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
                 let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
-                //console.log(tabelalinhas);
+                console.log(tabelalinhas);
                 //Pontos map()
                 let objgeometria = tabelalinhas.map((feicoes) => {
                     return {
@@ -206,13 +206,13 @@
                             'properties': {
                                 'nome': feicoes[0],
                                 //'map': feicoes[7],
-                                'id': feicoes[17]
+                                'id': feicoes[19]
                             },
                             'geometry': {
                                 'type': 'Point',
                                 'coordinates': [
-                                    feicoes[16],
-                                    feicoes[15]
+                                    feicoes[18],
+                                    feicoes[17]
                                 ]
                             }
                         }]
@@ -250,9 +250,9 @@
                 //mapa de calor
                 let mapacalor = tabelalinhas.map((feicoes) => {
                     return [
-                        feicoes[15],
-                        feicoes[16],
-                        feicoes[7]
+                        feicoes[17],
+                        feicoes[18],
+                        feicoes[10]
                     ]
                 });
                 var heatMap = new L.heatLayer(mapacalor, { blur: 20, radius: 50 });
@@ -265,17 +265,19 @@
                         'end': feicoes[1],
                         'test': feicoes[2],
                         'prof': feicoes[3],
-                        'area': feicoes[4],
+                        'areaterr': feicoes[4],
                         'areaav': feicoes[5],
-                        'valorm': feicoes[6],
-                        'porcento': feicoes[7]*100,
-                        'valortotal': feicoes[9],
-                        'zon': feicoes[10],
-                        'dataaval': feicoes[11],
-                        'inform': feicoes[12],
-                        'contato': feicoes[13],
-                        'obs': feicoes[14],
-                        'id': feicoes[17]
+                        'valortotalarea': feicoes[6],
+                        'valorbenf': feicoes[7],
+                        'valorterre': feicoes[8],
+                        'valormq': feicoes[9],
+                        'porcento': feicoes[10]*100,
+                        'zon': feicoes[12],
+                        'datavalia': feicoes[13],
+                        'inform': feicoes[14],
+                        'contato': feicoes[15],
+                        'obs': feicoes[16],
+                        'id': feicoes[19]
                     }
                 });
 
@@ -285,19 +287,21 @@
                     layout: "fitColumns",
                     columns: [
                         { title: "N.", field: "nome", width: 40 },
-                        { title: "End.", field: "end", width: 150 },
-                        { title: "Testada", field: "test", width: 60 },
-                        { title: "Profundidade", field: "prof", width: 60 },
-                        { title: "Lote (Área m²)", field: "area", width: 100 },
-                        { title: "Área avaliada (m²)", field: "areaav", width: 90 },
-                        { title: "Valor(m²)", field: "valorm", width: 110 },
-                        { title:"% relacionado ao maior", field:"porcento", align:"left", formatter:"progress", width: 190 },
-                        { title: "Valor Total", field: "valortotal", width: 110 },
+                        { title: "Endereço", field: "end", width: 360 },
+                        { title: "Testada", field: "test", width: 70 },
+                        { title: "Profundidade", field: "prof", width: 70 },
+                        { title: "Área total", field: "areaterr", width: 100 },
+                        { title: "Área avaliada", field: "areaav", width: 120 },
+                        { title: "Total avaliado", field: "valortotalarea", width: 120 },
+                        { title: "Benfeitoria", field: "valorbenf", width: 120 },
+                        { title: "Terreno", field: "valorterre", width: 120 },
+                        { title: "Terreno/m²", field: "valormq", width: 120 },
+                        { title: "% do maior valor", field:"porcento", align:"left", formatter:"progress", width: 70 },
+                        { title: "Data avaliação", field:"datavalia", sorter:"date", align:"center", width: 110 },
                         { title: "Zoneamento", field: "zon", width: 110 },
-                        { title:"Data da avaliação", field:"dataaval", sorter:"date", align:"center", width: 110 },
                         { title: "Informante", field: "inform", width: 120 },
-                        { title: "Contato", field: "contato", width: 110 },
-                        { title: "Obs.", field: "obs", width: 150 },
+                        { title: "Contato", field: "contato", width: 90 },
+                        { title: "Observações", field: "obs", width: 150 },
                     ],
                     rowClick: function (e, row) { //eventos quando sobre uma linha
                         let selecao = row.getIndex();
@@ -307,7 +311,7 @@
                         $("#tabelatabulator").tabulator("deselectRow");
                         $("#tabelatabulator").tabulator("selectRow", selecao);
 
-                        map.flyTo(latelong, 17);
+                        map.flyTo(latelong, 18);
 
                         L.popup({ maxWidth: 5 })
                             .setLatLng(latelong)
