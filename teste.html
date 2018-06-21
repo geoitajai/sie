@@ -57,14 +57,6 @@
         </span>
 
         <span>
-            <select id="filter-type">
-                <option value="like">=</option>
-                <option value="<=">&lt;=</option>
-                <option value=">=">&gt;=</option>
-            </select>
-        </span>
-
-        <span>
             <input id="filter-value" type="text" placeholder="digite para filtrar">
         </span>
 
@@ -98,7 +90,7 @@
                 $("#filter-value").prop("disabled", false);
             }
 
-            $("#tabelatabulator").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
+            $("#tabelatabulator").tabulator("setFilter", filter, "like", $("#filter-value").val());
         };
 
         //Atualiza o filtro ao mudar os valores
@@ -108,7 +100,6 @@
         //Botão reiniciar os valores
         $("#filter-clear").click(function () {
             $("#filter-field").val("nome");
-            $("#filter-type").val("like");
             $("#filter-value").val("");
 
             $("#tabelatabulator").tabulator("clearFilter");
@@ -163,7 +154,7 @@
                 let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
                 let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
                 let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
-                console.log(tabelalinhas);
+                //console.log(tabelalinhas);
                 //Pontos map()
                 let objgeometria = tabelalinhas.map((feicoes) => {
                     return {
@@ -181,9 +172,36 @@
                     }
                 });
 
-                console.log(objgeometria);
                 //pontos para mapa
-                L.geoJSON(objgeometria).addTo(map);
+                let mapviz;
+
+                let estilopadrao = {
+                    weight: 1,
+                    color: 'white',
+                    dashArray: '',
+                    fillOpacity: 0.7
+                };
+
+                let estilodestaque = {
+                    weight: 5,
+                    color: '#666',
+                    dashArray: '3'
+                };
+
+                destacarfeicao = (e) => {
+                    mapviz.setStyle(estilopadrao);
+                    var layersel = e.target;
+                    layersel.setStyle(estilodestaque);
+                    let rowid = e.sourceTarget.feature.properties.id;
+                    $("#tabelatabulator").tabulator("deselectRow");
+                    $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
+                    $("#tabelatabulator").tabulator("selectRow", rowid);
+                };
+
+                mapviz = L.geoJson(objgeometria, {
+                    style: estilopadrao,
+                    onEachFeature: (feature, layer) => { layer.on({ click: destacarfeicao }) }
+                }).addTo(map);
 
                 //Tabela map()
                 let objtabela = tabelalinhas.map((feicoes) => {
@@ -201,19 +219,13 @@
                         { title: "N.", field: "nome", width: 40 },
                     ],
                     rowClick: function (e, row) { //eventos quando sobre uma linha
+                        mapviz.setStyle(estilopadrao);
                         let selecao = row.getIndex();
-                        let poligono = [objgeometria[selecao].features[0].geometry.coordinates[1]];
-                        let popnome = objgeometria[selecao].features[0].properties.nome;
-
+                        //console.log(objgeometria[0]);
+                        let poligono = L.geoJSON(objgeometria[selecao]).getBounds();
                         $("#tabelatabulator").tabulator("deselectRow");
                         $("#tabelatabulator").tabulator("selectRow", selecao);
-
-                        map.flyTo(latelong, 17);
-
-                        L.popup({ maxWidth: 5 })
-                            .setLatLng(latelong)
-                            .setContent('<center>' + popnome + '</center>')
-                            .openOn(map);
+                        map.flyToBounds(poligono);
                     },
                 });
 
