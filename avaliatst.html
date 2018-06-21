@@ -199,64 +199,7 @@
                 let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
                 //console.log(tabelalinhas);
                 //Pontos map()
-                let objgeometria = tabelalinhas.map((feicoes) => {
-                    return {
-                        'features': [{
-                            'type': 'Feature',
-                            'properties': {
-                                'nome': feicoes[0],
-                                //'map': feicoes[7],
-                                'id': feicoes[17]
-                            },
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': [
-                                    feicoes[16],
-                                    feicoes[15]
-                                ]
-                            }
-                        }]
-                    }
-                });
 
-                //estilo ícone
-                let markicon = L.icon({
-                    iconUrl: 'images/dotb.png',
-                    iconAnchor: [8, 8],
-                    popupAnchor: [0, -8],
-                    iconSize: [14, 14]
-                });
-
-                //pontos para mapa
-                let clustermarcadores = L.markerClusterGroup({ disableClusteringAtZoom: 18 });
-                L.geoJSON(objgeometria, {
-                    'pointToLayer': function (feature, latlng) {
-                        let rowid = feature.properties.id;
-                        return L.marker(latlng)
-                            .bindPopup(
-                                '<center>' + feature.properties.nome + '</center>'
-                            )
-                            .setIcon(markicon)
-                            .on('popupopen', function (popup) {
-                                $("#tabelatabulator").tabulator("deselectRow");
-                                $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
-                                $("#tabelatabulator").tabulator("selectRow", rowid);
-                            }).addTo(clustermarcadores);
-                    }
-                });
-                //adicionar o markerClusterGroup com os pontos inseridos
-                map.addLayer(clustermarcadores);
-
-                //mapa de calor
-                let mapacalor = tabelalinhas.map((feicoes) => {
-                    return [
-                        feicoes[15],
-                        feicoes[16],
-                        feicoes[7]
-                    ]
-                });
-                var heatMap = new L.heatLayer(mapacalor, { blur: 20, radius: 50 });
-				map.addLayer(heatMap);
 
                 //Tabela map()
                 let objtabela = tabelalinhas.map((feicoes) => {
@@ -275,6 +218,8 @@
                         'inform': feicoes[12],
                         'contato': feicoes[13],
                         'obs': feicoes[14],
+                        'x': feicoes[16],
+                        'y': feicoes[15],
                         'id': feicoes[17]
                     }
                 });
@@ -314,6 +259,76 @@
                             .setContent('<center>' + popnome + '</center>')
                             .openOn(map);
                     },
+                    dataFiltered:function(filters, rows){
+                        //filters - array of filters currently applied
+                        //rows - array of row components that pass the filters
+                        //clustermarcadores.clearLayers();
+
+doSomething().then(successCallback, failureCallback);
+                        let rowdados = rows;
+                        rowdados.then(console.log(rowdados));
+
+                        /*
+                        let objgeometria = tabelalinhas.map((feicoes) => {
+                            return {
+                                'features': [{
+                                    'type': 'Feature',
+                                    'properties': {
+                                        'nome': feicoes[0],
+                                        //'map': feicoes[7],
+                                        'id': feicoes[17]
+                                    },
+                                    'geometry': {
+                                        'type': 'Point',
+                                        'coordinates': [
+                                            feicoes[16],
+                                            feicoes[15]
+                                        ]
+                                    }
+                                }]
+                            }
+                        });
+
+                        //estilo ícone
+                        let markicon = L.icon({
+                            iconUrl: 'images/dotb.png',
+                            iconAnchor: [8, 8],
+                            popupAnchor: [0, -8],
+                            iconSize: [14, 14]
+                        });
+
+                        //pontos para mapa
+                        let clustermarcadores = L.markerClusterGroup({ disableClusteringAtZoom: 18 });
+                        L.geoJSON(objgeometria, {
+                            'pointToLayer': function (feature, latlng) {
+                                let rowid = feature.properties.id;
+                                return L.marker(latlng)
+                                    .bindPopup(
+                                        '<center>' + feature.properties.nome + '</center>'
+                                    )
+                                    .setIcon(markicon)
+                                    .on('popupopen', function (popup) {
+                                        $("#tabelatabulator").tabulator("deselectRow");
+                                        $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
+                                        $("#tabelatabulator").tabulator("selectRow", rowid);
+                                    }).addTo(clustermarcadores);
+                            }
+                        });
+                        //adicionar o markerClusterGroup com os pontos inseridos
+                        map.addLayer(clustermarcadores);
+
+                        //mapa de calor
+                        let mapacalor = tabelalinhas.map((feicoes) => {
+                            return [
+                                feicoes[15],
+                                feicoes[16],
+                                feicoes[7]
+                            ]
+                        });
+                        var heatMap = new L.heatLayer(mapacalor, { blur: 20, radius: 50 });
+                        map.addLayer(heatMap);
+                        */
+                    }
                 });
 
                 $("#tabelatabulator").tabulator("setData", objtabela);
@@ -336,7 +351,7 @@
 		$.getJSON("data/perimetrourbano79.geojson", function (data) {
 			L.geoJson(data, {
 				style: function (feature) {
-					return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8, weight: 3 };
+					return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8, weight: 2 };
 				}
 			}).addTo(map);
 		});
