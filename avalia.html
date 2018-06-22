@@ -59,19 +59,9 @@
     <div class="botoestabela table-controls">
         <span>
             <select id="filter-field">
-                <option value="nome">Nome</option>
                 <option value="end">End.</option>
             </select>
         </span>
-
-        <span>
-            <select id="filter-type">
-                <option value="like">=</option>
-                <option value="<=">&lt;=</option>
-                <option value=">=">&gt;=</option>
-            </select>
-        </span>
-
         <span>
             <input id="filter-value" type="text" placeholder="digite para filtrar">
         </span>
@@ -111,7 +101,7 @@
                 $("#filter-value").prop("disabled", false);
             }
 
-            $("#tabelatabulator").tabulator("setFilter", filter, $("#filter-type").val(), $("#filter-value").val());
+            $("#tabelatabulator").tabulator("setFilter", filter, "like", $("#filter-value").val());
         };
 
         //Atualiza o filtro ao mudar os valores
@@ -120,7 +110,7 @@
 
         //Botão reiniciar os valores
         $("#filter-clear").click(function () {
-            $("#filter-field").val("nome");
+            $("#filter-field").val("end");
             $("#filter-type").val("like");
             $("#filter-value").val("");
 
@@ -146,37 +136,37 @@
         });
 
         //hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
-		var hash = new L.Hash(map);
+        var hash = new L.Hash(map);
 
-		//marca d´água
-		L.Control.Watermark = L.Control.extend({
-			onAdd: function (map) {
-				var img = L.DomUtil.create('img');
+        //marca d´água
+        L.Control.Watermark = L.Control.extend({
+            onAdd: function (map) {
+                var img = L.DomUtil.create('img');
 
-				img.src = 'images/brasaoavaliacoes.png';
-				img.style.width = '150px';
+                img.src = 'images/brasaoavaliacoes.png';
+                img.style.width = '150px';
 
-				return img;
-			},
-			onRemove: function (map) { }
-		});
+                return img;
+            },
+            onRemove: function (map) { }
+        });
 
-		L.control.watermark = function (opts) {
-			return new L.Control.Watermark(opts);
-		}
-		L.control.watermark({ position: 'topright' }).addTo(map);
+        L.control.watermark = function (opts) {
+            return new L.Control.Watermark(opts);
+        }
+        L.control.watermark({ position: 'topright' }).addTo(map);
 
-		//barra escala
-		L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+        //barra escala
+        L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
 
-		//Norte
-		var north = L.control({ position: "bottomright" });
-		north.onAdd = function (map) {
-			var div = L.DomUtil.create("div", "info legend");
-			div.innerHTML = '<img src="images/setanorte.png">';
-			return div;
-		}
-		north.addTo(map);
+        //Norte
+        var north = L.control({ position: "bottomright" });
+        north.onAdd = function (map) {
+            var div = L.DomUtil.create("div", "info legend");
+            div.innerHTML = '<img src="images/setanorte.png">';
+            return div;
+        }
+        north.addTo(map);
 
         //google image
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -256,7 +246,7 @@
                     ]
                 });
                 var heatMap = new L.heatLayer(mapacalor, { blur: 20, radius: 50 });
-				map.addLayer(heatMap);
+                map.addLayer(heatMap);
 
                 //Tabela map()
                 let objtabela = tabelalinhas.map((feicoes) => {
@@ -271,7 +261,7 @@
                         'valorbenf': feicoes[7],
                         'valorterre': feicoes[8],
                         'valormq': feicoes[9],
-                        'porcento': feicoes[10]*100,
+                        'porcento': feicoes[10] * 100,
                         'zon': feicoes[12],
                         'datavalia': feicoes[13],
                         'inform': feicoes[14],
@@ -296,8 +286,8 @@
                         { title: "Benfeitoria", field: "valorbenf", width: 120 },
                         { title: "Terreno", field: "valorterre", width: 120 },
                         { title: "Terreno/m²", field: "valormq", width: 120 },
-                        { title: "% do maior valor", field:"porcento", align:"left", formatter:"progress", width: 70 },
-                        { title: "Data avaliação", field:"datavalia", sorter:"date", align:"center", width: 110 },
+                        { title: "% do maior valor", field: "porcento", align: "left", formatter: "progress", width: 70 },
+                        { title: "Data avaliação", field: "datavalia", sorter: "date", align: "center", width: 110 },
                         { title: "Zoneamento", field: "zon", width: 110 },
                         { title: "Informante", field: "inform", width: 120 },
                         { title: "Contato", field: "contato", width: 90 },
@@ -324,29 +314,29 @@
             }
         });
 
-		//Limites Município
-		$.getJSON("data/limitesmunicipais.geojson", function (data) {
-			L.geoJson(data, {
-				style: function (feature) {
-					return {
-						color: '#000000',
-						fill: false
-					};
-				},
-			}).addTo(map);
-		});
+        //Limites Município
+        $.getJSON("data/limitesmunicipais.geojson", function (data) {
+            L.geoJson(data, {
+                style: function (feature) {
+                    return {
+                        color: '#000000',
+                        fill: false
+                    };
+                },
+            }).addTo(map);
+        });
 
-		//perímetro urbano
-		$.getJSON("data/perimetrourbano79.geojson", function (data) {
-			L.geoJson(data, {
-				style: function (feature) {
-					return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8, weight: 3 };
-				}
-			}).addTo(map);
-		});
+        //perímetro urbano
+        $.getJSON("data/perimetrourbano79.geojson", function (data) {
+            L.geoJson(data, {
+                style: function (feature) {
+                    return { color: "#ff0000", dashArray: "10 10", Opacity: 0.8, weight: 3 };
+                }
+            }).addTo(map);
+        });
 
-		//Medidas
-		L.Control.measureControl().addTo(map);
+        //Medidas
+        L.Control.measureControl().addTo(map);
 
     </script>
 
