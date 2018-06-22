@@ -172,9 +172,11 @@
                     }
                 });
 
-                //pontos para mapa
-                let mapviz;
 
+                let mapviz;//mapa
+                let poligonodtab = L.geoJSON().addTo(map);//seleção a partir da tabela
+
+                //pontos para mapa
                 let estilopadrao = {
                     weight: 1,
                     color: 'white',
@@ -190,6 +192,7 @@
 
                 destacarfeicao = (e) => {
                     mapviz.setStyle(estilopadrao);
+                    poligonodtab.clearLayers();
                     var layersel = e.target;
                     layersel.setStyle(estilodestaque);
                     let rowid = e.sourceTarget.feature.properties.id;
@@ -220,12 +223,12 @@
                     ],
                     rowClick: function (e, row) { //eventos quando sobre uma linha
                         mapviz.setStyle(estilopadrao);
+                        poligonodtab.clearLayers();
                         let selecao = row.getIndex();
-                        //console.log(objgeometria[0]);
-                        let poligono = L.geoJSON(objgeometria[selecao]).getBounds();
+                        poligono = L.geoJSON(objgeometria[selecao]).addTo(poligonodtab).setStyle(estilodestaque);
                         $("#tabelatabulator").tabulator("deselectRow");
                         $("#tabelatabulator").tabulator("selectRow", selecao);
-                        map.flyToBounds(poligono);
+                        map.flyToBounds(poligono.getBounds());
                     },
                 });
 
