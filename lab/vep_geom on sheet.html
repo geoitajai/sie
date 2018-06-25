@@ -144,73 +144,59 @@
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(map);
 
+        //mapa, Geometria
+        let vepgeom = L.geoJSON().addTo(map);//mapa
+        let poligonodtab = L.geoJSON().addTo(map);//destaque seleção a partir da tabela
+
+        let estilopadrao = {
+            weight: 1,
+            color: 'white',
+            dashArray: '',
+            fillOpacity: 0.7
+        };
+
+        let estilodestaque = {
+            weight: 5,
+            color: '#666',
+            dashArray: '3'
+        };
+
+        let destacarfeicao = (e) => {
+            vepgeom.setStyle(estilopadrao);
+            poligonodtab.clearLayers();
+            var layersel = e.target;
+            layersel.setStyle(estilodestaque);
+            // let rowid = e.sourceTarget.feature.properties.id;
+            // $("#tabelatabulator").tabulator("deselectRow");
+            // $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
+            // $("#tabelatabulator").tabulator("selectRow", rowid);
+        };
+
+        $.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:vepderapropria&outputFormat=application%2Fjson", function (data) {
+            console.log(data);
+            // L.geoJson(data, {
+            //     style: estilopadrao,
+            //         onEachFeature: (feature, layer) => { layer.on({ click: destacarfeicao }) }
+            //     }).addTo(vepgeom);
+        });
+
         //Avaliações
         $.ajax({
             type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJRIwvHqR7Ybd2hS9OOXLIDiSl1k5Bg0DD6LXlJLc99OIKpLDqtb-JbiVv6m-LHcMxFTG98FaXOd7A/pub?gid=0&single=true&output=tsv",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJp5cX3QWSFqnFTfZ1UhvE-s7zKxtPI6UG9pucVizvXOqFUqzhEzyGmNRNdVutYJ5aicaI67qhvQCS/pub?gid=1569936527&single=true&output=tsv",
             dataType: "text",
             success: function (data) {
 
                 let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
                 let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
-                let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
                 //console.log(tabelalinhas);
-                //Pontos map()
-                let objgeometria = tabelalinhas.map((feicoes) => {
-                    return {
-                        'features': [{
-                            'type': 'Feature',
-                            'properties': {
-                                'nome': feicoes[1],
-                                'id': feicoes[2]
-                            },
-                            'geometry': {
-                                'type': 'Polygon',
-                                'coordinates': [JSON.parse("[" + feicoes[0] + "]")]
-                            }
-                        }]
-                    }
-                });
-
-
-                let mapviz;//mapa
-                let poligonodtab = L.geoJSON().addTo(map);//seleção a partir da tabela
-
-                //pontos para mapa
-                let estilopadrao = {
-                    weight: 1,
-                    color: 'white',
-                    dashArray: '',
-                    fillOpacity: 0.7
-                };
-
-                let estilodestaque = {
-                    weight: 5,
-                    color: '#666',
-                    dashArray: '3'
-                };
-
-                destacarfeicao = (e) => {
-                    mapviz.setStyle(estilopadrao);
-                    poligonodtab.clearLayers();
-                    var layersel = e.target;
-                    layersel.setStyle(estilodestaque);
-                    let rowid = e.sourceTarget.feature.properties.id;
-                    $("#tabelatabulator").tabulator("deselectRow");
-                    $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
-                    $("#tabelatabulator").tabulator("selectRow", rowid);
-                };
-
-                mapviz = L.geoJson(objgeometria, {
-                    style: estilopadrao,
-                    onEachFeature: (feature, layer) => { layer.on({ click: destacarfeicao }) }
-                }).addTo(map);
 
                 //Tabela map()
                 let objtabela = tabelalinhas.map((feicoes) => {
                     return {
+                        'id': feicoes[0],
                         'nome': feicoes[1],
-                        'id': feicoes[2]
+                        'situacao': feicoes[2],
                     }
                 });
 
@@ -222,14 +208,14 @@
                         { title: "N.", field: "nome", width: 40 },
                     ],
                     rowClick: function (e, row) { //eventos quando sobre uma linha
-                        mapviz.setStyle(estilopadrao);
+                        vepgeom.setStyle(estilopadrao);
                         poligonodtab.clearLayers();
                         let selecao = row.getIndex();
-                        poligono = L.geoJSON(objgeometria[selecao]).addTo(poligonodtab).setStyle(estilodestaque);
-                        $("#tabelatabulator").tabulator("deselectRow");
-                        $("#tabelatabulator").tabulator("selectRow", selecao);
-                        map.flyToBounds(poligono.getBounds());
-                        console.log(objgeometria);
+                        console.log(vepgeom);
+                        // poligono = L.geoJSON(vepgeom._layers[78]._layers[77].feature.selecao).addTo(poligonodtab).setStyle(estilodestaque);
+                        // $("#tabelatabulator").tabulator("deselectRow");
+                        // $("#tabelatabulator").tabulator("selectRow", selecao);
+                        // map.flyToBounds(poligono.getBounds());
                     },
                 });
 
