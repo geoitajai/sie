@@ -479,29 +479,14 @@
 			}).addTo(zonasadm);
 		});
 
-		//Sistema viário para pesquisa
+		//sviario para pesquisa
 		var pesquisa = new L.LayerGroup();
-		$.ajax({
-			type: "GET",
-			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pub?gid=828218726&single=true&output=tsv",
-			dataType: "text",
-			success: function (data) {
-				csv2geojson.csv2geojson(data,
-					{
-						latfield: 'latitude',
-						lonfield: 'longitude',
-						delimiter: '\t'
-					},
-					function (err, data) {
-						L.geoJSON(data).addTo(pesquisa);
-					});
-			}
-		});
+		$.getJSON("data/sviario.geojson", function (data) { L.geoJson(data).addTo(pesquisa) });
 
 		//Barra pesquisa
 		var searchControl = new L.Control.Search({
 			layer: pesquisa,
-			propertyName: 'nome',
+			propertyName: 'nomevia',
 			circleLocation: false,
 			marker: false,
 			textPlaceholder: "Pesquisa por nome da via",
@@ -527,7 +512,7 @@
 
 		//Camadas
 		var overlayMaps = {
-			"<strong>Perímetro urbano'</strong>'</br>(<a href='http://leismunicipa.is/kqpfg' target='_blank' >Leiº1000/1970</a>, <a href='http://leismunicipa.is/gqphk' target='_blank' >Leiº2147/1984</a> e <a href='http://leismunicipa.is/kjpiq' target='_blank' >Leiº4157/2004</a>) e </br><strong>Zonas administrativas</strong></br>(<a href='http://leismunicipa.is/akipq' target='_blank' >Leiº3359/1998</a>, <a href='http://leismunicipa.is/qdpkj' target='_blank' >Leiº3673/2001</a> e <a href='http://leismunicipa.is/snvrj' target='_blank' >Leiº6790/2017</a>)": zonasadm,
+			"<strong>Perímetro urbano:</strong></br>(<a href='http://leismunicipa.is/kqpfg' target='_blank' >Leiº1000/1970</a>, <a href='http://leismunicipa.is/gqphk' target='_blank' >Leiº2147/1984</a> e <a href='http://leismunicipa.is/kjpiq' target='_blank' >Leiº4157/2004</a>) e </br><strong>Zonas administrativas:</strong></br>(<a href='http://leismunicipa.is/akipq' target='_blank' >Leiº3359/1998</a>, <a href='http://leismunicipa.is/qdpkj' target='_blank' >Leiº3673/2001</a> e <a href='http://leismunicipa.is/snvrj' target='_blank' >Leiº6790/2017</a>)": zonasadm,
 			"<strong>Setores Censitários 2010</strong>": censo2010,
 			"<img src='images/pesaude.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=456279987&single=true' target='_blank' >Saúde</a>": sau,
 			"<img src='images/peedifpublic.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=1984217895&single=true' target='_blank' >Prédios públicos</a>": ppubl,
