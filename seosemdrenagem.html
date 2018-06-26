@@ -1,85 +1,87 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>Sistema viário, Itajaí-SC</title>
-		<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
-		<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
-		<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
-		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-		<link rel="stylesheet" href="lib/leaflet.css" />
-		<link rel="stylesheet" href="lib/leaflet-search.min.css" />
-		<link rel="stylesheet" href="lib/leaflet.draw.css" />
-		<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
-		<link rel="stylesheet" href="lib/MarkerCluster.css" />
-		<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
 
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-			}
+<head>
+	<meta charset="utf-8" />
+	<title>Sistema viário, Itajaí-SC</title>
+	<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+	<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" href="lib/leaflet.css" />
+	<link rel="stylesheet" href="lib/leaflet-search.min.css" />
+	<link rel="stylesheet" href="lib/leaflet.draw.css" />
+	<link rel="stylesheet" href="lib/L.Control.MousePosition.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.css" />
+	<link rel="stylesheet" href="lib/MarkerCluster.Default.css" />
 
-			#map {
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				width: 100%;
-			}
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
 
-			.leaflet-container {
-				background: #ffffff;
-			}
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
 
-			td, th {
-				border: 1px solid #dddddd;
-			}
+		.leaflet-container {
+			background: #ffffff;
+		}
 
-			.legend {
-				padding: 6px 8px;
-				text-align: left;
-				line-height: 18px;
-				color: #555;
-				background : white;
-				box-shadow: 0 0 15px rgba(0,0,0,0.2);
-				border-radius: 5px;
-			}
+		td,
+		th {
+			border: 1px solid #dddddd;
+		}
 
-			.legend i {
-				width: 18px;
-				height: 18px;
-				float: left;
-				margin-right: 20px;
-			}
+		.legend {
+			padding: 6px 8px;
+			text-align: left;
+			line-height: 18px;
+			color: #555;
+			background: white;
+			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+			border-radius: 5px;
+		}
 
-				.legend .circle {
-				border-radius: 20%;
-				width: 15px;
-				height: 15px;
-			}
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 20px;
+		}
 
-			.leaflet-control-draw-measure {
-				background-image: url(images/measure-control.png);
-			}
-			
-			.leaflet-container .leaflet-control-search {				
-				left: 2px;
-			}			
-		</style>
-	</head>
+		.legend .circle {
+			border-radius: 20%;
+			width: 15px;
+			height: 15px;
+		}
 
-	<body>
-		<div id="map"></div>
-		<script src="lib/jquery-3.3.1.min.js"></script>
-		<script src="lib/leaflet.js"></script>
-		<script src="lib/leaflet-search.min.js"></script>
-		<script src="lib/leaflet-omnivore.min.js"></script>
-		<script src="lib/leaflet.markercluster.js"></script>
-		<script src="lib/L.Control.MousePosition.js"></script>
-		<script src="lib/leaflet.draw.js"></script>
-		<script src="lib/leaflet.measurecontrol.min.js"></script>
-		<script src="lib/leaflet.polylineDecorator.js"></script>
-		<script>
+		.leaflet-control-draw-measure {
+			background-image: url(images/measure-control.png);
+		}
+
+		.leaflet-container .leaflet-control-search {
+			left: 2px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="map"></div>
+	<script src="lib/jquery-3.3.1.min.js"></script>
+	<script src="lib/leaflet.js"></script>
+	<script src="lib/leaflet-search.min.js"></script>
+	<script src="lib/leaflet-omnivore.min.js"></script>
+	<script src="lib/leaflet.markercluster.js"></script>
+	<script src="lib/L.Control.MousePosition.js"></script>
+	<script src="lib/leaflet.draw.js"></script>
+	<script src="lib/leaflet.measurecontrol.min.js"></script>
+	<script src="lib/leaflet.polylineDecorator.js"></script>
+	<script>
 
 		var ldrenagem = L.layerGroup();
 		var ldrenagemseta = L.layerGroup();
@@ -99,7 +101,7 @@
 				[-26.8074, -48.5845]
 			],
 			center: new L.latLng([-26.9046, -48.6874]),
-			layers:[ tilesmu, ldrenagem ],
+			layers: [tilesmu, ldrenagem],
 			measureControl: true
 		});
 
@@ -107,11 +109,11 @@
 		L.control.mousePosition().addTo(map);
 
 		//barra escala
-		L.control.scale({imperial: false}).addTo(map);
+		L.control.scale({ imperial: false }).addTo(map);
 
 		//marca d´água
 		L.Control.Watermark = L.Control.extend({
-			onAdd: function(map) {
+			onAdd: function (map) {
 				var img = L.DomUtil.create('img');
 
 				img.src = 'images/brasaoseosem.png';
@@ -119,21 +121,21 @@
 
 				return img;
 			},
-			onRemove: function(map) {}
+			onRemove: function (map) { }
 		});
 
-		L.control.watermark = function(opts) {
+		L.control.watermark = function (opts) {
 			return new L.Control.Watermark(opts);
 		}
 		L.control.watermark({ position: 'bottomleft' }).addTo(map);
 
 		//Mapa base, google
-		new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+		new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
 			opacity: 0.6,
 			maxZoom: 19,
 			transparent: false,
 			attribution: '©2018 Google, Secretaria Municipal de Obras e Serviços Municipais - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-			subdomains:['mt0','mt1','mt2','mt3']
+			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 		}).addTo(tilegoogle);
 
 		//zona urbana e geral
@@ -165,7 +167,7 @@
 				opacity: 0.0
 			},
 
-			onEachFeature: function(feature, layer){
+			onEachFeature: function (feature, layer) {
 				layer.bindPopup(
 					'<strong>' + feature.properties.nomevia + '</strong>' + '<br/>' +
 					'Lei/data: ' + feature.properties.leidata + '<br/>' +
@@ -196,164 +198,165 @@
 		});
 
 		map.addControl(searchControl);
-		
-	//pontes
-	var educaicona = L.icon({
-		iconUrl: 'images/ponte.png',
-		iconSize: [30,30]
-	});
 
-	omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vRv4zc9nsq8vTdV7-X0rLq9Qm9bE29dwzQ_vf7VY2Xyt63C1gr1Jl-r9Dzdri5qqWgGH9gIo_FheFIv/pub?gid=0&single=true&output=csv')
-    .on('ready', function(layer) {
+		//pontes
+		var educaicona = L.icon({
+			iconUrl: 'images/ponte.png',
+			iconSize: [30, 30]
+		});
 
-        this.eachLayer(function(marker) {
+		omnivore.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vRv4zc9nsq8vTdV7-X0rLq9Qm9bE29dwzQ_vf7VY2Xyt63C1gr1Jl-r9Dzdri5qqWgGH9gIo_FheFIv/pub?gid=0&single=true&output=csv')
+			.on('ready', function (layer) {
 
-			marker.setIcon(educaicona);
-            marker.bindPopup(
-				'<strong>' + '<u>' + marker.toGeoJSON().properties.tipo + ' ' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
-				marker.toGeoJSON().properties.endereco + ', ' + marker.toGeoJSON().properties.bairro + '<br/>' +
-				' ' + '<br/>' +
-				'Material: ' + marker.toGeoJSON().properties.material + '<br/>' +
-				'Lei: ' + marker.toGeoJSON().properties.lei
-			);
-        });
-    })
-    .addTo(pontes);
+				this.eachLayer(function (marker) {
 
-	//drenagem, linhas com decorator
-	$.getJSON("data/seosemdrenagem.geojson", function(data) {
-		var geojson = L.geoJson(data, {
+					marker.setIcon(educaicona);
+					marker.bindPopup(
+						'<strong>' + '<u>' + marker.toGeoJSON().properties.tipo + ' ' + marker.toGeoJSON().properties.nome + '</u>' + '</strong>' + '<br/>' +
+						marker.toGeoJSON().properties.endereco + ', ' + marker.toGeoJSON().properties.bairro + '<br/>' +
+						' ' + '<br/>' +
+						'Material: ' + marker.toGeoJSON().properties.material + '<br/>' +
+						'Lei: ' + marker.toGeoJSON().properties.lei
+					);
+				});
+			})
+			.addTo(pontes);
 
-			//estilo da linha, regras primeiro e o estilo completo em return
-			style: function(feature){
-				var corlinha,
-					corl = feature.properties.tipo;
-				if ( corl == 'canal' ) corlinha = "#6d72ca";				
-				else if ( corl == 'galeria' ) corlinha = "#9511cd";
-				else if ( corl == 'galeria.150x150' ) corlinha = "#a3ea84";
-				else if ( corl == 'galeria.150x150*2' ) corlinha = "#e1866f";
-				else if ( corl == 'galeria.200x100' ) corlinha = "#d2ce7c";								
-				else if ( corl == 'galeria.200x150' ) corlinha = "#27ebcb";
-				else if ( corl == 'galeria.200x150*2' ) corlinha = "#c4e87d";				
-				else if ( corl == 'galeria.200x200' ) corlinha = "#ca1fe0";
-				else if ( corl == 'galeria.250x100' ) corlinha = "#cb5797";				
-				else if ( corl == 'galeria.250x150' ) corlinha = "#e24d68";
-				else if ( corl == 'galeria.250x200' ) corlinha = "#37e245";
-				else if ( corl == 'galeria.300x150' ) corlinha = "#6a3ec8";
-				else if ( corl == 'galeria.300x200' ) corlinha = "#e2c058";
-				else if ( corl == 'galeria.350x150' ) corlinha = "#d0e942";
-				else if ( corl == 'galeria.400x150' ) corlinha = "#da3c76";
-				else if ( corl == 'projetado' ) corlinha = "#8db6ef";
-				else if ( corl == 'tubo.100' ) corlinha = "#379edd";
-				else if ( corl == 'tubo.100x2' ) corlinha = "#dd57b9";
-				else if ( corl == 'tubo.100x3' ) corlinha = "#88eff0";
-				else if ( corl == 'tubo.120' ) corlinha = "#e09533";
-				else if ( corl == 'tubo.120*2' ) corlinha = "#47da6e";
-				else if ( corl == 'tubo.120x2' ) corlinha = "#76d56c";
-				else if ( corl == 'tubo.150' ) corlinha = "#4833d1";
-				else if ( corl == 'tubo.30' ) corlinha = "#a05edd";
-				else if ( corl == 'tubo.40' ) corlinha = "#e96ec7";
-				else if ( corl == 'tubo.50' ) corlinha = "#6db7c9";
-				else if ( corl == 'tubo.60' ) corlinha = "#d23838";
-				else if ( corl == 'tubo.60x2' ) corlinha = "#e06d25";
-				else if ( corl == 'tubo.80' ) corlinha = "#7de41b";
-				else if ( corl == 'tubo.80x2' ) corlinha = "#4b69ca";
-				else if ( corl == 'vala' ) corlinha = "#46e68e";				
-				else corlinha = "#ffff9b";
-				return { color: corlinha, weight: 8, opacity: 0.7 };
-			},
-			
-			//decoração da linha
-			onEachFeature: function (feature, layer) {	
-				L.polylineDecorator(layer, {
-					patterns: [
-            {offset: '95%', repeat: 0, symbol: L.Symbol.arrowHead({pixelSize: 8, polygon: false, pathOptions: {color: '#666666', stroke: true}})}
-					]
-				}).addTo(ldrenagemseta);  /// Adiciona cada seta ao mapa
-			
-			//popups
-			layer.bindPopup('<h3>' + feature.properties.tipo + '</h3>');
+		//drenagem, linhas com decorator
+		$.getJSON("data/seosemdrenagem.geojson", function (data) {
+			var geojson = L.geoJson(data, {
+
+				//estilo da linha, regras primeiro e o estilo completo em return
+				style: function (feature) {
+					var corlinha,
+						corl = feature.properties.tipo;
+					if (corl == 'canal') corlinha = "#6d72ca";
+					else if (corl == 'galeria') corlinha = "#9511cd";
+					else if (corl == 'galeria.150x150') corlinha = "#a3ea84";
+					else if (corl == 'galeria.150x150*2') corlinha = "#e1866f";
+					else if (corl == 'galeria.200x100') corlinha = "#d2ce7c";
+					else if (corl == 'galeria.200x150') corlinha = "#27ebcb";
+					else if (corl == 'galeria.200x150*2') corlinha = "#c4e87d";
+					else if (corl == 'galeria.200x200') corlinha = "#ca1fe0";
+					else if (corl == 'galeria.250x100') corlinha = "#cb5797";
+					else if (corl == 'galeria.250x150') corlinha = "#e24d68";
+					else if (corl == 'galeria.250x200') corlinha = "#37e245";
+					else if (corl == 'galeria.300x150') corlinha = "#6a3ec8";
+					else if (corl == 'galeria.300x200') corlinha = "#e2c058";
+					else if (corl == 'galeria.350x150') corlinha = "#d0e942";
+					else if (corl == 'galeria.400x150') corlinha = "#da3c76";
+					else if (corl == 'projetado') corlinha = "#8db6ef";
+					else if (corl == 'tubo.100') corlinha = "#379edd";
+					else if (corl == 'tubo.100x2') corlinha = "#dd57b9";
+					else if (corl == 'tubo.100x3') corlinha = "#88eff0";
+					else if (corl == 'tubo.120') corlinha = "#e09533";
+					else if (corl == 'tubo.120*2') corlinha = "#47da6e";
+					else if (corl == 'tubo.120x2') corlinha = "#76d56c";
+					else if (corl == 'tubo.150') corlinha = "#4833d1";
+					else if (corl == 'tubo.30') corlinha = "#a05edd";
+					else if (corl == 'tubo.40') corlinha = "#e96ec7";
+					else if (corl == 'tubo.50') corlinha = "#6db7c9";
+					else if (corl == 'tubo.60') corlinha = "#d23838";
+					else if (corl == 'tubo.60x2') corlinha = "#e06d25";
+					else if (corl == 'tubo.80') corlinha = "#7de41b";
+					else if (corl == 'tubo.80x2') corlinha = "#4b69ca";
+					else if (corl == 'vala') corlinha = "#46e68e";
+					else corlinha = "#ffff9b";
+					return { color: corlinha, weight: 8, opacity: 0.7 };
+				},
+
+				//decoração da linha
+				onEachFeature: function (feature, layer) {
+					L.polylineDecorator(layer, {
+						patterns: [
+							{ offset: '95%', repeat: 0, symbol: L.Symbol.arrowHead({ pixelSize: 8, polygon: false, pathOptions: { color: '#666666', stroke: true } }) }
+						]
+					}).addTo(ldrenagemseta);  /// Adiciona cada seta ao mapa
+
+					//popups
+					layer.bindPopup('<h3>' + feature.properties.tipo + '</h3>');
+				}
 			}
-		}
-	).addTo(ldrenagemseta);
-	});
-	
-	//drenagem, apenas linhas
-	$.getJSON("data/seosemdrenagem.geojson", function(data) {
-		var geojson = L.geoJson(data, {
+			).addTo(ldrenagemseta);
+		});
 
-			//estilo da linha, regras primeiro e o estilo completo em return
-			style: function(feature){
-				var corlinha,
-					corl = feature.properties.tipo;
-				if ( corl == 'canal' ) corlinha = "#6d72ca";				
-				else if ( corl == 'galeria' ) corlinha = "#9511cd";
-				else if ( corl == 'galeria.150x150' ) corlinha = "#a3ea84";
-				else if ( corl == 'galeria.150x150*2' ) corlinha = "#e1866f";
-				else if ( corl == 'galeria.200x100' ) corlinha = "#d2ce7c";								
-				else if ( corl == 'galeria.200x150' ) corlinha = "#27ebcb";
-				else if ( corl == 'galeria.200x150*2' ) corlinha = "#c4e87d";				
-				else if ( corl == 'galeria.200x200' ) corlinha = "#ca1fe0";
-				else if ( corl == 'galeria.250x100' ) corlinha = "#cb5797";				
-				else if ( corl == 'galeria.250x150' ) corlinha = "#e24d68";
-				else if ( corl == 'galeria.250x200' ) corlinha = "#37e245";
-				else if ( corl == 'galeria.300x150' ) corlinha = "#6a3ec8";
-				else if ( corl == 'galeria.300x200' ) corlinha = "#e2c058";
-				else if ( corl == 'galeria.350x150' ) corlinha = "#d0e942";
-				else if ( corl == 'galeria.400x150' ) corlinha = "#da3c76";
-				else if ( corl == 'projetado' ) corlinha = "#8db6ef";
-				else if ( corl == 'tubo.100' ) corlinha = "#379edd";
-				else if ( corl == 'tubo.100x2' ) corlinha = "#dd57b9";
-				else if ( corl == 'tubo.100x3' ) corlinha = "#88eff0";
-				else if ( corl == 'tubo.120' ) corlinha = "#e09533";
-				else if ( corl == 'tubo.120*2' ) corlinha = "#47da6e";
-				else if ( corl == 'tubo.120x2' ) corlinha = "#76d56c";
-				else if ( corl == 'tubo.150' ) corlinha = "#4833d1";
-				else if ( corl == 'tubo.30' ) corlinha = "#a05edd";
-				else if ( corl == 'tubo.40' ) corlinha = "#e96ec7";
-				else if ( corl == 'tubo.50' ) corlinha = "#6db7c9";
-				else if ( corl == 'tubo.60' ) corlinha = "#d23838";
-				else if ( corl == 'tubo.60x2' ) corlinha = "#e06d25";
-				else if ( corl == 'tubo.80' ) corlinha = "#7de41b";
-				else if ( corl == 'tubo.80x2' ) corlinha = "#4b69ca";
-				else if ( corl == 'vala' ) corlinha = "#46e68e";				
-				else corlinha = "#ffff9b";
-				return { color: corlinha, weight: 4, opacity: 0.7 };
-			},
-		}
-	).addTo(ldrenagem);
-	});	
+		//drenagem, apenas linhas
+		$.getJSON("data/seosemdrenagem.geojson", function (data) {
+			var geojson = L.geoJson(data, {
 
-	//remover camada propostas zoom minimo
-	map.on('zoomend', function() {
-		if (map.getZoom() >= 16){
+				//estilo da linha, regras primeiro e o estilo completo em return
+				style: function (feature) {
+					var corlinha,
+						corl = feature.properties.tipo;
+					if (corl == 'canal') corlinha = "#6d72ca";
+					else if (corl == 'galeria') corlinha = "#9511cd";
+					else if (corl == 'galeria.150x150') corlinha = "#a3ea84";
+					else if (corl == 'galeria.150x150*2') corlinha = "#e1866f";
+					else if (corl == 'galeria.200x100') corlinha = "#d2ce7c";
+					else if (corl == 'galeria.200x150') corlinha = "#27ebcb";
+					else if (corl == 'galeria.200x150*2') corlinha = "#c4e87d";
+					else if (corl == 'galeria.200x200') corlinha = "#ca1fe0";
+					else if (corl == 'galeria.250x100') corlinha = "#cb5797";
+					else if (corl == 'galeria.250x150') corlinha = "#e24d68";
+					else if (corl == 'galeria.250x200') corlinha = "#37e245";
+					else if (corl == 'galeria.300x150') corlinha = "#6a3ec8";
+					else if (corl == 'galeria.300x200') corlinha = "#e2c058";
+					else if (corl == 'galeria.350x150') corlinha = "#d0e942";
+					else if (corl == 'galeria.400x150') corlinha = "#da3c76";
+					else if (corl == 'projetado') corlinha = "#8db6ef";
+					else if (corl == 'tubo.100') corlinha = "#379edd";
+					else if (corl == 'tubo.100x2') corlinha = "#dd57b9";
+					else if (corl == 'tubo.100x3') corlinha = "#88eff0";
+					else if (corl == 'tubo.120') corlinha = "#e09533";
+					else if (corl == 'tubo.120*2') corlinha = "#47da6e";
+					else if (corl == 'tubo.120x2') corlinha = "#76d56c";
+					else if (corl == 'tubo.150') corlinha = "#4833d1";
+					else if (corl == 'tubo.30') corlinha = "#a05edd";
+					else if (corl == 'tubo.40') corlinha = "#e96ec7";
+					else if (corl == 'tubo.50') corlinha = "#6db7c9";
+					else if (corl == 'tubo.60') corlinha = "#d23838";
+					else if (corl == 'tubo.60x2') corlinha = "#e06d25";
+					else if (corl == 'tubo.80') corlinha = "#7de41b";
+					else if (corl == 'tubo.80x2') corlinha = "#4b69ca";
+					else if (corl == 'vala') corlinha = "#46e68e";
+					else corlinha = "#ffff9b";
+					return { color: corlinha, weight: 4, opacity: 0.7 };
+				},
+			}
+			).addTo(ldrenagem);
+		});
+
+		//remover camada propostas zoom minimo
+		map.on('zoomend', function () {
+			if (map.getZoom() >= 16) {
 				map.removeLayer(ldrenagem);
-		}
-		else {
+			}
+			else {
 				map.addLayer(ldrenagem);
 			}
-	});
+		});
 
-	//remover camada propostas no zoom máximo
-	map.on('zoomend', function() {
-		if (map.getZoom() < 16){
+		//remover camada propostas no zoom máximo
+		map.on('zoomend', function () {
+			if (map.getZoom() < 16) {
 				map.removeLayer(ldrenagemseta);
-		}
-		else {
+			}
+			else {
 				map.addLayer(ldrenagemseta);
 			}
-	});
+		});
 
-	//Controle de camadas
-	var overlayMaps = {		
-		"Pontes" : pontes		
-	};
-	var baseMaps = {
-			"Sistema viário" : tilesmu,
-			"Imagem, Google maps" : tilegoogle
+		//Controle de camadas
+		var overlayMaps = {
+			"Pontes": pontes
 		};
-	L.control.layers(baseMaps, overlayMaps,{collapsed:false, position: 'topleft'}).addTo(map);
+		var baseMaps = {
+			"Sistema viário": tilesmu,
+			"Imagem, Google maps": tilegoogle
+		};
+		L.control.layers(baseMaps, overlayMaps, { collapsed: false, position: 'topleft' }).addTo(map);
 
-		</script>
-	</body>
+	</script>
+</body>
+
 </html>
