@@ -187,7 +187,6 @@
                 let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
                 let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
                 let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
-                console.log(tabelalinhas);
                 //Pontos map()
                 let objgeometria = tabelalinhas.map((feicoes) => {
                     return {
@@ -195,7 +194,7 @@
                             'type': 'Feature',
                             'properties': {
                                 'nome': feicoes[0],
-                                //'map': feicoes[7],
+                                'map': feicoes[11],
                                 'id': feicoes[19]
                             },
                             'geometry': {
@@ -208,25 +207,54 @@
                         }]
                     }
                 });
+                console.log(objgeometria);
 
-                //estilo ícone
-                let markicon = L.icon({
-                    iconUrl: 'images/dotb.png',
+                //estilo ícone verde
+                let markiconverde = L.icon({
+                    iconUrl: 'images/dotverde.png',
+                    iconAnchor: [8, 8],
+                    popupAnchor: [0, -8],
+                    iconSize: [14, 14]
+                });
+
+                //estilo ícone amarelo
+                let markiconamarelo = L.icon({
+                    iconUrl: 'images/dotamarelo.png',
+                    iconAnchor: [8, 8],
+                    popupAnchor: [0, -8],
+                    iconSize: [14, 14]
+                });
+
+                //estilo ícone vermelho
+                let markiconvermelho = L.icon({
+                    iconUrl: 'images/dotvermelho.png',
                     iconAnchor: [8, 8],
                     popupAnchor: [0, -8],
                     iconSize: [14, 14]
                 });
 
                 //pontos para mapa
-                let clustermarcadores = L.markerClusterGroup({ disableClusteringAtZoom: 18 });
+                let clustermarcadores = L.markerClusterGroup({ disableClusteringAtZoom: 14 });
                 L.geoJSON(objgeometria, {
                     'pointToLayer': function (feature, latlng) {
                         let rowid = feature.properties.id;
+                        let iconeunidade;
+                        iconeprop = feature.properties.map;
+                        //regra para ícones
+                        if (iconeprop == 'M') {
+                            iconeunidade = markiconvermelho;
+                        }
+                        else if (iconeprop == 'A') {
+                            iconeunidade = markiconamarelo;
+                        }
+                        else {
+                            iconeunidade = markiconverde;
+                        };
                         return L.marker(latlng)
                             .bindPopup(
                                 '<center>' + feature.properties.nome + '</center>'
                             )
-                            .setIcon(markicon)
+                            .setIcon(iconeunidade)
                             .on('popupopen', function (popup) {
                                 $("#tabelatabulator").tabulator("deselectRow");
                                 $("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
