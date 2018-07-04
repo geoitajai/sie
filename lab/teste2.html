@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title> </title>
+    <link rel="icon" type="image/png" href="../images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="../lib/leaflet.css" />
+</head>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #map {
+        position: absolute;
+        top: 50%;
+        width: 50%;
+        height: 50%;
+    }
+</style>
+
+<body>
+    <!-- Mapa -->
+    <div id="map"></div>
+
+    <!-- Bibliotecas -->
+    <script src="../lib/leaflet.js"></script>
+
+    <!-- Mapa -->
+    <script>
+        //div do mapa
+        var map = new L.Map('map', {
+            zoom: 14,
+            minZoom: 12,
+            maxZoom: 19,
+            maxBounds: [
+                //south west
+                [-27.215341, -49.020370],
+                //north east
+                [-26.701009, -48.397961]
+            ],
+            center: new L.latLng([-26.906960, -48.685425])
+        });
+
+        //google image
+        new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.6,
+            maxZoom: 19,
+            transparent: false,
+            attribution: '©2018 Google, SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+
+        //show image
+        function show_image(src, width, height, alt) {
+            var img = document.createElement("img");
+            img.src = src;
+            img.width = width;
+            img.height = height;
+            img.alt = alt;
+            // This next line will just add it to the <body> tag
+            document.body.appendChild(img);
+        };
+
+        show_image('../images/patrdsocial.png',
+            276,
+            110,
+            'Google Logo'
+        ).then console.log('teste');
+/*
+        loadImagePromised('../images/patrdsocial.png')
+            .then((img) => {
+                let imgElement =
+                    document.createElement("img")
+                imgElement.src = img.srcdocument.body.appendChild(imgElement)
+            });
+            */
+
+    </script>
+
+</body>
+
+</html>
