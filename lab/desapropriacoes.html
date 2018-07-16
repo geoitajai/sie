@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <title> </title>
-    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-16x16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet.css" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/jquery-ui.min.css" />
@@ -183,7 +183,7 @@
         var north = L.control({ position: "topright" });
         north.onAdd = function (map) {
             var div = L.DomUtil.create("div", "info legend");
-            div.innerHTML = '<img src="http://geo-smu.itajai.local/geo/images/setanorte.png">';
+            div.innerHTML = '<img src="images/setanorte.png">';
             return div;
         }
         north.addTo(map);
@@ -284,9 +284,7 @@
                         let nometab = objtabela.nome;
                         return {
                             'type': 'Feature',
-                            'properties': {
-                                'id': feicoes.properties.id
-                            },
+                            'properties': objtabela.find(e => e.id == feicoes.properties.id),
                             'geometry': {
                                 'type': 'MultiPolygon',
                                 'coordinates': feicoes.geometry.coordinates
@@ -320,20 +318,20 @@
                     };
 
                     //mapa
-                    console.log(objtabela["0"].id);
+                    //console.log(geomuniao);
                     L.geoJson(geomuniao, {
                         style: (feature, layer) => {
+                            /*
                             let corzona;
-                            console.log(feature.properties.id);
-                            let cormz = objtabela[feature.properties.id.toString()].situacao;
-                            console.log(cormz);
-                            // if (cormz.includes("Concluso vep anterior")) feature.properties.situacao = "#00cc66";
-                            // if (cormz.includes("Concluso vep atual")) feature.properties.situacao = "#00ffff";
-                            // if (cormz.includes("Concluso vep fazer prestacao de contas")) feature.properties.situacao = "#0000ff";
-                            // if (cormz.includes("Indenização dispensada")) feature.properties.situacao = "#ff99ff";
-                            // if (cormz.includes("Paralisada")) feature.properties.situacao = "#f1e2cc";
-                            // if (cormz.includes("PENDENTE")) feature.properties.situacao = "#ffff00";
-                            // if (cormz.includes("Resolvido")) feature.properties.situacao = "#ffffff";
+                            let cormz = feature.properties.situacao;
+                            if (cormz.includes("Concluso vep anterior")) corzona = "#00cc66";
+                            if (cormz.includes("Concluso vep atual")) corzona = "#00ffff";
+                            if (cormz.includes("Concluso vep fazer prestacao de contas")) corzona = "#0000ff";
+                            if (cormz.includes("Indenização dispensada")) corzona = "#ff99ff";
+                            if (cormz.includes("Paralisada")) corzona = "#f1e2cc";
+                            if (cormz.includes("PENDENTE")) corzona = "#ffff00";
+                            if (cormz.includes("Resolvido")) corzona = "#ffffff";
+                            */
                             return { weight: 1, color: '#f2f2f2', fillColor: '#ffffff', fillOpacity: 0.4, weight: 2 };
                         },
                         onEachFeature: (feature, layer) => {
