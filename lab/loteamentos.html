@@ -114,6 +114,7 @@
 
 		//controle de layers
 		var areasmunicip = L.layerGroup();
+		var areascaucionadas = L.layerGroup();
 
 		//div do mapa
 		var map = new L.Map('map', {
@@ -130,6 +131,21 @@
 			maxBoundsViscosity: 1.0,
 			zoomControl: false
 		});
+
+		//barra escala
+		L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+
+		//Norte
+		var titulomapa = L.control({ position: 'bottomright' });
+
+		titulomapa.onAdd = function (map) {
+			var div = L.DomUtil.create('div', 'info legend');
+			div.innerHTML +=
+				'<center><sub><font size="4">▲</font></sub><br/>' +
+				'<sup><font size="2">N</font></sup></center>'
+			return div;
+		};
+		titulomapa.addTo(map);
 
 		//marca, logo município smu
 		L.Control.Watermark = L.Control.extend({
@@ -152,9 +168,6 @@
 		}
 
 		L.control.watermark({ position: 'topleft' }).addTo(map);
-
-		//barra escala
-		L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
 		//Mapa base, google
 		map.addLayer(new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -420,10 +433,31 @@
 			}).addTo(areasmunicip);
 		});
 
+		//Áreas caucionadas
+		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:loteamentoslotescaucionados&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return {
+						fillColor: "#ffff00",
+						color: "#808000",
+						fillOpacity: 0.4
+					};
+				},
+
+				onEachFeature: function (feature, layer) {
+					layer.bindPopup(
+						'Descrição: ' + feature.properties.nome + '<br/>' +
+						'Lei: ' + feature.properties.lei
+					);
+				}
+			}).addTo(areascaucionadas);
+		});
+
 		//Controle de camadas 1
 		var overlay = {
 			"Áreas município": areasmunicip,
-			"Lotes, cadastro": lotcad
+			"Lotes, cadastro": lotcad,
+			"Lotes caucionados": areascaucionadas
 		};
 
 		L.control.layers(null, overlay, { collapsed: false, position: 'topleft' }).addTo(map);
