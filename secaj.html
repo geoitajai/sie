@@ -4,11 +4,13 @@
 <head>
     <meta charset="utf-8" />
     <title> </title>
-    <link rel="icon" type="image/png" href="https://geoitajai.github.io/sie/images/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="https://geoitajai.github.io/sie/images/favicon-16x16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="https://geoitajai.github.io/sie/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <link rel="stylesheet" href="https://geoitajai.github.io/sie/lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/leaflet-search.min.css" />
+    <link rel="stylesheet" href="lib/leaflet.draw.css" />
 </head>
 
 <style>
@@ -27,6 +29,18 @@
     .leaflet-container {
         background: #ffffff;
     }
+
+    .info {
+        padding: 6px 8px;
+        background: white;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+        border-radius: 0px;
+    }
+
+    .leaflet-control-draw-measure {
+        background-image: url(images/measure-control.png);
+    }
 </style>
 
 <body>
@@ -34,15 +48,21 @@
     <div id="map"></div>
 
     <!-- Bibliotecas -->
-    <script src="https://geoitajai.github.io/sie/lib/leaflet.js"></script>
-    <script src="https://geoitajai.github.io/sie/lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/leaflet.js"></script>
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/leaflet-search.min.js"></script>
+    <script src="lib/leaflet.draw.js"></script>
+    <script src="lib/leaflet.measurecontrol.min.js"></script>
 
     <!-- Mapa -->
     <script>
 
+        var tilegoogle = new L.layerGroup();
+        var tilesmu = new L.LayerGroup();
+
         //div do mapa
         var map = new L.Map('map', {
-            zoom: 14,
+            zoom: 13,
             minZoom: 12,
             maxZoom: 19,
             maxBounds: [
@@ -51,29 +71,73 @@
                 //north east
                 [-26.701009, -48.397961]
             ],
-            center: new L.latLng([-26.906960, -48.685425])
+            center: new L.latLng([-26.906960, -48.685425]),
+            layers: [tilegoogle],
+            zoomControl: false
         });
+
+        //título
+        var titulomapa = L.control({ position: 'topleft' });
+
+        titulomapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML +=
+                '<center><strong><font size="6">SECAJ</font></strong><br/>' +
+                '<hr>' +
+                '<strong><font size="4">Territorialização</font></strong><br/>' +
+                '<font size="2">Diagnóstico da Realidade<br/>Social de Crianças e<br/>Adolescentes</font>' +
+                '<hr>' +
+                '<a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vT0Jk9I41pnVJnz4BlqquF89Y9cZooAH4XrzHJeaXToGexJiZkjgYg0JTtojufImSU0St078OhOUshK/pubhtml?gid=0&single=true" target="_blank">- TABELA SETORES</a><br/>' +
+                '<a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vT0Jk9I41pnVJnz4BlqquF89Y9cZooAH4XrzHJeaXToGexJiZkjgYg0JTtojufImSU0St078OhOUshK/pubhtml?gid=2114979329&single=true" target="_blank">- Hab/setor</a></center>'
+            return div;
+        };
+        titulomapa.addTo(map);
 
         //barra escala
         L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
 
         //Norte
-        var north = L.control({ position: "bottomright" });
-        north.onAdd = function (map) {
-            var div = L.DomUtil.create("div", "info legend");
-            div.innerHTML = '<img src="https://geoitajai.github.io/sie/images/setanorte.png">';
-            return div;
-        }
-        north.addTo(map);
+        var titulomapa = L.control({ position: 'bottomright' });
 
-        //google image
+        titulomapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info2 legend');
+            div.innerHTML +=
+                '<center><sub><font size="4">▲</font></sub><br/>' +
+                '<sup><font size="2">N</font></sup></center>'
+            return div;
+        };
+        titulomapa.addTo(map);
+
+        //Mapa base, google
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
             opacity: 0.6,
-            maxZoom: 19,
+            maxZoom: 17,
             transparent: false,
-            attribution: '©2018 Google, SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            attribution: '©2018 Google, SECAJ - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-        }).addTo(map);
+        }).addTo(tilegoogle);
+
+        //zona urbana e geral
+        new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
+            opacity: 0.6,
+            minZoom: 10,
+            attribution: 'SECAJ - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            maxZoom: 17
+        }).addTo(tilesmu);
+
+        //zona rural, zoom 17
+        new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
+            opacity: 0.6,
+            minZoom: 17,
+            maxZoom: 17
+        }).addTo(tilesmu);
+
+        //bairros
+        map.addLayer(new L.TileLayer('tiles/bairros/{z}/{x}/{y}.png', {
+            opacity: 0.5,
+            minZoom: 10,
+            maxZoom: 16
+        }));
 
         //Avaliações
         $.ajax({
@@ -103,8 +167,113 @@
                     }
                 });
                 console.log(objgeometria);
+                L.geoJson(objgeometria, {
+                    style: function (feature) {
+                        let corzona;
+                        cormz = feature.properties.codarea;
+                        if (cormz == '1') corzona = "#d9ead3";
+                        else if (cormz == '2') corzona = "#c9daf8";
+                        else if (cormz == '3') corzona = "#ea9999";
+                        else if (cormz == '4') corzona = "#b6d7a8";
+                        else if (cormz == '5') corzona = "#b4a7d6";
+                        else if (cormz == '6') corzona = "#fff2cc";
+                        else if (cormz == '7') corzona = "#cfe2f3";
+                        else if (cormz == '8') corzona = "#93c47d";
+                        else if (cormz == '9') corzona = "#9fc5e8";
+                        else if (cormz == '10') corzona = "#ead1dc";
+                        else if (cormz == '11') corzona = "#6aa84f";
+                        else if (cormz == '12') corzona = "#1c4587";
+                        else if (cormz == '13') corzona = "#d5a6bd";
+                        else if (cormz == '14') corzona = "#d9d9d9";
+                        else if (cormz == '15') corzona = "#a64d79";
+                        else if (cormz == '16') corzona = "#00ff00";
+                        else if (cormz == '17') corzona = "#8e7cc3";
+                        else if (cormz == '18') corzona = "#f6b26b";
+                        else if (cormz == '19') corzona = "#d0e0e3";
+                        else if (cormz == '20') corzona = "#c27ba0";
+                        else if (cormz == '21') corzona = "#38761d";
+                        else if (cormz == '22') corzona = "#00ffff";
+                        else if (cormz == '23') corzona = "#7f6000";
+                        else if (cormz == '24') corzona = "#d9d2e9";
+                        else if (cormz == '25') corzona = "#e6b8af";
+                        else if (cormz == '26') corzona = "#45818e";
+                        else if (cormz == '27') corzona = "#990000";
+                        else if (cormz == '28') corzona = "#b45f06";
+                        else if (cormz == '29') corzona = "#bf9000";
+                        else if (cormz == '30') corzona = "#dd7e6b";
+                        else corzona = "#fff";
+                        return { color: "#808080", fillColor: corzona, fillOpacity: 0.6, weight: 1 };
+                    },
+
+                    onEachFeature: function (feature, layer) {
+                        /*
+                        layer.bindTooltip(
+                            feature.properties.codcenso,
+                            { sticky: true, direction: "center" }
+                        );
+                        */
+                        layer.bindPopup(
+                            'Cód.: ' + feature.properties.codarea + '</br>' +
+                            'Apelido: ' + feature.properties.apelido + '</br>' +
+                            'Bairro(IBGE): ' + feature.properties.ibgebairro + '</br>' +
+                            'Cód.setor, censo2010(IBGE): ' + feature.properties.codcenso + '</br>' +
+                            'Nº habitantes, censo2010(IBGE): ' + feature.properties.numhabit + '</br>' +
+                            'Observações: ' + feature.properties.obs
+                        );
+                    }
+
+                }).addTo(map);
             }
         });
+
+        //Limites Município
+        $.getJSON("data/limitesmunicipais.geojson", function (data) {
+            L.geoJson(data, {
+                style: function (feature) {
+                    return {
+                        color: '#000000',
+                        fill: false
+                    };
+                },
+            }).addTo(map);
+        });
+
+        //sviario para pesquisa
+        var pesquisa = new L.LayerGroup();
+        $.getJSON("data/sviario.geojson", function (data) { L.geoJson(data).addTo(pesquisa) });
+
+        //Barra pesquisa
+        var searchControl = new L.Control.Search({
+            layer: pesquisa,
+            propertyName: 'nomevia',
+            circleLocation: false,
+            marker: false,
+            textPlaceholder: "Pesquisa por nome da via",
+            textErr: "Não localizado",
+            textCancel: "Cancelar",
+            zoom: 17,
+            openPopup: false,
+            collapsed: false,
+            initial: false,
+            position: 'bottomleft',
+            minLength: 2
+        });
+        map.addControl(searchControl);
+        //camada não precisa ser visível, apenas para searchcontrol
+        map.removeLayer(pesquisa);
+
+        //Camadas base
+        var baseMaps = {
+            "<a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pubhtml?gid=1271041860&single=true' target='_blank' >Sistema viário(Tabela)</a>": tilesmu,
+            "Imagem, Google maps": tilegoogle
+        };
+        L.control.layers(baseMaps, null, { collapsed: false, position: 'bottomleft' }).addTo(map);
+
+        //Botão zoom posicionado
+        L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+        //Ferramenta medidas
+        L.Control.measureControl({ position: 'bottomleft' }).addTo(map);
 
     </script>
 
