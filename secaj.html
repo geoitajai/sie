@@ -4,11 +4,11 @@
 <head>
     <meta charset="utf-8" />
     <title> </title>
-    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://geoitajai.github.io/sie/images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="https://geoitajai.github.io/sie/images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="https://geoitajai.github.io/sie/images/favicon-32x32.png" sizes="32x32">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="https://geoitajai.github.io/sie/lib/leaflet.css" />
 </head>
 
 <style>
@@ -21,7 +21,7 @@
         position: absolute;
         top: 0;
         width: 100%;
-        height: 70%;
+        height: 100%;
     }
 
     .leaflet-container {
@@ -34,8 +34,8 @@
     <div id="map"></div>
 
     <!-- Bibliotecas -->
-    <script src="lib/leaflet.js"></script>
-    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="https://geoitajai.github.io/sie/lib/leaflet.js"></script>
+    <script src="https://geoitajai.github.io/sie/lib/jquery-3.3.1.min.js"></script>
 
     <!-- Mapa -->
     <script>
@@ -61,7 +61,7 @@
         var north = L.control({ position: "bottomright" });
         north.onAdd = function (map) {
             var div = L.DomUtil.create("div", "info legend");
-            div.innerHTML = '<img src="images/setanorte.png">';
+            div.innerHTML = '<img src="https://geoitajai.github.io/sie/images/setanorte.png">';
             return div;
         }
         north.addTo(map);
@@ -78,12 +78,31 @@
         //Avaliações
         $.ajax({
             type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT0Jk9I41pnVJnz4BlqquF89Y9cZooAH4XrzHJeaXToGexJiZkjgYg0JTtojufImSU0St078OhOUshK/pub?gid=0&single=true&output=tsv",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT0Jk9I41pnVJnz4BlqquF89Y9cZooAH4XrzHJeaXToGexJiZkjgYg0JTtojufImSU0St078OhOUshK/pub?gid=354645626&single=true&output=tsv",
             dataType: "text",
             success: function (data) {
                 let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
                 let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
-                console.log(tabelalinhas);
+                let objgeometria = tabelalinhas.map((feicoes) => {
+                    return {
+                        'features': [{
+                            'type': 'Feature',
+                            'properties': {
+                                'codcenso': feicoes[1],
+                                'ibgebairro': feicoes[2],
+                                'numhabit': feicoes[3],
+                                'obs': feicoes[4],
+                                'codarea': feicoes[5],
+                                'apelido': feicoes[6]
+                            },
+                            'geometry': {
+                                'type': 'Polygon',
+                                'coordinates': [JSON.parse("[" + feicoes[0] + "]")]
+                            }
+                        }]
+                    }
+                });
+                console.log(objgeometria);
             }
         });
 
