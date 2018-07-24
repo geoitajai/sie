@@ -354,6 +354,7 @@
 
 			//Tabela map()
 			let datafeatures = data.features;
+			console.log(datafeatures);
 			let objtabela = datafeatures.map((feicoes) => {
 				return {
 					'id': feicoes.properties.id,
@@ -361,6 +362,7 @@
 					'tipo': feicoes.properties.tipo,
 					'bairro': feicoes.properties.bairro,
 					'setor': feicoes.properties.setor,
+					'pranchaprovada': feicoes.properties.carimboaprov,
 					'link': '<a href="http://10.10.1.158/geo/images/loteamentos/' + feicoes.properties.codigo + '.pdf" target="_blank">ABRIR PLANTA</a>'
 				}
 			});
@@ -375,6 +377,7 @@
 					{ title: "Bairro", field: "bairro", width: 200 },
 					{ title: "Setor", field: "setor", width: 70 },
 					{ title: "Prancha", field: "link", formatter: "html", width: 120 },
+					{ title: "Cópia da prancha aprovada", field: "pranchaprovada", align:"center", width: 220 },
 				],
 				rowClick: function (e, row) { //eventos quando sobre uma linha
 					vepgeom.setStyle(estilopadrao);
