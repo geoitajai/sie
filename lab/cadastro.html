@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet.draw.css" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/css/cadastro.css" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-measure-path.css" />
 
     <style>
         .leaflet-control-draw-measure {
@@ -42,6 +43,7 @@
     <script src="http://geo-smu.itajai.local/geo/lib/leaflet.draw.js"></script>
     <script src="http://geo-smu.itajai.local/geo/lib/leaflet.measurecontrol.min.js"></script>
     <script src="http://geo-smu.itajai.local/geo/lib/bundle.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet-measure-path.js"></script>
 
     <script>
         //div do mapa
@@ -145,7 +147,7 @@
         }).addTo(map);
 
         //Limites Município
-        $.getJSON("http://geo-smu.itajai.local/geo/data/limitesmunicipais.geojson", function (data) {
+        $.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:geo2007limitesmunicip&outputFormat=application%2Fjson", function (data) {
             L.geoJson(data, {
                 style: function (feature) {
                     return {
@@ -161,7 +163,7 @@
             'showFeatureInfo': function (latlng, info) {
                 if (!this._map) { return };
                 //let nome = info.split(/\n|=/);
-                //console.log(nome);
+                console.log(info);
                 let nadaencontrado = info.split(/\n|=/)[0];
                 let vianomechk = info.split(/\n|=/)[16];
                 let vianome = info.split(/\n|=/)[17];
@@ -281,6 +283,7 @@
             pesquisaQ.clearLayers();
             $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:viewcadastrovias&outputFormat=application%2Fjson&CQL_FILTER=(inscr='" + inputpesquisaQ + "')OR(quadra='" + inputpesquisaQ + "')",
                 function (data) {
+                    //console.log(data);
                     let error = data.totalFeatures;
                     if (error == 0) {
                         alert('não encontrado');
