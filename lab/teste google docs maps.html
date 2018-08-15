@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title> </title>
+    <link rel="icon" type="image/png" href="../images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="../images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="../images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="../lib/leaflet.css" />
+</head>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #map {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body>
+    <!-- Mapa -->
+    <div id="map"></div>
+
+    <!-- Bibliotecas -->
+    <script src="../lib/leaflet.js"></script>
+    <script src="../lib/jquery-3.3.1.min.js"></script>
+
+    <!-- Mapa -->
+    <script>
+        //div do mapa
+        var map = new L.Map('map', {
+            zoom: 14,
+            center: new L.latLng([-26.906960, -48.685425])
+        });
+
+        //google image
+        new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.6,
+            maxZoom: 19,
+            transparent: false,
+            attribution: '©2018 Google, SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        /*
+        //Teste multipoligono
+        $.ajax({
+            type: "GET",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlNp552pg8Z2AcL7eZ_9tMRurALSIUmFqx3zvINugE5b_ojRKGElZ0g8wAcK6F8eMziXXiruh7u1qZ/pub?gid=800094508&single=true&output=tsv",
+            dataType: "text",
+            success: function (data) {
+                let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
+                let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
+                let objgeometriapoly = tabelalinhas.map((feicoes) => {
+                    return {
+                        'features': [{
+                            'type': 'Feature',
+                            'properties': {
+                                'nome': feicoes[2]
+                            },
+                            'geometry': {
+                                'type': 'MultiPolygon',
+                                'coordinates': JSON.parse(feicoes[0])
+                            }
+                        }]
+                    }
+                });
+                console.log(objgeometriapoly);
+                L.geoJson(objgeometriapoly).addTo(map);
+            }
+        });
+        */
+
+        //Teste multilinha
+        $.ajax({
+            type: "GET",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlNp552pg8Z2AcL7eZ_9tMRurALSIUmFqx3zvINugE5b_ojRKGElZ0g8wAcK6F8eMziXXiruh7u1qZ/pub?gid=0&single=true&output=tsv",
+            dataType: "text",
+            success: function (data) {
+                let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
+                let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
+                //console.log(tabelalinhas);
+                let objgeometria = tabelalinhas.map((feicoes) => {
+                    return {
+                        'features': [{
+                            'type': 'Feature',
+                            'properties': {
+                                'nome': feicoes[2]
+                            },
+                            'geometry': {
+                                'type': 'MultiLineString',
+                                'coordinates': JSON.parse(feicoes[0])
+                            }
+                        }]
+                    }
+                });
+                //console.log(objgeometria);
+                L.geoJson(objgeometria).addTo(map);
+            }
+        });
+
+        let entradateste = {
+            'features': [{
+                "type": "MultiLineString",
+                "coordinates": [
+                    [
+                        [
+                            [-48.67870848748591328, -26.90646875934699267],
+                            [-48.68021863378773872, -26.91381761359810199],
+                            [-48.67352902370073053, -26.91451134199833817],
+                            [-48.67291076209419032, -26.90741532371750466]
+                        ]
+                    ],
+                    [
+                        [
+                            [-48.67633893997933825, -26.90866270152478279],
+                            [-48.67429602293007207, -26.90463955050788059],
+                            [-48.66689756845614312, -26.90591675375841518],
+                            [-48.66853606047627778, -26.91344645253557033]
+                        ]
+                    ]
+                ]
+            }]
+        };
+        //L.geoJson(entradateste).addTo(map);
+        //console.log(entradateste);
+
+    </script>
+
+</body>
+
+</html>

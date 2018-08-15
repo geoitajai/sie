@@ -4,11 +4,11 @@
 <head>
     <meta charset="utf-8" />
     <title> </title>
-    <link rel="icon" type="image/png" href="../images/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="../images/favicon-16x16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="../images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-32x32.png" sizes="32x32">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <link rel="stylesheet" href="../lib/leaflet.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet.css" />
 </head>
 
 <style>
@@ -29,22 +29,14 @@
     <div id="map"></div>
 
     <!-- Bibliotecas -->
-    <script src="../lib/leaflet.js"></script>
-    <script src="../lib/jquery-3.3.1.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/jquery-3.3.1.min.js"></script>
 
     <!-- Mapa -->
     <script>
         //div do mapa
         var map = new L.Map('map', {
             zoom: 14,
-            minZoom: 12,
-            maxZoom: 19,
-            maxBounds: [
-                //south west
-                [-27.215341, -49.020370],
-                //north east
-                [-26.701009, -48.397961]
-            ],
             center: new L.latLng([-26.906960, -48.685425])
         });
 
@@ -57,15 +49,14 @@
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(map);
 
-        //Avaliações
+        //Teste multilinha
         $.ajax({
             type: "GET",
-            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlNp552pg8Z2AcL7eZ_9tMRurALSIUmFqx3zvINugE5b_ojRKGElZ0g8wAcK6F8eMziXXiruh7u1qZ/pub?gid=0&single=true&output=tsv",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvgBm1YQPlDwojLsKf3vycXqogOlCnk-xylnPucEbwQ8kaPjopYGjh8m2CZ0vwxaLYBFdzH04R0TJr/pub?gid=1376333171&single=true&output=tsv",
             dataType: "text",
             success: function (data) {
                 let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
-                let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
-                console.log(tabelalinhas);
+                //console.log(tabelalinhas);
                 let objgeometria = tabelalinhas.map((feicoes) => {
                     return {
                         'features': [{
@@ -75,17 +66,15 @@
                             },
                             'geometry': {
                                 'type': 'MultiLineString',
-                                'coordinates': [JSON.parse(feicoes[0])]
+                                'coordinates': JSON.parse(feicoes[0])
                             }
                         }]
                     }
                 });
+                console.log(objgeometria);
                 L.geoJson(objgeometria).addTo(map);
             }
         });
-
-        $.getJSON("teste.geojson", function (data) { L.geoJson(data).addTo(map); console.log(data); });
-
 
     </script>
 

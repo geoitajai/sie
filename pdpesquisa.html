@@ -204,7 +204,7 @@
 		var searchControl = new L.Control.Search({
 			layer: pesquisa,
 			propertyName: 'nomevia',
-			circleLocation: false,
+			circleLocation: true,
 			marker: false,
 			textPlaceholder: "Pesquisa por nome da via",
 			textErr: "Não localizado",
@@ -214,7 +214,10 @@
 			collapsed: false,
 			initial: false,
 			position: 'topleft',
-			minLength: 2
+			minLength: 2,
+			autoType: true,
+			hideMarkerOnCollapse: true,
+			firstTipSubmit: true
 		});
 		map.addControl(searchControl);
 		//camada não precisa ser visível, apenas para searchcontrol
