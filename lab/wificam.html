@@ -66,11 +66,10 @@
 		var esportiv = new L.LayerGroup();
 		var pracas = new L.LayerGroup();
 		var zonasadm = new L.LayerGroup();
-		var ctimaequip = new L.LayerGroup();
 
 		//div do mapa
 		var map = new L.Map('map', {
-			zoom: 14,
+			zoom: 15,
 			minZoom: 12,
 			maxZoom: 20,
 			maxBounds: [
@@ -126,35 +125,6 @@
 			return new L.Control.Watermark(opts);
 		}
 		L.control.watermark({ position: 'topleft' }).addTo(map);
-
-		//Sistema viário para pesquisa
-		var pesquisa = new L.LayerGroup();
-		$.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewsistemaviariopts&outputFormat=application%2Fjson", function (data) { L.geoJson(data).addTo(pesquisa) });
-
-		//Barra pesquisa
-		var searchControl = new L.Control.Search({
-			layer: pesquisa,
-			propertyName: 'nome',
-			circleLocation: false,
-			marker: false,
-			textPlaceholder: "Pesquisa nome logradouro",
-			textErr: "Não localizado",
-			textCancel: "Cancelar",
-			zoom: 18,
-			openPopup: false,
-			collapsed: true,
-			initial: false,
-			position: 'topleft',
-			minLength: 2
-		});
-		map.addControl(searchControl);
-		//camada não precisa ser visível, apenas para searchcontrol
-		map.removeLayer(pesquisa);
-
-		//Botão zoom posicionado
-		L.control.zoom({
-			position: 'topleft'
-		}).addTo(map);
 
 		//#PATRIMONIO Saúde#
 		var sauicon = L.icon({
@@ -388,23 +358,8 @@
 		});
 
 		//#CTIMA#
-		//ícone educação
-		var ctptsedu = L.icon({
-			iconUrl: 'images/ctptsedu.png',
-			iconAnchor: [16, 60],
-			popupAnchor: [0, -50],
-			iconSize: [33, 60]
-		});
-
-		//ícone Saúde
-		var ctptssms = L.icon({
-			iconUrl: 'images/ctptssms.png',
-			iconAnchor: [16, 60],
-			popupAnchor: [0, -50],
-			iconSize: [33, 60]
-		});
-
-		//ícone Edifícios administração
+		//Edifícios administração
+		var ctimaadm = new L.LayerGroup();
 		var ctptsadm = L.icon({
 			iconUrl: 'images/ctptsadm.png',
 			iconAnchor: [16, 60],
@@ -412,7 +367,35 @@
 			iconSize: [33, 60]
 		});
 
+		//educação
+		var ctimaeduca = new L.LayerGroup();
+		var ctptsedu = L.icon({
+			iconUrl: 'images/ctptsedu.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		//Saúde
+		var ctimasaude = new L.LayerGroup();
+		var ctptssms = L.icon({
+			iconUrl: 'images/ctptssms.png',
+			iconAnchor: [16, 60],
+			popupAnchor: [0, -50],
+			iconSize: [33, 60]
+		});
+
+		//ícone wifi
+		var ctimawifi = new L.LayerGroup();
+		var ctptswifi = L.icon({
+			iconUrl: 'images/ctptswifi.png',
+			iconAnchor: [20, 20],
+			popupAnchor: [0, -20],
+			iconSize: [40, 40]
+		});
+
 		//ícone Câmeras Ativas
+		var ctimacama = new L.LayerGroup();
 		var ctptscamativa = L.icon({
 			iconUrl: 'images/ctptscamativa.png',
 			iconAnchor: [20, 20],
@@ -421,27 +404,12 @@
 		});
 
 		//ícone Câmeras Inativas
+		var ctimacami = new L.LayerGroup();
 		var ctptscaminativa = L.icon({
 			iconUrl: 'images/ctptscaminativa.png',
-			iconAnchor: [20, 20],
-			popupAnchor: [0, -20],
-			iconSize: [40, 40]
-		});
-
-		//ícone wifi
-		var ctptswifi = L.icon({
-			iconUrl: 'images/ctptswifi.png',
-			iconAnchor: [20, 20],
-			popupAnchor: [0, -20],
-			iconSize: [40, 40]
-		});
-
-		//Outras áreas
-		var paoutrosicon = L.icon({
-			iconUrl: 'images/paoutros.png',
-			iconAnchor: [16, 60],
-			popupAnchor: [0, -50],
-			iconSize: [33, 60]
+			iconAnchor: [10, 10],
+			popupAnchor: [0, -10],
+			iconSize: [20, 20]
 		});
 
 		$.ajax({
@@ -458,48 +426,58 @@
 					function (err, data) {
 						L.geoJSON(data, {
 							pointToLayer: function (feature, latlng) {
-								let iconeunidade;
-								iconeprop = feature.properties.unidade;
-								iconestatus = feature.properties.status;
-								if (iconeprop == 'ADM') {
-									iconeunidade = ctptsadm;
-								}
-								else if (iconeprop == 'EDU') {
-									iconeunidade = ctptsedu;
-								}
-								else if (iconeprop == 'SMS') {
-									iconeunidade = ctptssms;
-								}
-								else if (iconeprop == 'WFL') {
-									iconeunidade = ctptswifi;
-								}
-								else if (iconeprop == 'CAM' && iconestatus == "ATIVA") {
-									iconeunidade = ctptscamativa;
-								}
-								else if (iconeprop == 'CAM' && iconestatus != "ATIVA") {
-									iconeunidade = ctptscaminativa;
-								}
-								else {
-									iconeunidade = paoutrosicon;
-								};
-								let marker = L.marker(latlng, { icon: iconeunidade });
-								marker.bindPopup(
+								let popuppadrao =
 									'<strong>' + '<u>' + feature.properties.nome + '</u>' + '</strong>' + '<br/>' +
 									'Lote/unidade: ' + feature.properties.lote + feature.properties.unidade + '<br/>' +
 									'Endereço: ' + feature.properties.end + '<br/>' +
 									'<strong>' + 'Conexão/Velocidade: ' + feature.properties.conexao + ' / ' + feature.properties.velocidade + '</strong>'
-								);
-								return marker;
+									;
+								let unidadetipo = feature.properties.unidade;
+								let unidadestatus = feature.properties.status;
+								if (unidadetipo == 'ADM') {
+									L.marker(latlng, {
+										icon: ctptsadm
+									}).bindPopup(popuppadrao).addTo(ctimaadm);
+								};
+								if (unidadetipo == 'EDU') {
+									L.marker(latlng, {
+										icon: ctptsedu
+									}).bindPopup(popuppadrao).addTo(ctimaeduca);
+								};
+								if (unidadetipo == 'SMS') {
+									L.marker(latlng, {
+										icon: ctptssms
+									}).bindPopup(popuppadrao).addTo(ctimasaude);
+								};
+								if (unidadetipo == 'WFL') {
+									L.marker(latlng, {
+										icon: ctptswifi
+									}).bindPopup(popuppadrao).addTo(ctimawifi);
+								};
+								if (unidadetipo == 'CAM' && unidadestatus == "ATIVA") {
+									L.marker(latlng, {
+										icon: ctptscamativa
+									}).bindPopup(popuppadrao).addTo(ctimacama);
+								};
+								if (unidadetipo == 'CAM' && unidadestatus != "ATIVA") {
+									L.marker(latlng, {
+										icon: ctptscaminativa
+									}).bindPopup(popuppadrao).addTo(ctimacami);
+								};
 							}
-						}).addTo(ctimaequip);
+						});
 					});
 			}
 		});
 
 		//marker clustering com suporte para layers
 		var mcg = L.markerClusterGroup.layerSupport({ disableClusteringAtZoom: 16 }).addTo(map);
-		mcg.checkIn([sau, ppubl, educa, dsocial, esportiv, pracas, ctimaequip]);
-		ctimaequip.addTo(map);
+		mcg.checkIn([sau, ppubl, educa, dsocial, esportiv, pracas, ctimaadm, ctimaeduca, ctimasaude, ctimawifi, ctimacama, ctimacami]);
+		ctimaadm.addTo(map);
+		ctimaeduca.addTo(map);
+		ctimasaude.addTo(map);
+		ctimawifi.addTo(map);
+		ctimacama.addTo(map);
 
 		//Limites Município
 		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:geo2007limitesmunicip&outputFormat=application%2Fjson", function (data) {
@@ -512,7 +490,6 @@
 				},
 			}).addTo(map);
 		});
-
 
 		//Zonas administrativas
 		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:zonasadm98&outputFormat=application%2Fjson", function (data) {
@@ -566,9 +543,49 @@
 			}).addTo(zonasadm);
 		});
 
-		L.Control.measureControl().addTo(map);
 		//Controle de camadas, principal
-		var overlayMaps = {
+		var overlayMapsPatrimonio = {
+			"<img src='images/ctptsadm.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vT61CmutHXYjN_bqZFf6_zmCjaeYSLx6VKQYaANDoqOehz0wgBAuMbeR1q6uLPsZjsayQcmUQycLhtz/pubhtml?gid=0&single=true' target='_blank' >Prédios públicos</a>": ctimaadm,
+			"<img src='images/ctptsedu.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vT61CmutHXYjN_bqZFf6_zmCjaeYSLx6VKQYaANDoqOehz0wgBAuMbeR1q6uLPsZjsayQcmUQycLhtz/pubhtml?gid=1939425468&single=true' target='_blank' >Educação</a>": ctimaeduca,
+			"<img src='images/ctptssms.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vT61CmutHXYjN_bqZFf6_zmCjaeYSLx6VKQYaANDoqOehz0wgBAuMbeR1q6uLPsZjsayQcmUQycLhtz/pubhtml?gid=1951385430&single=true' target='_blank' >Saúde</a>": ctimasaude,
+			"<img src='images/ctptswifi.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vT61CmutHXYjN_bqZFf6_zmCjaeYSLx6VKQYaANDoqOehz0wgBAuMbeR1q6uLPsZjsayQcmUQycLhtz/pubhtml?gid=1171856711&single=true' target='_blank' >WIFI Livre</a>": ctimawifi,
+			"<img src='images/ctptscamativa.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vT61CmutHXYjN_bqZFf6_zmCjaeYSLx6VKQYaANDoqOehz0wgBAuMbeR1q6uLPsZjsayQcmUQycLhtz/pubhtml?gid=185281017&single=true' target='_blank' >Câmeras Ativas</a>": ctimacama,
+			"<img src='images/ctptscaminativa.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vT61CmutHXYjN_bqZFf6_zmCjaeYSLx6VKQYaANDoqOehz0wgBAuMbeR1q6uLPsZjsayQcmUQycLhtz/pubhtml?gid=185281017&single=true' target='_blank' >Câmeras desativ.</a>": ctimacami
+		};
+		L.control.layers(null, overlayMapsPatrimonio, { collapsed: false, position: 'topleft' }).addTo(map);
+
+		//Ferramenta medidas
+		L.Control.measureControl().addTo(map);
+
+		//Botão zoom posicionado
+		L.control.zoom({ position: 'topleft' }).addTo(map);
+
+		//Sistema viário para pesquisa
+		var pesquisa = new L.LayerGroup();
+		$.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewsistemaviariopts&outputFormat=application%2Fjson", function (data) { L.geoJson(data).addTo(pesquisa) });
+
+		//Barra pesquisa
+		var searchControl = new L.Control.Search({
+			layer: pesquisa,
+			propertyName: 'nome',
+			circleLocation: false,
+			marker: false,
+			textPlaceholder: "Pesquisa nome logradouro",
+			textErr: "Não localizado",
+			textCancel: "Cancelar",
+			zoom: 18,
+			openPopup: false,
+			collapsed: true,
+			initial: false,
+			position: 'topleft',
+			minLength: 2
+		});
+		map.addControl(searchControl);
+		//camada não precisa ser visível, apenas para searchcontrol
+		map.removeLayer(pesquisa);
+
+		//Controle de camadas, outras informações
+		var overlayMapsPatrimonio = {
 			"<img src='images/pesaude.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=456279987&single=true' target='_blank' >Saúde</a>": sau,
 			"<img src='images/peedifpublic.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=1984217895&single=true' target='_blank' >Prédios públicos</a>": ppubl,
 			"<img src='images/paeduca.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTvqB-pK6_c3upEBRwndOmoXyrLDsaNg2UIXbOP9dVUD-f7LncVbGYILKJ8xI7orMpqmu7Neykp6yAo/pubhtml?gid=1907272550&single=true' target='_blank' >Educação</a>": educa,
@@ -577,7 +594,7 @@
 			"<img src='images/ppracas.png' height='25' /> <a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vTrFlUSn1OrVYOZ0MORZzWUPHwfCpsioEx2Tk4UCdB9ugjlw9HTxYD1Qt-WV32iNQl_heCeqF6phJ-c/pubhtml?gid=0&single=true' target='_blank' >Praças</a>": pracas,
 			"- Zonas Administrativas": zonasadm
 		};
-		L.control.layers(null, overlayMaps, { position: 'topleft' }).addTo(map);
+		L.control.layers(null, overlayMapsPatrimonio, { position: 'bottomleft' }).addTo(map);
 
 		//coordenadas no click
 		var c = new L.Control.Coordinates({ promptText: 'Coordenadas para a área de transferência, utilize Ctrl+C' });

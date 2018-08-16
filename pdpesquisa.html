@@ -9,6 +9,8 @@
 	<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
 	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 	<link rel="stylesheet" href="lib/leaflet.css" />
+	<link rel="stylesheet" href="lib/jquery-ui.min.css" />
+	<link rel="stylesheet" href="lib/tabulator.min.css" />
 	<link rel="stylesheet" href="lib/leaflet-search.min.css" />
 
 	<style>
@@ -20,16 +22,19 @@
 		#map {
 			position: absolute;
 			top: 0;
-			bottom: 0;
 			width: 100%;
+			height: 83%;
 		}
 
 		.leaflet-container {
 			background: #ffffff;
 		}
 
-		.leaflet-control-draw-measure {
-			background-image: url(images/measure-control.png);
+		.linhatabela {
+			position: absolute;
+			bottom: 0;
+			width: 99.5%;
+			height: 15%;
 		}
 
 		.leaflet-container .leaflet-control-search {
@@ -57,9 +62,15 @@
 
 <body>
 	<div id="map"></div>
+	<!-- Tabela -->
+	<div class="linhatabela" id="tabelatabulator"></div>
 	<script src="lib/jquery-3.3.1.min.js"></script>
 	<script src="lib/leaflet.js"></script>
+	<script src="lib/jquery-3.3.1.min.js"></script>
+	<script src="lib/jquery-ui.min.js"></script>
+	<script src="lib/tabulator.min.js"></script>
 	<script src="lib/leaflet-search.min.js"></script>
+	<script src="lib/leaflet-hash.js"></script>
 	<script>
 
 		var tilegoogle = new L.layerGroup();
@@ -78,9 +89,7 @@
 			],
 			center: new L.latLng([-26.9732, -48.7398]),
 			layers: [tilesmu],
-			zoomControl: false,
-			zoomSnap: 0.5,
-			scrollWheelZoom: false
+			zoomControl: false
 		});
 
 		//marca d´água
@@ -213,7 +222,7 @@
 			openPopup: false,
 			collapsed: false,
 			initial: false,
-			position: 'topleft',
+			position: 'bottomleft',
 			minLength: 2,
 			autoType: true,
 			hideMarkerOnCollapse: true,
@@ -222,6 +231,153 @@
 		map.addControl(searchControl);
 		//camada não precisa ser visível, apenas para searchcontrol
 		map.removeLayer(pesquisa);
+
+		//Pontos planilha
+		//Avaliações
+		$.ajax({
+			type: "GET",
+			url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJgEmc0r9KDRy9ow7VnvvCwoDdqlFjHOb9DDTeWW_yA0cqvkAQvHraeq2sNFi5gqylMsR7YSW1L7A2/pub?gid=1265613449&single=true&output=tsv",
+			dataType: "text",
+			success: function (data) {
+
+				let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
+				let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
+				//Pontos map()
+				console.log(tabelalinhas);
+				let objgeometria = tabelalinhas.map((feicoes) => {
+					return {
+						'features': [{
+							'type': 'Feature',
+							'properties': {
+								'num': feicoes[2],
+								'nome': feicoes[3],
+								'data': feicoes[4],
+								'descr': feicoes[5],
+								'end': feicoes[6],
+								'icone': feicoes[7],
+								'link': feicoes[8],
+								'id': feicoes[9]
+							},
+							'geometry': {
+								'type': 'Point',
+								'coordinates': [
+									feicoes[1],
+									feicoes[0]
+								]
+							}
+						}]
+					}
+				});
+
+				//estilo ícone verde
+				let markiconverde = L.icon({
+					iconUrl: 'images/pinoverde.png',
+					shadowUrl: 'images/pinosombra.png',
+					iconSize: [30, 41],
+					shadowSize: [20, 13],
+					iconAnchor: [26, 40],
+					shadowAnchor: [3, 11],
+					popupAnchor: [-12, -30]
+				});
+
+				//estilo ícone amarelo
+				let markiconamarelo = L.icon({
+					iconUrl: 'images/pinoamarelo.png',
+					shadowUrl: 'images/pinosombra.png',
+					iconSize: [30, 41],
+					shadowSize: [20, 13],
+					iconAnchor: [26, 40],
+					shadowAnchor: [3, 11],
+					popupAnchor: [-12, -30]
+				});
+
+				//estilo ícone vermelho
+				let markiconvermelho = L.icon({
+					iconUrl: 'images/pinovermelho.png',
+					shadowUrl: 'images/pinosombra.png',
+					iconSize: [30, 41],
+					shadowSize: [20, 13],
+					iconAnchor: [26, 40],
+					shadowAnchor: [3, 11],
+					popupAnchor: [-12, -30]
+				});
+
+				//pontos para mapa
+				L.geoJSON(objgeometria, {
+					'pointToLayer': function (feature, latlng) {
+						let rowid = feature.properties.id;
+						let iconeunidade;
+						iconeprop = feature.properties.icone;
+						//regra para ícones
+						if (iconeprop == 'M') {
+							iconeunidade = markiconvermelho;
+						}
+						else if (iconeprop == 'A') {
+							iconeunidade = markiconamarelo;
+						}
+						else {
+							iconeunidade = markiconverde;
+						};
+						return L.marker(latlng)
+							.bindPopup(
+								'<strong><center>' + feature.properties.nome + '</center></strong>' + '<br/>' +
+								'Data:' + feature.properties.data
+							)
+							.setIcon(iconeunidade)
+							.on('popupopen', function (popup) {
+								$("#tabelatabulator").tabulator("deselectRow");
+								$("#tabelatabulator").tabulator("scrollToRow", rowid, "center", false);
+								$("#tabelatabulator").tabulator("selectRow", rowid);
+							}).addTo(map);
+					}
+				});
+
+				//Tabela map()
+				let objtabela = tabelalinhas.map((feicoes) => {
+					return {
+						'num': feicoes[2],
+						'nome': feicoes[3],
+						'data': feicoes[4],
+						'descr': feicoes[5],
+						'end': feicoes[6],
+						'icone': feicoes[7],
+						'link': feicoes[8],
+						'id': feicoes[9]
+					}
+				});
+
+				//Tabela
+				$("#tabelatabulator").tabulator({
+					height: "16%",
+					layout: "fitColumns",
+					columns: [
+						{ title: "Nº", field: "num", width: 30 },
+						{ title: "Agenda", field: "descr", width: 360 },
+						{ title: "Data", field: "data", width: 100 },
+						{ title: "Endereço", field: "end", width: 150 },
+						{ title: "Nome", field: "nome", width: 210 },
+						{ title: "Google maps", field: "link", formatter: "link", width: 90 },
+					],
+					rowClick: function (e, row) { //eventos quando sobre uma linha
+						let selecao = row.getIndex();
+						let latelong = [objgeometria[selecao].features[0].geometry.coordinates[1], objgeometria[selecao].features[0].geometry.coordinates[0]];
+						let popnome = objgeometria[selecao].features[0].properties.nome;
+
+						$("#tabelatabulator").tabulator("deselectRow");
+						$("#tabelatabulator").tabulator("selectRow", selecao);
+
+						map.flyTo(latelong, 18);
+
+						L.popup({ maxWidth: 5 })
+							.setLatLng(latelong)
+							.setContent('<center>' + popnome + '</center>')
+							.openOn(map);
+					},
+				});
+
+				$("#tabelatabulator").tabulator("setData", objtabela);
+			}
+		});
 
 		//Camadas base
 		var baseMaps = {
@@ -232,7 +388,7 @@
 		L.control.layers(baseMaps, null, { collapsed: false, position: 'bottomleft' }).addTo(map);
 
 		//Botão zoom posicionado
-		L.control.zoom({ position: 'topleft' }).addTo(map);
+		L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
 		var legend = L.control({ position: 'bottomright' });
 
