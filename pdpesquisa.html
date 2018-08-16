@@ -92,6 +92,9 @@
 			zoomControl: false
 		});
 
+		//hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
+		var hash = new L.Hash(map);
+
 		//marca d´água
 		L.Control.Watermark = L.Control.extend({
 			onAdd: function (map) {
