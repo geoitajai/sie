@@ -185,8 +185,8 @@
 					return { color: "#808080", fillColor: corzona, fillOpacity: 0.3, weight: 2 };
 				},
 				onEachFeature: (feature, layer) => {
-					layer.bindTooltip('<font size="6">' + feature.properties.areapesqui.toString() + '</font>', { permanent: true, direction: 'center' });
-					layer.bindPopup('<center>' + feature.properties.areapesqui.toString() + '-' + feature.properties.descr.toString() + '</center>', { sticky: true, direction: 'center' });
+					layer.bindTooltip('<font size="6">' + feature.properties.areapesqui + '</font>', { permanent: true, direction: 'center' });
+					layer.bindPopup('<center>' + feature.properties.areapesqui + '-' + feature.properties.descr + '</center>', { sticky: true, direction: 'center' });
 				}
 			}
 			).addTo(map);
