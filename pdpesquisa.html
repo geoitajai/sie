@@ -119,7 +119,7 @@
 		titulomapa.onAdd = function (map) {
 			var div = L.DomUtil.create('div', 'info legend');
 			div.innerHTML +=
-				'<font size="3">REVISÃO DO PLANO DIRETOR DE ITAJAÍ</font>'
+				'<font size="3">REVISÃO DO PLANO <br/> DIRETOR DE ITAJAÍ</font>'
 			return div;
 		};
 		titulomapa.addTo(map);
@@ -141,7 +141,6 @@
 			opacity: 0.6,
 			maxZoom: 17,
 			transparent: false,
-			attribution: '©2018 Google, Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
 			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 		}).addTo(tilegoogle);
 
@@ -149,7 +148,7 @@
 		new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
 			opacity: 0.6,
 			minZoom: 10,
-			attribution: 'Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+			attribution: '©2018 Google, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
 			maxZoom: 17
 		}).addTo(tilesmu);
 
@@ -225,7 +224,7 @@
 			openPopup: false,
 			collapsed: false,
 			initial: false,
-			position: 'topleft',
+			position: 'bottomleft',
 			minLength: 2,
 			autoType: true,
 			hideMarkerOnCollapse: true,
