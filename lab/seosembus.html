@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>SEOSEM, Paradas de ônibus - Itajaí-SC</title>
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/jquery-ui.min.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/tabulator.min.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/MarkerCluster.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/MarkerCluster.Default.css" />
+</head>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #map {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 75%;
+    }
+
+    .leaflet-container {
+        background: #ffffff;
+    }
+
+    .linhatabela {
+        position: absolute;
+        bottom: 0;
+        width: 99.5%;
+        height: 25%;
+    }
+</style>
+
+<body>
+    <!-- Mapa -->
+    <div id="map"></div>
+
+    <!-- Tabela -->
+    <div class="linhatabela" id="tabelatabulator"></div>
+
+    <!-- Bibliotecas -->
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/jquery-3.3.1.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/jquery-ui.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/tabulator.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet.wms.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/papaparse.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet.markercluster.js"></script>
+
+    <!-- Mapa -->
+    <script>
+
+        //div do mapa
+        var map = new L.Map('map', {
+            zoom: 14,
+            minZoom: 12,
+            maxZoom: 20,
+            maxBounds: [
+                //south west
+                [-27.215341, -49.020370],
+                //north east
+                [-26.701009, -48.397961]
+            ],
+            center: new L.latLng([-26.906960, -48.685425]),
+            zoomControl: false
+        });
+
+        //marca d´água
+        L.Control.Watermark = L.Control.extend({
+            onAdd: function (map) {
+                let img = L.DomUtil.create('img');
+
+                img.src = 'http://geo-smu.itajai.local/geo/images/brasaoseosem.png';
+                img.style.width = '250px';
+
+                return img;
+            },
+            onRemove: function (map) { }
+        });
+
+        L.control.watermark = function (opts) {
+            return new L.Control.Watermark(opts);
+        }
+        L.control.watermark({ position: 'topleft' }).addTo(map);
+
+        //barra escala
+        L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+
+        //Botão zoom posicionado
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        //google image
+        new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.6,
+            maxZoom: 20,
+            transparent: false,
+            attribution: '©2018 Google, SMU/Porto, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        //Curvas 10x10
+        new L.tileLayer.wms('http://10.10.1.158:8080/geoserver/ows?', {
+            layers: 'geoitj:curvas10x10govest2013',
+            format: 'image/png8',
+            minZoom: 16,
+            maxZoom: 20,
+            attribution: false,
+            transparent: true
+        }).addTo(map);
+
+        //Limites Município
+        $.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:geo2007limitesmunicip&outputFormat=application%2Fjson", function (data) {
+            L.geoJson(data, {
+                style: function (feature) {
+                    return {
+                        color: '#000000',
+                        fill: false
+                    };
+                },
+            }).addTo(map);
+        });
+
+        //Paradas mapa>tabela
+        //Clustering
+        let clustermarcadores = L.markerClusterGroup({ disableClusteringAtZoom: 18 });
+        map.addLayer(clustermarcadores);
+        //ícone normal
+        var ctimaadm = new L.LayerGroup();
+        var ctptsadm = L.icon({
+            iconUrl: 'images/ctptsadm.png',
+            iconAnchor: [16, 60],
+            popupAnchor: [0, -50],
+            iconSize: [33, 60]
+        });
+
+        //ícone pendência
+        var ctimaeduca = new L.LayerGroup();
+        var ctptsedu = L.icon({
+            iconUrl: 'images/ctptsedu.png',
+            iconAnchor: [16, 60],
+            popupAnchor: [0, -50],
+            iconSize: [33, 60]
+        });
+
+        //mapa x tabela
+        Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vQyHcrT6fAZ_L81AMP-jU4Zsd0HyITl6RuAsntblxi0juoI3rZbq9G0SfYRvw81DBq-xw8zoDwtthta/pub?gid=1002032247&single=true&output=tsv", {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function (tabelaresult) {
+
+                let dadosmapa = new Promise(function (resolve, reject) {
+                    resolve(
+                        $.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:paradasonibus&maxFeatures=10000000&outputFormat=application%2Fjson")
+                    )
+                });
+
+                dadosmapa.then(function (result) {
+                    //console.log(result);
+                    console.log(tabelaresult.data);
+
+                    L.geoJSON(result, {
+                        pointToLayer: function (feature, latlng) {
+                            let popuppadrao = feature.properties.ident;
+                            let idmapa = feature.properties.ident;
+                            //let idtabela = feature.properties.status;
+                            return L.circleMarker(latlng);
+                        }
+                    }).addTo(clustermarcadores);
+
+                });
+            }
+        });
+
+
+    </script>
+
+</body>
+
+</html>
