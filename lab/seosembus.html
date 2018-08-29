@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/tabulator.min.css" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/MarkerCluster.css" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.css" />
 </head>
 
 <style>
@@ -38,6 +39,18 @@
         width: 99.5%;
         height: 25%;
     }
+
+    .info {
+        padding: 6px 8px;
+        background: white;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+        border-radius: 0px;
+    }
+
+    .leaflet-container .leaflet-control-search {
+        left: 1px;
+    }
 </style>
 
 <body>
@@ -55,6 +68,7 @@
     <script src="http://geo-smu.itajai.local/geo/lib/leaflet.wms.js"></script>
     <script src="http://geo-smu.itajai.local/geo/lib/papaparse.min.js"></script>
     <script src="http://geo-smu.itajai.local/geo/lib/leaflet.markercluster.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.js"></script>
 
     <!-- Mapa -->
     <script>
@@ -74,29 +88,61 @@
             zoomControl: false
         });
 
-        //marca d´água
-        L.Control.Watermark = L.Control.extend({
-            onAdd: function (map) {
-                let img = L.DomUtil.create('img');
+        //título
+        var titulomapa = L.control({ position: 'topleft' });
 
-                img.src = 'http://geo-smu.itajai.local/geo/images/brasaoseosem.png';
-                img.style.width = '250px';
-
-                return img;
-            },
-            onRemove: function (map) { }
-        });
-
-        L.control.watermark = function (opts) {
-            return new L.Control.Watermark(opts);
-        }
-        L.control.watermark({ position: 'topleft' }).addTo(map);
-
-        //barra escala
-        L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+        titulomapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML +=
+                '<center><img src="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" alt="brasao" width="60"><br/><strong><font size="6">SEOSEM</font></strong><br/>' +
+                '<hr>' +
+                '<strong><font size="4">Pontos de ônibus</font></strong><br/>' +
+                '<font size="3">Manutenção e controle</font>'
+            return div;
+        };
+        titulomapa.addTo(map);
 
         //Botão zoom posicionado
-        L.control.zoom({ position: 'topright' }).addTo(map);
+        L.control.zoom({ position: 'topleft' }).addTo(map);
+
+        //Sistema viário para pesquisa
+        var pesquisa = new L.LayerGroup();
+        $.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewsistemaviariopts&outputFormat=application%2Fjson", function (data) { L.geoJson(data).addTo(pesquisa) });
+
+        //Barra pesquisa
+        var searchControl = new L.Control.Search({
+            layer: pesquisa,
+            propertyName: 'nome',
+            circleLocation: false,
+            marker: false,
+            textPlaceholder: "Pesquisa nome logradouro",
+            textErr: "Não localizado",
+            textCancel: "Cancelar",
+            zoom: 18,
+            openPopup: false,
+            collapsed: true,
+            initial: false,
+            position: 'topleft',
+            minLength: 2
+        });
+        map.addControl(searchControl);
+        //camada não precisa ser visível, apenas para searchcontrol
+        map.removeLayer(pesquisa);
+
+        //barra escala
+        L.control.scale({ position: "bottomleft", imperial: false }).addTo(map);
+
+        //Norte
+        var titulomapa = L.control({ position: 'bottomleft' });
+
+        titulomapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info2 legend');
+            div.innerHTML +=
+                '<center><sub><font size="4">▲</font></sub><br/>' +
+                '<sup><font size="2">N</font></sup></center>'
+            return div;
+        };
+        titulomapa.addTo(map);
 
         //google image
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -107,8 +153,30 @@
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(map);
 
+        //Mapa base, viário
+        var wmsLayer = L.tileLayer.wms('http://geo-smu.itajai.local:8080/geoserver/ows?', {
+            layers: 'geoitj:viewsistemaviarioestilosempauta',
+            format: 'image/png8',
+            opacity: 0.5,
+            minZoom: 14,
+            maxZoom: 20,
+            attribution: false,
+            transparent: true
+        }).addTo(map);
+
+        //Mapa base, lotes
+        var lotcad = L.tileLayer.wms('http://geo-smu.itajai.local:8080/geoserver/ows?', {
+            layers: 'geoitj:viewcadastrovias',
+            format: 'image/png',
+            opacity: 0.3,
+            minZoom: 15,
+            maxZoom: 20,
+            attribution: false,
+            transparent: true
+        }).addTo(map);
+
         //Curvas 10x10
-        new L.tileLayer.wms('http://10.10.1.158:8080/geoserver/ows?', {
+        new L.tileLayer.wms('http://geo-smu.itajai.local:8080/geoserver/ows?', {
             layers: 'geoitj:curvas10x10govest2013',
             format: 'image/png8',
             minZoom: 16,
@@ -133,54 +201,104 @@
         //Clustering
         let clustermarcadores = L.markerClusterGroup({ disableClusteringAtZoom: 18 });
         map.addLayer(clustermarcadores);
-        //ícone normal
-        var ctimaadm = new L.LayerGroup();
-        var ctptsadm = L.icon({
-            iconUrl: 'images/ctptsadm.png',
-            iconAnchor: [16, 60],
-            popupAnchor: [0, -50],
-            iconSize: [33, 60]
-        });
 
         //ícone pendência
-        var ctimaeduca = new L.LayerGroup();
-        var ctptsedu = L.icon({
-            iconUrl: 'images/ctptsedu.png',
-            iconAnchor: [16, 60],
-            popupAnchor: [0, -50],
-            iconSize: [33, 60]
+        let iconagendabus = L.icon({
+            iconUrl: 'http://geo-smu.itajai.local/geo/images/pinovermelho.png',
+            shadowUrl: 'http://geo-smu.itajai.local/geo/images/pinosombra.png',
+            iconSize: [30, 41],
+            shadowSize: [20, 13],
+            iconAnchor: [26, 40],
+            shadowAnchor: [3, 11],
+            popupAnchor: [-12, -30]
         });
 
-        //mapa x tabela
-        Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vQyHcrT6fAZ_L81AMP-jU4Zsd0HyITl6RuAsntblxi0juoI3rZbq9G0SfYRvw81DBq-xw8zoDwtthta/pub?gid=1002032247&single=true&output=tsv", {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function (tabelaresult) {
+        let marcadorpnormal = {
+            radius: 8,
+            fillColor: "#33ff33",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
 
-                let dadosmapa = new Promise(function (resolve, reject) {
+        //mapa x tabela
+        $.ajax({
+            type: "GET",
+            url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyHcrT6fAZ_L81AMP-jU4Zsd0HyITl6RuAsntblxi0juoI3rZbq9G0SfYRvw81DBq-xw8zoDwtthta/pub?gid=1002032247&single=true&output=tsv",
+            dataType: "text",
+            success: (data) => {
+
+                let tabelalinhas = data.split('\n').map(linha => linha.split('\t'));//separa as linhas
+                let cabecalho = tabelalinhas.shift();//remove a primeira linha, retorna o cabeçalho
+                let tabelaindex = tabelalinhas.reduce((total, numero, indice) => [numero.push(indice)], 0);//adiciona o campo id, gerado feicoes[15]
+
+                //Pontos mapa
+                let dadosmapa = new Promise((resolve, reject) => {
                     resolve(
-                        $.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:paradasonibus&maxFeatures=10000000&outputFormat=application%2Fjson")
+                        $.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewptsonibus&maxFeatures=10000000&outputFormat=application%2Fjson")
                     )
                 });
 
-                dadosmapa.then(function (result) {
-                    //console.log(result);
-                    console.log(tabelaresult.data);
-
+                dadosmapa.then((result) => {
+                    //console.log(result.features);
+                    //console.log(tabelalinhas);
                     L.geoJSON(result, {
-                        pointToLayer: function (feature, latlng) {
-                            let popuppadrao = feature.properties.ident;
+                        pointToLayer: (feature, latlng) => {
+                            let popuppadrao =
+                                '<strong>Código: ' + feature.properties.ident + '</strong>' + '<br/>' +
+                                'Modelo: ' + feature.properties.modelo + '<br/>' +
+                                'Localização: ' + feature.properties.nomevia + ' altura: ' + feature.properties.altvia + '<br/>' +
+                                'Bairro: ' + feature.properties.bairro
+                                ;
+
                             let idmapa = feature.properties.ident;
-                            //let idtabela = feature.properties.status;
-                            return L.circleMarker(latlng);
+                            let idtabela = tabelalinhas.filter((item) => { return item[0] == feature.properties.ident; });
+                            if (idtabela.length != 0) {
+                                return L.marker(latlng, { icon: iconagendabus }).bindPopup(popuppadrao).addTo(map);
+                            }
+                            else {
+                                return L.circleMarker(latlng, marcadorpnormal).bindPopup(popuppadrao).addTo(clustermarcadores);
+                            };
                         }
-                    }).addTo(clustermarcadores);
+                    });
+
+                    //Tabela map()
+                    let objtabela = tabelalinhas.map((feicoes) => {
+                        return {
+                            'cod': feicoes[0],
+                            'dataab': feicoes[1],
+                            'descri': feicoes[2],
+                            'observ': feicoes[3],
+                            'id': feicoes[4]
+                        }
+                    });
+
+                    //Definir elementos da tabela
+                    $("#tabelatabulator").tabulator({
+                        height: "25%",
+                        layout: "fitColumns",
+                        columns: [
+                            { title: "Código", field: "cod", width: 80 },
+                            { title: "Data abertura do chamado", field: "dataab", width: 210 },
+                            { title: "Descrição", field: "descri", width: 350 },
+                            { title: "Observações", field: "observ", width: 350 },
+                        ],
+                        rowClick: function (e, row) { //eventos quando sobre uma linha
+                            let poligonodtab = L.geoJSON();
+                            let selecao = row.getData();
+                            let filtradoobj = result.features.find(e => e.properties.ident == selecao.cod);
+                            poligono = L.geoJSON(filtradoobj).addTo(poligonodtab);
+                            $("#tabelatabulator").tabulator("deselectRow");
+                            map.flyToBounds(poligono.getBounds());
+                        },
+                    });
+
+                    $("#tabelatabulator").tabulator("setData", objtabela);
 
                 });
             }
         });
-
 
     </script>
 
