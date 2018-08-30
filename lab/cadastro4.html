@@ -147,9 +147,9 @@
                 { title: "Andar", field: "nnumanda", width: 50 },
                 { title: "CEP", field: "nceplogr", width: 100 },
                 { title: "Bairro", field: "nnomebai", width: 150 },
-                //{ title: "Razão social", field: "nrazaoso", width: 350 },
+                { title: "Razão social", field: "nrazaoso", width: 350 },
                 { title: "Tipo pessoa", field: "ntipopes", width: 70 },
-                //{ title: "CNPJ/CPF", field: "nncpfpj", width: 120 },
+                { title: "CNPJ/CPF", field: "nncpfpj", width: 120 },
                 //{ title: "RG/Inscr.estadual", field: "nrginscr", width: 150 },
                 { title: "Cód.contribuinte", field: "ncodcont", width: 140 },
                 { title: "Testada", field: "ntestapr", width: 80 },
@@ -192,7 +192,7 @@
                 if (!this._map) { return };
                 pesquisaQ.clearLayers();
                 let liginscr = info.split(/\n|=/)[7].trim();
-                $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:tmicadbase&outputFormat=application%2Fjson&CQL_FILTER=inscrlig='" + liginscr + "'",
+                $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:tmigeom&outputFormat=application%2Fjson&CQL_FILTER=inscrlig='" + liginscr + "'",
                     (data) => {
                         L.geoJson(data, {
                             style: (feature) => {
