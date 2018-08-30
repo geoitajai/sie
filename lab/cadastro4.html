@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title> </title>
+    <title>Planta cadastral</title>
     <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-16x16.png" sizes="16x16">
     <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-32x32.png" sizes="32x32">
@@ -228,12 +228,6 @@
                 let viaptotal = info.split(/\n|=/)[9];
                 let passeioa = info.split(/\n|=/)[11];
                 let passeiob = info.split(/\n|=/)[13];
-                let lotenumchk = info.split(/\n|=/)[10];
-                let lotenum = info.split(/\n|=/)[11];
-                let loteviachk = info.split(/\n|=/)[8];
-                let lotevia = info.split(/\n|=/)[9];
-                let lotedatachk = info.split(/\n|=/)[12];
-                let lotedata = info.split(/\n|=/)[13];
                 //campos
                 let legendaA;
                 let legendaB;
@@ -245,21 +239,15 @@
                     legendaC = '';
                 };
                 //legenda sistema viário
-                if (vianomechk == 'nome ') { legendaA = '<strong>' + vianome + '</strong>' };
-                if (vialeichk == 'leidata ') { legendaB = 'Lei' + vialei };
-                if (viaptotalchk == 'ptotalvia ') {
-                    legendaC = 'Cx.da via: ' + viaptotal + 'm' + ' - Passeios:' + passeioa + '/' + passeiob + 'm';
+                if (vianomechk == 'nome ') {
+                    info =
+                        'Informações do logradouro:' + '<br/>' +
+                        '<strong>' + vianome + '</strong>' + '<br/>' +
+                        'Lei:' + vialei + '<br/>' +
+                        'Cx.da via: ' + viaptotal + 'm' + ' - Passeios:' + passeioa + '/' + passeiob + 'm'
+                        ;
+                    this._map.openPopup(info, latlng);
                 };
-                //legenda lote
-                if (loteviachk == 'nomevia ') { legendaA = '<hr>' };
-                if (lotenumchk == 'numero ' && lotevia == ' ') { legendaB = 'Número: ' + lotenum };
-                if (lotenumchk == 'numero ' && lotevia != ' ') { legendaB = 'End: ' + lotevia + ', nº: ' + lotenum };
-                if (lotedatachk == 'datamod ' && lotedata == ' null') { legendaC = 'Conferência pendente' };
-                if (lotedatachk == 'datamod ' && lotedata != ' null') { legendaC = 'Planta atualizada: ' + lotedata };
-                //legenda
-                info = legendaA + '<br/>' + legendaB + '<br/>' + legendaC;
-                //popup
-                this._map.openPopup(info, latlng);
             }
         });
         var options = { 'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20, opacity: 0.7 };
@@ -268,7 +256,7 @@
         source.addSubLayer('geoitj:tmigeom');
         source.addTo(map);
 
-        //pesquisa por setor.quadra
+        //Pesquisa por código cadastro
         function elementoNavQ() {
             let inputpesquisaQ = document.forms["pesquisaquadra"]["setorQuadra"].value;
             pesquisaQ.clearLayers();
