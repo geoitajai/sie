@@ -191,7 +191,7 @@
             'showFeatureInfo': function (latlng, info) {
                 if (!this._map) { return };
                 pesquisaQ.clearLayers();
-                let liginscr = info.split(/\n|=/)[7].trim();
+                let liginscr = info.split(/\n|=/)[9].trim();
                 $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:tmigeom&outputFormat=application%2Fjson&CQL_FILTER=inscrlig='" + liginscr + "'",
                     (data) => {
                         L.geoJson(data, {
@@ -204,7 +204,7 @@
 
                 //async para a tabela
                 let promise = new Promise(function (resolve, reject) {
-                    resolve(info.split(/\n|=/)[7].trim());
+                    resolve(info.split(/\n|=/)[9].trim());
                 });
                 promise.then(function (result) {
                     Papa.parse("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:tmicad&outputFormat=csv&CQL_FILTER=inscrlig='" + result + "'", {
