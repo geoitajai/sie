@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/jquery-ui.min.css" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/tabulator.min.css" />
     <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-ruler.css" />
 </head>
 
 <style>
@@ -49,6 +50,18 @@
     .leaflet-container .leaflet-control-search {
         left: 1px;
     }
+
+    .leaflet-ruler {
+        background-image: url("http://geo-smu.itajai.local/geo/images/icon.png");
+    }
+
+    .leaflet-ruler:hover {
+        background-image: url("http://geo-smu.itajai.local/geo/images/icon-colored.png");
+    }
+
+    .leaflet-ruler-clicked {
+        background-image: url("http://geo-smu.itajai.local/geo/images/icon-colored.png");
+    }
 </style>
 
 <body>
@@ -66,6 +79,7 @@
     <script src="http://geo-smu.itajai.local/geo/lib/leaflet.wms.js"></script>
     <script src="http://geo-smu.itajai.local/geo/lib/papaparse.min.js"></script>
     <script src="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet-ruler.js"></script>
 
     <!-- Mapa -->
     <script>
@@ -336,6 +350,24 @@
         map.addControl(searchControl);
         //camada não precisa ser visível, apenas para searchcontrol
         map.removeLayer(pesquisa);
+
+        //ferramenta medidas
+        var ruleroptions = {
+            position: 'bottomright',
+            lengthUnit: {
+                display: 'm',
+                decimal: 2,
+                factor: 1000,
+                label: 'Dist.:'
+            },
+            angleUnit: {
+                display: '&deg;',
+                decimal: 2,
+                factor: null,
+                label: 'Az.:'
+            }
+        };
+        L.control.ruler(ruleroptions).addTo(map);
 
         //Norte
         let nortemapa = L.control({ position: 'bottomright' });
