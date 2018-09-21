@@ -238,29 +238,30 @@
             }).addTo(map);
         });
 
-        //sviario para pesquisa
-        var pesquisa = new L.LayerGroup();
-        $.getJSON("data/sviario.geojson", function (data) { L.geoJson(data).addTo(pesquisa) });
+		//sviario para pesquisa
+		var pesquisa = new L.LayerGroup();
+		$.getJSON("data/sviario.geojson", function (data) { L.geoJson(data).addTo(pesquisa) });
 
-        //Barra pesquisa
-        var searchControl = new L.Control.Search({
-            layer: pesquisa,
-            propertyName: 'nomevia',
-            circleLocation: false,
-            marker: false,
-            textPlaceholder: "Pesquisa por nome da via",
-            textErr: "Não localizado",
-            textCancel: "Cancelar",
-            zoom: 17,
-            openPopup: false,
-            collapsed: false,
-            initial: false,
-            position: 'bottomleft',
-            minLength: 2
-        });
-        map.addControl(searchControl);
-        //camada não precisa ser visível, apenas para searchcontrol
-        map.removeLayer(pesquisa);
+		//Barra pesquisa
+		var searchControl = new L.Control.Search({
+			layer: pesquisa,
+			propertyName: 'nome',
+			circleLocation: false,
+			marker: false,
+			textPlaceholder: "Pesquisa por nome da via",
+			textErr: "Não localizado",
+			textCancel: "Cancelar",
+			zoom: 17,
+			openPopup: false,
+			collapsed: false,
+			initial: false,
+			position: 'topleft',
+			minLength: 2,
+			firstTipSubmit: true
+		});
+		map.addControl(searchControl);
+		//camada não precisa ser visível, apenas para searchcontrol
+		map.removeLayer(pesquisa);
 
         //Camadas base
         var baseMaps = {
