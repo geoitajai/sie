@@ -59,7 +59,7 @@
 		}
 
 		.leaflet-control-draw-measure {
-			background-image: url(http: //geo-smu.itajai.local/geo/images/measure-control.png);
+			background-image: url('http://geo-smu.itajai.local/geo/images/measure-control.png');
 		}
 
 		.leaflet-container .leaflet-control-search {
@@ -85,15 +85,14 @@
 	<script src="http://geo-smu.itajai.local/geo/lib/L.Control.MousePosition.js"></script>
 	<script src="http://geo-smu.itajai.local/geo/lib/leaflet.draw.js"></script>
 	<script src="http://geo-smu.itajai.local/geo/lib/leaflet.measurecontrol.min.js"></script>
-	<script src="http://geo-smu.itajai.local/geo/lib/leaflet-hash.js"></script>
 	<script>
 
-		var tilegoogle = L.layerGroup();
-		var tilesmu = new L.LayerGroup();
-		var sdcsc = new L.LayerGroup();
+		let tilegoogle = new L.layerGroup();
+		let sdcsc = new L.LayerGroup();
+		let inundasetembro2011 = new L.layerGroup();
 
 		//div do mapa
-		var map = new L.Map('map', {
+		let map = new L.Map('map', {
 			zoom: 14,
 			minZoom: 11,
 			maxZoom: 20,
@@ -104,12 +103,9 @@
 				[-26.8074, -48.5845]
 			],
 			center: new L.latLng([-26.91549, -48.6866]),
-			layers: [tilesmu],
+			layers: [inundasetembro2011],
 			zoomControl: false
 		});
-
-		//hash, acesso a coordenadas e zoom pela barra de endereços ex: .html#12/37.7631/-122.4437
-		var hash = new L.Hash(map);
 
 		//marca d´água
 		L.Control.Watermark = L.Control.extend({
@@ -145,7 +141,7 @@
 		}).addTo(map);
 
 		//Mapa base, viário
-		var wmsLayer = L.tileLayer.wms('http://geo-smu.itajai.local:8080/geoserver/ows?', {
+		let wmsLayer = L.tileLayer.wms('http://geo-smu.itajai.local:8080/geoserver/ows?', {
 			layers: 'geoitj:viewsistemaviarioestilosempauta',
 			format: 'image/png8',
 			opacity: 0.5,
@@ -156,7 +152,7 @@
 		}).addTo(map);
 
 		//Mapa base, lotes
-		var lotcad = L.tileLayer.wms('http://geo-smu.itajai.local:8080/geoserver/ows?', {
+		let lotcad = L.tileLayer.wms('http://geo-smu.itajai.local:8080/geoserver/ows?', {
 			layers: 'geoitj:viewcadastrovias',
 			format: 'image/png',
 			opacity: 0.3,
@@ -317,7 +313,7 @@
 		});
 
 		//Sistema viário para pesquisa
-		var pesquisa = new L.LayerGroup();
+		let pesquisa = new L.LayerGroup();
 		$.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewsistemaviariopts&outputFormat=application%2Fjson", function (data) { L.geoJson(data).addTo(pesquisa) });
 
 		//ZPA3
@@ -408,14 +404,14 @@
 		});
 
 		//Controle de layers
-		var aerogab = L.layerGroup();
-		var ccs = L.layerGroup();
+		let aerogab = L.layerGroup();
+		let ccs = L.layerGroup();
 
 		//Gabarito aeroporto
 		$.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:aeroportogabarito&maxFeatures=10000000&outputFormat=application%2Fjson", function (data) {
 			L.geoJson(data, {
 				style: function (feature) {
-					var coraero,
+					let coraero,
 						corae = feature.properties.descr;
 					if (corae == 'área de aproximação 1') coraero = "#b14ee9";
 					else if (corae == 'superfície horizontal interna') coraero = "#926de8";
@@ -492,7 +488,7 @@
 
 		//Pesquisa por código cadastro
 		//elemento destacado
-		var pesquisaQ = L.featureGroup().addTo(map);
+		let pesquisaQ = L.featureGroup().addTo(map);
 		function elementoNavQ() {
 			let inputpesquisaQ = document.forms["pesquisaquadra"]["setorQuadra"].value;
 			pesquisaQ.clearLayers();
@@ -519,7 +515,7 @@
 		};
 
 		//caixa de pesquisa
-		var InfoControl = L.Control.extend({
+		let InfoControl = L.Control.extend({
 			options: { position: "topleft" },
 
 			onAdd: function (map) {
@@ -536,58 +532,44 @@
 					'</form>';
 			}
 		});
-		var info = new InfoControl().addTo(map);
+		let info = new InfoControl().addTo(map);
 
 		//inundações
-		//layer.bindTooltip(feature.properties.legenda, { sticky: true, direction: 'center' })
-		//Cotas 2013 (setembro)
-		var inundasetembro2011 = L.layerGroup();
 		//Cotas 2011 (setembro)
 		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:inundasetembro2011&outputFormat=application%2Fjson", function (data) {
 			L.geoJson(data, {
 				style: function (feature) {
-					var corlinha,
+					let corlinha,
 						corl = feature.properties.situa;
-					if (corl == '0,20') corlinha = "#ffffcc";
-					else if (corl == '0,21 a 0,40') corlinha = "#ffeda0";
-					else if (corl == '0,41 a 0,60') corlinha = "#fed976";
-					else if (corl == '0,50') corlinha = "#feb24c";
-					else if (corl == '0,51 a 1') corlinha = "#fd8d3c";
-					else if (corl == '1,01 a 1,50') corlinha = "#fc4e2a";
-					else if (corl == '1,51 a 2') corlinha = "#e31a1c";
+					if (corl == '0,50') corlinha = "#4dc5ff";
+					else if (corl == '0,51 a 1') corlinha = "#c8fe4e";
+					else if (corl == '1,01 a 1,50') corlinha = "#fffe4d";
+					else if (corl == '1,51 a 2') corlinha = "#fec64d";
 					else if (corl == '2,01 a 3') corlinha = "#b10026";
 					else corlinha = "#fff";
-					return { weight: 1, fillColor: corlinha, fillOpacity: 0.8 };
+					return { weight: 0.5, color: '#000000b7', fillColor: corlinha, fillOpacity: 0.8 };
 				},
-
 				onEachFeature: function (feature, layer) {
-					let tippadrao =
-					if (corl == '0,20') corlinha = "#ffffcc";
-					else if (corl == '0,21 a 0,40') corlinha = "#ffeda0";
-					else if (corl == '0,41 a 0,60') corlinha = "#fed976";
-					else if (corl == '0,50') corlinha = "#feb24c";
-					else if (corl == '0,51 a 1') corlinha = "#fd8d3c";
-					else if (corl == '1,01 a 1,50') corlinha = "#fc4e2a";
-					else if (corl == '1,51 a 2') corlinha = "#e31a1c";
-					else if (corl == '2,01 a 3') corlinha = "#b10026";
-					else corlinha = "#fff";
-					return { weight: 1, fillColor: corlinha, fillOpacity: 0.8 };
-					;
-					layer.bindTooltip(feature.properties.legenda, { sticky: true, direction: 'center' });
+					let poptip,
+						poptx = feature.properties.situa;
+					if (poptx == '0,50') poptip = "Baixo/Médio(1a50cm)";
+					else if (poptx == '0,51 a 1') poptip = "Médio(51cm a 1,00m)";
+					else if (poptx == '1,01 a 1,50') poptip = "Médio/Alto(1,01 a 1,50m)";
+					else if (poptx == '1,51 a 2') poptip = "Alto(1,51 a 2,00m)";
+					else if (poptx == '2,01 a 3') poptip = "Muito Alto(2,01 a 3,00m)";
+					layer.bindTooltip('<strong>' + poptip + '</strong>', { sticky: true, direction: 'center' })
 				}
-			}).addTo(inundasetembro2011).addTo(map);
+			}).addTo(inundasetembro2011);
 		});
 
 		//Controle de camadas
-		var overlayMaps = {
+		let overlayMaps = {
+			"Mapa Cota Inundação Defesa Civil (setembro 2011)": inundasetembro2011,
 			"<a href='http://servicos.decea.gov.br/aga/' target='_blank' > DECEA <br/> Portaria nº957/GC3-7/2015</a>": aerogab,
 			"Corredores de <br/> comércio e serviços": ccs
 		};
-		var baseMaps = {
-			"Vias<a href='https://docs.google.com/spreadsheets/d/e/2PACX-1vQBLSrcsNMwpbaF1ShxlSLeX7CdHAmOkX452MEoYgDEbMIF41DJmvN4Y2yv6Ge0nOp8DDh4B4r40xQG/pubhtml?gid=61646311&single=true' target='_blank' >(Tabela, pauta)</a>": tilesmu,
-			"Imagem Google maps": tilegoogle
-		};
-		L.control.layers(baseMaps, overlayMaps, { position: 'bottomleft', collapsed: false }).addTo(map);
+
+		L.control.layers(null, overlayMaps, { position: 'bottomleft', collapsed: false }).addTo(map);
 
 		//Controle camada SDS on zoom 15+
 		map.on('zoomend', function () {
@@ -600,7 +582,7 @@
 		});
 
 		//Barra pesquisa
-		var searchControl = new L.Control.Search({
+		let searchControl = new L.Control.Search({
 			layer: pesquisa,
 			propertyName: 'nome',
 			circleLocation: false,
