@@ -31,24 +31,117 @@
         left: 0;
         bottom: 0;
     }
+
+    #layers {
+        position: absolute;
+        z-index: 2;
+        background-color: rgba(0,60,136,0.7);
+        color:#fff;
+        padding: 8px 12px;
+        font-size: 12px;
+        right: 5px;
+        top: 5px;
+    }
+
+    #layers > ul {
+        list-style: none;
+    }
 </style>
 
 <body>
     <div id="mapa"></div>
+    <nav id="layers">
+        <ul>
+            <li><input type="radio" name="layer" value="GoogleSatellite" checked> Google </li>
+            <li><input type="radio" name="layer" value="OpenStreetMaps"> OSM </li>
+            <li><input type="radio" name="layer" value="bingmaps"> BingMaps </li>
+            <li><input type="radio" name="layer" value="esri"> ESRI </li>
+            <li><input type="radio" name="layer" value="stamen"> Stamen </li>
+        </ul>
+    </nav>
 
     <script>
-        view: new ol.View({
-            center: [-26.9046, -48.6874],
+        //config da view
+        let view = new ol.View({
+            center: ol.proj.fromLonLat([-48.69, -26.9146]),
             zoom: 12,
             maxZoom: 18,
-            minZoom: 10
+            minZoom: 5
         });
 
-        let baseLayer = new ol.layer.Tile({
-            source: new XYZ({
-                url: 'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'
-            })
+        //Google Satellite
+        let GoogleSatellite = new ol.layer.Tile({
+            title: "Google Satellite",
+            source: new ol.source.TileImage({ url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}' }),
+            visible: false,
+            name: 'GoogleSatellite'
         });
+        //mapa.addLayer(baseLayer);
+
+        //Openstreetmaps
+        let OpenStreetMaps = new ol.layer.Tile({
+            source: new ol.source.OSM(),
+            visible: false,
+            name: 'OpenStreetMaps'
+        });
+        //mapa.addLayer(OSMbaseLayer);
+
+        //Bing Maps
+        let bingmaps = new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+                imagerySet: 'AerialWithLabels'
+            }),
+            visible: false,
+            name: 'bingmaps'
+        });
+
+        //ESRI
+        let esri = new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: 'http://server.arcgisonline.com/ArcGIS/rest/services/' +
+                    'World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+            }),
+            visible: false,
+            name: 'esri'
+        });
+
+        //Stamen, em um grupo de layers
+        let stamen = new ol.layer.Group({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.Stamen({
+                        layer: 'watercolor'
+                    })
+                }),
+                new ol.layer.Tile({
+                    source: new ol.source.Stamen({
+                        layer: 'terrain-labels'
+                    })
+                })
+            ],
+            visible: false,
+            name: 'stamen'
+        });
+
+        //mapa
+        let mapa = new ol.Map({
+            target: 'mapa',
+            controls: ol.control.defaults(),
+            layers: [GoogleSatellite,OpenStreetMaps,bingmaps,esri,stamen],
+            view: view
+        })
+
+        //lista criada com Jquery
+        $('#layers input[type=radio]').change(function () {
+            var layer = $(this).val();
+
+            mapa.getLayers().getArray().forEach(function (e) {
+                var name = e.get('name');
+                e.setVisible(name == layer);
+            });
+        });
+
     </script>
 </body>
 
