@@ -64,9 +64,10 @@
         width: 195px;
         font-size: 13px;
         position: absolute;
+        border-radius: 5px;
         padding: 8px 10px;
-        background-color: rgba(0,60,136,0.7);
-        border: 1px solid #285e8e;
+        background-color: #fff;
+        border: 2px solid #ccc;
     }
 </style>
 
@@ -146,15 +147,8 @@
             name: 'stamen'
         });
 
-        //mapa
-        let mapa = new ol.Map({
-            target: 'mapa',
-            controls: ol.control.defaults(),
-            layers: [GoogleSatellite, OpenStreetMaps, bingmaps, esri, stamen],
-            view: view
-        });
-
         //Exemplo ponto com popup
+        //Estilo do ponto
         let style = new ol.style.Style({
             image: new ol.style.Circle({
                 radius: 7,
@@ -166,31 +160,32 @@
                     color: 'rgba(52,152,219,0.3)'
                 })
             })
-        })
+        });
 
+        //Ponto
         let point = new ol.layer.Vector({
             source: new ol.source.Vector({
-                features: [new ol.Feature({
-                    text: 'Minha localização é</br>',
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([-48.69, -26.9146]))
-                })]
+                features: [
+                    new ol.Feature({
+                        geometry: new ol.geom.Point(ol.proj.fromLonLat([-48.69, -26.9146])),
+                        text: 'Minha localização é <br>'
+                    })
+                ]
             }),
             style: style
         });
-        mapa.addLayer(point);
 
         let element = $('#popup');
-
         let popup = new ol.Overlay({
             element: element,
             stopEvent: false
         });
 
-        mapa.addOverlay(popup);
+        map.addOverlay(popup);
 
-        mapa.on('click', function (evt) {
+        map.on('click', function (evt) {
 
-            let feature = mapa.forEachFeatureAtPixel(evt.pixel,
+            let feature = map.forEachFeatureAtPixel(evt.pixel,
                 function (feature, layer) {
                     return feature;
                 });
@@ -198,28 +193,13 @@
             if (feature) {
                 let coordinate = feature.getGeometry().getCoordinates();
                 element.show();
-                element.html(feature.get('text') + ol.coordinate.toStringHDMS(ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326')));
+                element.html('text');
                 popup.setPosition(coordinate);
             } else {
                 element.hide();
             }
 
         });
-
-        //Botão Geolocalizar
-        /*
-        let geolocation = new ol.Geolocation({
-            projection: view.getProjection(),
-            tracking: true
-        });
-
-        $('#geolocation').click(() => {
-            let position = geolocation.getPosition();
-            view.setCenter(position);
-            view.setResolution(2.388657133911758);
-            return false;
-        });
-        */
 
         //lista criada com Jquery, interação
         $('#layers input[type=radio]').change(function () {
@@ -229,6 +209,14 @@
                 let name = e.get('name');
                 e.setVisible(name == layer);
             });
+        });
+
+        //mapa
+        let mapa = new ol.Map({
+            target: 'mapa',
+            controls: ol.control.defaults(),
+            layers: [GoogleSatellite, point],
+            view: view
         });
 
     </script>

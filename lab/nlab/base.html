@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Teste</title>
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/jquery-ui.min.css" />
+    <link rel="stylesheet" href="lib/tabulator.min.css" />
+    <script src="lib/leaflet.js"></script>
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/jquery-ui.min.js"></script>
+    <script src="lib/tabulator.min.js"></script>
+</head>
+
+<style>
+    {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        vertical-align: baseline;
+    }
+
+    html,
+    body {
+        min-height: 100%;
+    }
+
+    #mapa {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+
+    #pesquisa {
+        position: absolute;
+        z-index: 400;
+        background-color: rgba(0, 60, 136, 1);
+        color: #fff;
+        padding: 8px 12px;
+        font-size: 12px;
+        right: 5px;
+        top: 5px;
+    }
+
+    ul.ui-autocomplete {
+        z-index: 401;
+    }
+
+    .leaflet-container {
+        background: #ffffff;
+    }
+
+    .leaflet-default-icon-path {
+        background-image: url(../images/marker-icon.png);
+    }
+
+    .leaflet-control-layers-toggle {
+        background-image: url(../images/layers.png);
+    }
+
+    .leaflet-retina .leaflet-control-layers-toggle {
+        background-image: url(../images/layers-2x.png);
+    }
+</style>
+
+<body>
+    <div id="mapa"></div>
+
+    <div id="pesquisa" class="ui-widget">
+        <form>
+            <label for="pesquisaRapida">Procurar: </label>
+            <input id="pesquisaRapida">
+        </form>
+    </div>
+
+    <script>
+        //div do mapa
+        let map = new L.Map('mapa', {
+            zoom: 14,
+            minZoom: 11,
+            maxZoom: 20,
+            maxBounds: [
+                //south west
+                [-27.3000, -49.2300],
+                //north east
+                [-26.3285, -48.3200]
+            ],
+            center: new L.latLng([-26.9046, -48.6874]),
+            //layers: [tilesmu],
+            zoomControl: false
+        });
+
+        //Mapa base, google
+        new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.6,
+            maxZoom: 20,
+            transparent: false,
+            attribution: '©2018 Google, Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        //Barra de pesquisa
+        let names = ["José Meiríllio", "Cornélio Avelino", "Cabeça cabecuco", "CABACA"];
+
+        //tabela substituições
+        let accentMap = {
+            'á': 'a',
+            'à': 'a',
+            'ã': 'a',
+            'â': 'a',
+            'ç': 'c',
+            'é': 'e',
+            'è': 'e',
+            'í': 'i',
+            'ì': 'i',
+            'ó': 'o',
+            'ò': 'o',
+            'õ': 'o',
+            'ô': 'o',
+            'ú': 'u',
+            'ù': 'u'
+        };
+        //função para substituição de caracteres especiais
+        let normalize = function (term) {
+            let ret = "";
+            for (let i = 0; i < term.length; i++) {
+                ret += accentMap[term.charAt(i)] || term.charAt(i);
+            }
+            return ret;
+        };
+
+        //Caso enter em um número abaixo do mínimo de caracteres, prevenir submeter a pesquisa com fonte inválida
+        $("#pesquisaRapida").keypress(function (event) {
+            if (event.keyCode == 13) {
+                event.preventDefault();
+            }
+        });
+        //função de pesquisa
+        $(() => {
+            $("#pesquisaRapida").autocomplete({
+                minLength: 3,
+                autoFocus: true,
+                source: function (request, response) {
+                    let matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+                    response($.grep(names, function (value) {
+                        value = value.label || value.value || value;
+                        return matcher.test(value) || matcher.test(normalize(value));
+                    }));
+                },
+                select: function (event, ui) {
+                    console.log(ui.item.value);
+                },
+                search: function (request) {
+                    console.log(request);
+                },
+            });
+        });
+    </script>
+</body>
+
+</html>
