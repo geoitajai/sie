@@ -41,10 +41,32 @@
         font-size: 12px;
         right: 5px;
         top: 5px;
+        border: 1px solid #285e8e;
     }
 
     #layers > ul {
         list-style: none;
+    }
+
+/*     #geolocation {
+        position: absolute;
+        z-index: 2;
+        top: 10px;
+        right: 195px;
+        font-size: 13px;
+        background-color: rgba(0,60,136,0.7);
+        color: #fff;
+        border: 1px solid #285e8e;
+        padding: 6px 12px;
+    } */
+
+    #popup {
+        width: 195px;
+        font-size: 13px;
+        position: absolute;
+        padding: 8px 10px;
+        background-color: rgba(0,60,136,0.7);
+        border: 1px solid #285e8e;
     }
 </style>
 
@@ -59,34 +81,34 @@
             <li><input type="radio" name="layer" value="stamen"> Stamen </li>
         </ul>
     </nav>
+    <!-- <button id="geolocation">Geolocalizar</button> -->
+    <div id="popup"></div>
 
     <script>
         //config da view
         let view = new ol.View({
             center: ol.proj.fromLonLat([-48.69, -26.9146]),
-            zoom: 12,
+            zoom: 17,
             maxZoom: 18,
             minZoom: 5
         });
 
-        //Google Satellite
+        //BASEMAP - Google Satellite
         let GoogleSatellite = new ol.layer.Tile({
             title: "Google Satellite",
             source: new ol.source.TileImage({ url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}' }),
-            visible: false,
+            visible: true,
             name: 'GoogleSatellite'
         });
-        //mapa.addLayer(baseLayer);
 
-        //Openstreetmaps
+        //BASEMAP - Openstreetmaps
         let OpenStreetMaps = new ol.layer.Tile({
             source: new ol.source.OSM(),
             visible: false,
             name: 'OpenStreetMaps'
         });
-        //mapa.addLayer(OSMbaseLayer);
 
-        //Bing Maps
+        //BASEMAP - Bing Maps
         let bingmaps = new ol.layer.Tile({
             source: new ol.source.BingMaps({
                 key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
@@ -96,7 +118,7 @@
             name: 'bingmaps'
         });
 
-        //ESRI
+        //BASEMAP - ESRI
         let esri = new ol.layer.Tile({
             source: new ol.source.XYZ({
                 url: 'http://server.arcgisonline.com/ArcGIS/rest/services/' +
@@ -106,7 +128,7 @@
             name: 'esri'
         });
 
-        //Stamen, em um grupo de layers
+        //BASEMAP - Stamen, em um grupo de layers
         let stamen = new ol.layer.Group({
             layers: [
                 new ol.layer.Tile({
@@ -128,16 +150,83 @@
         let mapa = new ol.Map({
             target: 'mapa',
             controls: ol.control.defaults(),
-            layers: [GoogleSatellite,OpenStreetMaps,bingmaps,esri,stamen],
+            layers: [GoogleSatellite, OpenStreetMaps, bingmaps, esri, stamen],
             view: view
+        });
+
+        //Exemplo ponto com popup
+        let style = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 7,
+                stroke: new ol.style.Stroke({
+                    color: '#2980b9',
+                    width: 3
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(52,152,219,0.3)'
+                })
+            })
         })
 
-        //lista criada com Jquery
+        let point = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [new ol.Feature({
+                    text: 'Minha localização é</br>',
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([-48.69, -26.9146]))
+                })]
+            }),
+            style: style
+        });
+        mapa.addLayer(point);
+
+        let element = $('#popup');
+
+        let popup = new ol.Overlay({
+            element: element,
+            stopEvent: false
+        });
+
+        mapa.addOverlay(popup);
+
+        mapa.on('click', function (evt) {
+
+            let feature = mapa.forEachFeatureAtPixel(evt.pixel,
+                function (feature, layer) {
+                    return feature;
+                });
+
+            if (feature) {
+                let coordinate = feature.getGeometry().getCoordinates();
+                element.show();
+                element.html(feature.get('text') + ol.coordinate.toStringHDMS(ol.proj.transform(coordinate, 'EPSG:3857', 'EPSG:4326')));
+                popup.setPosition(coordinate);
+            } else {
+                element.hide();
+            }
+
+        });
+
+        //Botão Geolocalizar
+        /*
+        let geolocation = new ol.Geolocation({
+            projection: view.getProjection(),
+            tracking: true
+        });
+
+        $('#geolocation').click(() => {
+            let position = geolocation.getPosition();
+            view.setCenter(position);
+            view.setResolution(2.388657133911758);
+            return false;
+        });
+        */
+
+        //lista criada com Jquery, interação
         $('#layers input[type=radio]').change(function () {
-            var layer = $(this).val();
+            let layer = $(this).val();
 
             mapa.getLayers().getArray().forEach(function (e) {
-                var name = e.get('name');
+                let name = e.get('name');
                 e.setVisible(name == layer);
             });
         });
