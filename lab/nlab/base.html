@@ -33,24 +33,42 @@
 
     #mapa {
         position: absolute;
-        top: 0;
+        top: 7%;
         bottom: 0;
+        left: 0;
         width: 100%;
+    }
+
+    #cabecalho {
+        position: absolute;
+        z-index: 401;
+        background-color: rgba(0, 60, 136, 1);
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 7%;
     }
 
     #pesquisa {
         position: absolute;
-        z-index: 400;
-        background-color: rgba(0, 60, 136, 1);
+        z-index: 402;
         color: #fff;
-        padding: 8px 12px;
         font-size: 12px;
         right: 5px;
-        top: 5px;
+        top: 18px;
+    }
+
+    #titulo {
+        position: absolute;
+        z-index: 402;
+        color: #fff;
+        font-size: 18px;
+        left: 60px;
+        top: 0px;
     }
 
     ul.ui-autocomplete {
-        z-index: 401;
+        z-index: 402;
     }
 
     .leaflet-container {
@@ -71,12 +89,17 @@
 </style>
 
 <body>
+    <div id="cabecalho">
+        <img src="images/favicon-96x96.png" alt="Brasão Município de Itajaí-SC" style="width:48px">
+        <div id="titulo">
+            <p>Planta Cadastral</p>
+        </div>
+    </div>
     <div id="mapa"></div>
 
     <div id="pesquisa" class="ui-widget">
         <form>
-            <label for="pesquisaRapida">Procurar: </label>
-            <input id="pesquisaRapida">
+            <input id="pesquisaRapida"  placeholder="Inscr.imobiliária, código ou nome logradouro" style="width: 300px;">
         </form>
     </div>
 
@@ -107,7 +130,7 @@
         }).addTo(map);
 
         //Barra de pesquisa
-        let names = ["José Meiríllio", "Cornélio Avelino", "Cabeça cabecuco", "CABACA"];
+        let names = ["José Meiríllio", "Cornélio Avelino", "Cabeça cabecuco", "CABACA", "Jose amamonam conceiçaao moreiria mamaca"];
 
         //tabela substituições
         let accentMap = {
@@ -158,7 +181,7 @@
                     console.log(ui.item.value);
                 },
                 search: function (request) {
-                    console.log(request);
+                    console.log(request.currentTarget.value);
                 },
             });
         });
