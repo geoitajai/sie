@@ -99,7 +99,7 @@
 
     <div id="pesquisa" class="ui-widget">
         <form>
-            <input id="pesquisaRapida"  placeholder="Inscr.imobiliária, código ou nome logradouro" style="width: 300px;">
+            <input id="pesquisaRapida" placeholder="Inscr.imobiliária, código ou nome logradouro" style="width: 300px;">
         </form>
     </div>
 
@@ -159,16 +159,10 @@
             return ret;
         };
 
-        //Caso enter em um número abaixo do mínimo de caracteres, prevenir submeter a pesquisa com fonte inválida
-        $("#pesquisaRapida").keypress(function (event) {
-            if (event.keyCode == 13) {
-                event.preventDefault();
-            }
-        });
         //função de pesquisa
         $(() => {
             $("#pesquisaRapida").autocomplete({
-                minLength: 3,
+                //minLength: 3,
                 autoFocus: true,
                 source: function (request, response) {
                     let matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
@@ -179,10 +173,19 @@
                 },
                 select: function (event, ui) {
                     console.log(ui.item.value);
-                },
-                search: function (request) {
-                    console.log(request.currentTarget.value);
-                },
+                }
+                /*,
+                response: function (event, ui) {
+                    if (!ui.content.length) {
+                        console.log('121');
+                    }
+                }
+                */
+            })/*captura a tecla enter e pega o valor do campo*/.keypress(function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    console.log($("#pesquisaRapida").val());
+                }
             });
         });
     </script>
