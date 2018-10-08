@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Planta cadastral</title>
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/jquery-ui.min.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/tabulator.min.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.css" />
+    <link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-ruler.css" />
+</head>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #map {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 75%;
+    }
+
+    .leaflet-container {
+        background: #ffffff;
+    }
+
+    .linhatabela {
+        position: absolute;
+        bottom: 0;
+        width: 99.5%;
+        height: 25%;
+    }
+
+    .info {
+        padding: 6px 8px;
+        background: white;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+        border-radius: 0px;
+    }
+
+    .leaflet-container .leaflet-control-search {
+        left: 1px;
+    }
+
+    .leaflet-ruler {
+        background-image: url("http://geo-smu.itajai.local/geo/images/icon.png");
+    }
+
+    .leaflet-ruler:hover {
+        background-image: url("http://geo-smu.itajai.local/geo/images/icon-colored.png");
+    }
+
+    .leaflet-ruler-clicked {
+        background-image: url("http://geo-smu.itajai.local/geo/images/icon-colored.png");
+    }
+</style>
+
+<body>
+    <!-- Mapa -->
+    <div id="map"></div>
+
+    <!-- Tabela -->
+    <div class="linhatabela" id="tabelatabulator"></div>
+
+    <!-- Bibliotecas -->
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/jquery-3.3.1.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/jquery-ui.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/tabulator.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet.wms.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/papaparse.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.js"></script>
+    <script src="http://geo-smu.itajai.local/geo/lib/leaflet-ruler.js"></script>
+
+    <!-- Mapa -->
+    <script>
+
+        //div do mapa
+        var map = new L.Map('map', {
+            zoom: 14,
+            minZoom: 12,
+            maxZoom: 20,
+            maxBounds: [
+                //south west
+                [-27.215341, -49.020370],
+                //north east
+                [-26.701009, -48.397961]
+            ],
+            center: new L.latLng([-26.906960, -48.685425]),
+            zoomControl: false
+        });
+
+        //título
+        var titulomapa = L.control({ position: 'topleft' });
+
+        titulomapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML +=
+                '<center><img src="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" alt="brasao" width="60"><br/><strong><font size="6">SEFAZ</font></strong><br/>' +
+                '<hr>' +
+                '<strong><font size="4">Planta cadastral</font></strong><br/>'
+            return div;
+        };
+        titulomapa.addTo(map);
+
+        //barra escala
+        L.control.scale({ position: "bottomright", imperial: false }).addTo(map);
+
+        //google image
+        new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.6,
+            maxZoom: 20,
+            transparent: false,
+            attribution: '©2018 Google, SEFAZ/Cadastro, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+
+        //Curvas 10x10
+        new L.tileLayer.wms('http://10.10.1.158:8080/geoserver/ows?', {
+            layers: 'geoitj:curvas10x10govest2013',
+            format: 'image/png8',
+            minZoom: 16,
+            maxZoom: 20,
+            attribution: false,
+            transparent: true
+        }).addTo(map);
+
+        //Limites Município
+        $.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:geo2007limitesmunicip&outputFormat=application%2Fjson", function (data) {
+            L.geoJson(data, {
+                style: function (feature) {
+                    return {
+                        color: '#000000',
+                        fill: false
+                    };
+                },
+            }).addTo(map);
+        });
+
+        //Cadastro
+        //Definir elementos da tabela
+        $("#tabelatabulator").tabulator({
+            height: "25%",
+            layout: "fitColumns",
+            columns: [
+                { title: "Código", field: "ncodimov", width: 80 },
+                { title: "Inscrição imob.", field: "ninscrao", width: 160 },
+                { title: "nº matrícula", field: "nmatricu", width: 100 },
+                { title: "Logradouro", field: "nlogrado", width: 150 },
+                { title: "nº", field: "nnumimov", width: 50 },
+                { title: "Compl.", field: "ncomplem", width: 120 },
+                { title: "Andar", field: "nnumanda", width: 50 },
+                { title: "CEP", field: "nceplogr", width: 100 },
+                { title: "Bairro", field: "nnomebai", width: 150 },
+                { title: "Razão social", field: "nrazaoso", width: 350 },
+                { title: "Tipo pessoa", field: "ntipopes", width: 70 },
+                { title: "CNPJ/CPF", field: "nncpfpj", width: 120 },
+                //{ title: "RG/Inscr.estadual", field: "nrginscr", width: 150 },
+                { title: "Cód.contribuinte", field: "ncodcont", width: 140 },
+                { title: "Testada", field: "ntestapr", width: 80 },
+                { title: "Profund.", field: "nmfundos", width: 80 },
+                { title: "Área terreno", field: "nareater", width: 80 },
+                { title: "Patrimônio", field: "npatrimo", width: 80 },
+                { title: "Ano constr.", field: "nanocons", width: 80 },
+                { title: "Tipologia", field: "ntipolog", width: 80 },
+                { title: "nº pavmtos", field: "nnumpavt", width: 80 },
+                { title: "Data habite-se", field: "ndatahab", width: 80 },
+                { title: "Espécie", field: "nespecie", width: 80 },
+                { title: "Tipo de uso", field: "ntipouso", width: 80 },
+                { title: "Utilização", field: "nutiliza", width: 80 },
+                { title: "Situação edif.", field: "nsituaed", width: 80 },
+                { title: "Conservação", field: "nconserv", width: 80 },
+                { title: "Acabamento", field: "nacabame", width: 80 },
+                { title: "Disp.no lote", field: "ndispolo", width: 80 },
+                { title: "Preservação(%)", field: "narepreser", width: 80 },
+                { title: "Imóvel rural", field: "nimovrur", width: 80 },
+                { title: "nº INCRA", field: "nnuincra", width: 80 },
+                { title: "Situação lote", field: "nsitulot", width: 180 },
+                { title: "Benfeitoria", field: "nbenfeit", width: 80 },
+                { title: "Topografia", field: "ntopogra", width: 80 },
+                { title: "Passeio", field: "npasseio", width: 80 },
+                { title: "nº hidrômetro", field: "nnumhidr", width: 80 },
+                { title: "nº medidor energia elétrica", field: "nnumener", width: 80 },
+                { title: "Data alteração TMI", field: "ndataalter", width: 80 },
+                { title: "Área tributável", field: "nareatri", width: 80 },
+                { title: "Fração ideal informada", field: "nfracaoi", width: 80 },
+                { title: "Área tributável do terreno", field: "naretrlo", width: 80 },
+                { title: "Cód.logradouro", field: "ncodlogr", width: 80 },
+            ]
+        });
+        //elemento destacado
+        var pesquisaQ = L.featureGroup().addTo(map);
+
+        //WMS
+        var CleanInfoSource = L.WMS.Source.extend({
+            'showFeatureInfo': function (latlng, info) {
+                if (!this._map) { return };
+                pesquisaQ.clearLayers();
+                let liginscr = info.split(/\n|=/)[9].trim();
+                $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:tmigeom&outputFormat=application%2Fjson&CQL_FILTER=inscrlig='" + liginscr + "'",
+                    (data) => {
+                        L.geoJson(data, {
+                            style: (feature) => {
+                                return { color: '#000000', fill: false, weight: 5 }
+                            }
+                        }).addTo(pesquisaQ);
+                    });
+                //console.log(info.split(/\n|=/));
+
+                //async para a tabela
+                let promise = new Promise(function (resolve, reject) {
+                    resolve(info.split(/\n|=/)[9].trim());
+                });
+                promise.then(function (result) {
+                    Papa.parse("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:tmicad&outputFormat=csv&CQL_FILTER=inscrlig='" + result + "'", {
+                        download: true,
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function (results) {
+                            //popular a tabela com os resultados
+                            $("#tabelatabulator").tabulator("setData", results.data);
+                        }
+                    });
+                });
+
+                //legenda - ANTIGA
+                let nadaencontrado = info.split(/\n|=/)[0];
+                let vianomechk = info.split(/\n|=/)[16];
+                let vianome = info.split(/\n|=/)[17];
+                let vialeichk = info.split(/\n|=/)[14];
+                let vialei = info.split(/\n|=/)[15];
+                let viaptotalchk = info.split(/\n|=/)[8];
+                let viaptotal = info.split(/\n|=/)[9];
+                let passeioa = info.split(/\n|=/)[11];
+                let passeiob = info.split(/\n|=/)[13];
+                //campos
+                let legendaA;
+                let legendaB;
+                let legendaC;
+                //abastecer os campos'';
+                if (nadaencontrado == 'no features were found') {
+                    legendaA = 'clique sobre um elemento';
+                    legendaB = '';
+                    legendaC = '';
+                };
+                //legenda sistema viário
+                if (vianomechk == 'nome ') {
+                    info =
+                        'Informações do logradouro:' + '<br/>' +
+                        '<strong>' + vianome + '</strong>' + '<br/>' +
+                        'Lei:' + vialei + '<br/>' +
+                        'Cx.da via: ' + viaptotal + 'm' + ' - Passeios:' + passeioa + '/' + passeiob + 'm'
+                        ;
+                    this._map.openPopup(info, latlng);
+                };
+            }
+        });
+        var options = { 'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20, opacity: 0.7 };
+        var source = new CleanInfoSource("http://geo-smu.itajai.local:8080/geoserver/geoitj/wms", options);
+        source.addSubLayer('geoitj:hidrobase');
+        source.addSubLayer('geoitj:hidrobasepoly');
+        source.addSubLayer('geoitj:viewsistemaviarioestilosempauta');
+        source.addSubLayer('geoitj:tmigeom');
+        source.addTo(map);
+
+        //Pesquisa por código cadastro
+        function elementoNavQ() {
+            let inputpesquisaQ = document.forms["pesquisaquadra"]["setorQuadra"].value;
+            pesquisaQ.clearLayers();
+            $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:tmimgeom&outputFormat=application%2Fjson&CQL_FILTER=ncodimov='" + inputpesquisaQ + "'",
+                function (data) {
+                    let error = data.totalFeatures;
+                    if (error == 0) {
+                        alert('não encontrado');
+                    }
+                    else {
+                        L.geoJson(data, {
+                            style: function (feature) {
+                                return { color: '#000000', fill: false, weight: 5 }
+                            }
+                        }).addTo(pesquisaQ);
+                        let dataq = pesquisaQ.getBounds();
+                        map.flyToBounds(dataq);
+                        //async para a tabela
+                        let promise = new Promise(function (resolve, reject) {
+                            resolve(data.features["0"].properties.inscrlig);
+                        });
+                        promise.then(function (result) {
+                            Papa.parse("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:tmicad&outputFormat=csv&CQL_FILTER=inscrlig='" + result + "'", {
+                                download: true,
+                                header: true,
+                                skipEmptyLines: true,
+                                complete: function (results) {
+                                    //popular a tabela com os resultados
+                                    $("#tabelatabulator").tabulator("setData", results.data);
+                                }
+                            });
+                        });
+                    };
+                });
+        };
+
+        //caixa de pesquisa
+        var InfoControl = L.Control.extend({
+            options: { position: "bottomleft" },
+
+            onAdd: function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                L.DomEvent.disableClickPropagation(this._div);
+                this.update();
+                return this._div;
+            },
+            update: function (d) {
+                this._div.innerHTML =
+                    '<form name="pesquisaquadra" action="" onsubmit="elementoNavQ(); return false;" method="post">' +
+                    '<input type="submit" value="Pesquisa por cód.cadastro">' + '</br>' +
+                    '<input type="text" placeholder="digite o código" name="setorQuadra">' +
+                    '</form>';
+            }
+        });
+        var info = new InfoControl().addTo(map);
+
+        //Botão zoom posicionado
+        L.control.zoom({ position: 'topleft' }).addTo(map);
+
+        //Sistema viário para pesquisa
+        var pesquisa = new L.LayerGroup();
+        $.getJSON("http://geo-smu.itajai.local:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewsistemaviariopts&outputFormat=application%2Fjson", function (data) { L.geoJson(data).addTo(pesquisa) });
+
+        //Barra pesquisa
+        var searchControl = new L.Control.Search({
+            layer: pesquisa,
+            propertyName: 'nome',
+            circleLocation: false,
+            marker: false,
+            textPlaceholder: "Pesquisa nome logradouro",
+            textErr: "Não localizado",
+            textCancel: "Cancelar",
+            zoom: 18,
+            openPopup: false,
+            collapsed: true,
+            initial: false,
+            position: 'topleft',
+            minLength: 2
+        });
+        map.addControl(searchControl);
+        //camada não precisa ser visível, apenas para searchcontrol
+        map.removeLayer(pesquisa);
+
+        //ferramenta medidas
+        var ruleroptions = {
+            position: 'bottomright',
+            lengthUnit: {
+                display: 'm',
+                decimal: 2,
+                factor: 1000,
+                label: 'Dist.:'
+            },
+            angleUnit: {
+                display: '&deg;',
+                decimal: 2,
+                factor: null,
+                label: 'Az.:'
+            }
+        };
+        L.control.ruler(ruleroptions).addTo(map);
+
+        //Norte
+        let nortemapa = L.control({ position: 'bottomright' });
+
+        nortemapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info2 legend');
+            div.innerHTML +=
+                '<center><sub><font size="4">▲</font></sub><br/>' +
+                '<sup><font size="2">N</font></sup></center>'
+            return div;
+        };
+        nortemapa.addTo(map);
+
+    </script>
+
+</body>
+
+</html>
