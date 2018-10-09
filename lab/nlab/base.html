@@ -10,7 +10,7 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="stylesheet" href="lib/leaflet.css" />
     <link rel="stylesheet" href="lib/jquery-ui.min.css" />
-    <link rel="stylesheet" href="lib/tabulator.min.css" />
+    <link rel="stylesheet" href="lib/tabulator_simple.min.css" />
     <script src="lib/leaflet.js"></script>
     <script src="lib/jquery-3.3.1.min.js"></script>
     <script src="lib/jquery-ui.min.js"></script>
@@ -27,7 +27,7 @@
     }
 
     body {
-        margin: 0;
+
         padding: 0;
         font-family: Arial, Helvetica, sans-serif;
     }
@@ -56,7 +56,7 @@
         padding-top: 7px;
         display: flex;
         flex-direction: column;
-        color: white;
+        color: var(--claro);
         text-shadow: 1px 1px 2px black;
     }
 
@@ -98,6 +98,25 @@
         }
     }
 
+    .tabulator {
+        font-size: 12px;
+        background: var(--claro);
+    }
+
+    .tabulator .tabulator-header .tabulator-col {
+        background: var(--base);
+        color: var(--claro);
+        text-shadow: 1px 1px 2px black;
+    }
+
+    .tabulator .tabulator-header {
+        border-bottom: 0px;
+    }
+
+    .tabulator .tabulator-header,
+    .tabulator .tabulator-header .tabulator-col {
+        background-color: var(--base);
+    }
 
     ul.ui-autocomplete {
         z-index: 402;
@@ -159,7 +178,7 @@
             opacity: 0.6,
             maxZoom: 20,
             transparent: false,
-            attribution: '©2018 Google, Secretaria Municipal de Urbanismo - Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            attribution: '©2018 Google, Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(mapa);
 
@@ -184,19 +203,18 @@
                 { title: "Código", field: "ncodimov", width: 80 },
                 { title: "Inscrição imob.", field: "ninscrao", width: 160 },
                 { title: "Razão social", field: "nrazaoso", width: 350 },
-                { title: "Tipo pessoa", field: "ntipopes", width: 70 },
+                { title: "Tipo", field: "ntipopes", width: 70 },
                 { title: "CNPJ/CPF", field: "nncpfpj", width: 120 },
                 { title: "Logradouro", field: "nlogrado", width: 150 },
-                { title: "nº", field: "nnumimov", width: 50 },
+                { title: "nº", field: "nnumimov", width: 60 },
                 { title: "Compl.", field: "ncomplem", width: 120 },
                 { title: "CEP", field: "nceplogr", width: 100 },
-                { title: "Bairro", field: "nnomebai", width: 150 },
-                { title: "Cód.contribuinte", field: "ncodcont", width: 140 },
+                { title: "Bairro", field: "nnomebai", width: 100 },
                 { title: "Testada", field: "ntestapr", width: 80 },
                 { title: "Profund.", field: "nmfundos", width: 80 },
                 { title: "Área terreno", field: "nareater", width: 80 },
-                { title: "Andar", field: "nnumanda", width: 50 },
                 { title: "nº matrícula", field: "nmatricu", width: 100 },
+                { title: "Cód.contrib.", field: "ncodcont", width: 100 },
             ]
         });
 
@@ -321,7 +339,7 @@
         });
 
         //WMS
-        var CleanInfoSource = L.WMS.Source.extend({
+        let CleanInfoSource = L.WMS.Source.extend({
             'showFeatureInfo': function (latlng, info) {
                 if (!this._map) { return };
                 pesquisaL.clearLayers();
@@ -377,8 +395,8 @@
                 };
             }
         });
-        var options = { 'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20, opacity: 0.7 };
-        var source = new CleanInfoSource("http://geo-smu.itajai.local:8080/geoserver/geoitj/wms", options);
+        let options = { 'transparent': true, 'info_format': 'text/plain', 'format': 'image/png8', 'tiled': true, minZoom: 10, maxZoom: 20, opacity: 0.7 };
+        let source = new CleanInfoSource("http://geo-smu.itajai.local:8080/geoserver/geoitj/wms", options);
         source.addSubLayer('geoitj:hidrobase');
         source.addSubLayer('geoitj:hidrobasepoly');
         source.addSubLayer('geoitj:viewsistemaviarioestilosempauta');
