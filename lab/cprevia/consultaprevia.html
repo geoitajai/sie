@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Consulta Prévia</title>
+	<link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-16x16.png" sizes="16x16">
+	<link rel="icon" type="image/png" href="http://geo-smu.itajai.local/geo/images/favicon-32x32.png" sizes="32x32">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet.css" />
+	<link rel="stylesheet" href="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.css" />
+	<link rel="stylesheet" href="consultaprevia.css" />
+</head>
+
+<body>
+	<div id="cxpesquisa"></div>
+	<div id="folha">
+		<img src="consultaprevia.svg" alt="folha" height="1340">
+	</div>
+	<div id="map" class="leaflet-container"></div>
+
+	<!--Senta que lá vem div-->
+	<div id="nprotocolo"></div>
+	<!--Nº do protocolo-->
+	<div id="cabnome"></div>
+	<!--Nome do requerente-->
+	<div id="cabend"></div>
+	<!--End.do requerente-->
+	<div id="cabproprie"></div>
+	<!--Nome do proprietário-->
+	<div id="cabendim"></div>
+	<!--End.do lote-->
+	<div id="cabbairro"></div>
+	<!--Bairro-->
+	<div id="cabnumerou"></div>
+	<!--Nº da unidade-->
+	<div id="cabtel"></div>
+	<!--Telefone-->
+	<div id="numcadastr"></div>
+	<!--Nº do cadastro-->
+	<div id="inscrimob"></div>
+	<!--Inscrição imobiliária-->
+	<div id="usohabuni"></div>
+	<!--Uso habitacional unifamiliar-->
+	<div id="susohabuni"></div>
+	<div id="usohabmult"></div>
+	<!--Uso habitacional multifamiliar-->
+	<div id="susohabmult"></div>
+	<div id="usocs1"></div>
+	<!--Uso comercial/serviço - CS1-->
+	<div id="susocs1"></div>
+	<div id="usocs2"></div>
+	<!--Uso comercial/serviço - CS2-->
+	<div id="susocs2"></div>
+	<div id="usocs3"></div>
+	<!--Uso comercial/serviço - CS3-->
+	<div id="susocs3"></div>
+	<div id="usocomunit"></div>
+	<!--Uso comunitário-->
+	<div id="susocomunit"></div>
+	<div id="usoindbaix"></div>
+	<!--Uso industrial de baixo impacto-->
+	<div id="susoindbaix"></div>
+	<div id="usoindmedi"></div>
+	<!--Uso industrial de média impacto-->
+	<div id="susoindmedi"></div>
+	<div id="usoindalto"></div>
+	<!--Uso industrial de alto impacto-->
+	<div id="susoindalto"></div>
+	<div id="usoindinco"></div>
+	<!--Uso industrial, atividades incômodas-->
+	<div id="susoindinco"></div>
+	<div id="usoindcse"></div>
+	<!--Uso industrial CSE-->
+	<div id="susoindcse"></div>
+	<div id="zona"></div>
+	<!--Zoneamento da área-->
+	<div id="caixavia"></div>
+	<!--Caixa da via / Largura da calçada-->
+	<div id="rrecuofron"></div>
+	<!--Recuo frontal para todas as ruas-->
+	<div id="parecdc"></div>
+	<!--Parecer Defesa Civil-->
+	<div id="licambient"></div>
+	<!--Licenciamento ambiental-->
+	<div id="parecdeinf"></div>
+	<!--Parecer DEINFRA / Autopista-->
+	<div id="parecpatri"></div>
+	<!--Parecer do patrimônio histórico-->
+	<div id="cota20"></div>
+	<!--Válida para área abaixo da cota 20-->
+	<div id="parecomaer"></div>
+	<!--Parecer COMAER-->
+	<div id="vagaacada"></div>
+	<!--Uma vaga a cada 80m² (CS)-->
+	<div id="observacoes"></div>
+	<!--Observações-->
+	<div id="ccs"></div>
+	<!--Pertence a um CCS-->
+	<div id="permitidos"></div>
+	<!--usos permitidos-->
+	<div id="permissiv"></div>
+	<!--usos permissíveis-->
+	<div id="alturamax"></div>
+	<!--altura máxima-->
+	<div id="alturaemb"></div>
+	<!--altura máxima embasamento-->
+	<div id="coefaprov"></div>
+	<!--coeficiente de aproveitamento-->
+	<div id="toemb"></div>
+	<!--taxa de ocupação embasamento-->
+	<div id="totorre"></div>
+	<!--taxa de ocupação torre-->
+	<div id="permeab"></div>
+	<!--taxa de permeabilidade-->
+	<div id="embrecfron"></div>
+	<!--embasamento recuo frontal-->
+	<div id="embreclat"></div>
+	<!--embasamento recuo lateral-->
+	<div id="embreclatc"></div>
+	<!--embasamento recuo lateral com abertura-->
+	<div id="lotemaxare"></div>
+	<!--área máxima do lote-->
+	<div id="lotemaxtes"></div>
+	<!--testada máxima do lote-->
+	<div id="lotemaxpro"></div>
+	<!--profundidade máxima do lote-->
+	<div id="recuoftorre"></div>
+	<!--recuo frontal da torre-->
+	<div id="perpermiti"></div>
+	<!--permitida-->
+	<div id="perproib"></div>
+	<!--proibida-->
+	<div id="dataconsulta"></div>
+
+	<script src="http://geo-smu.itajai.local/geo/lib/jquery-3.2.1.min.js"></script>
+	<script src="http://geo-smu.itajai.local/geo/lib/leaflet.js"></script>
+	<script src="http://geo-smu.itajai.local/geo/lib/leaflet-search.min.js"></script>
+	<script>
+
+		//camadas básicas
+		var sobrep = L.layerGroup();
+
+		//div do mapa
+		var map = new L.Map('map', {
+			zoom: 11,
+			minZoom: 11,
+			maxZoom: 19,
+			maxBounds: [
+				//south west
+				[-27.1279, -48.8954],
+				//north east
+				[-26.8074, -48.5845]
+			],
+			center: new L.latLng([-26.91549, -48.6866]),
+			attributionControl: false,
+			scrollWheelZoom: false
+		});
+
+		//barra escala
+		L.control.scale({ imperial: false }).addTo(map);
+
+		//Mapa base, google
+		map.addLayer(new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+			opacity: 0.4,
+			maxZoom: 19,
+			transparent: false,
+			attribution: 'Secretaria Municipal de Urbanismo, Itajaí-SC,<a href="http://leismunicipa.is/pfdkq" target="_blank">LEI COMPLEMENTAR Nº 215, DE 31 DE DEZEMBRO DE 2012</a>',
+			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+		}));
+
+		//Manchas zoneamento
+		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewzoneamentoclegenda&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					var corzona,
+						cormz = feature.properties.legenda;
+					if (cormz == 'ZAP') corzona = "#ffc821";
+					else if (cormz == 'ZC 1') corzona = "#917951";
+					else if (cormz == 'ZC 2') corzona = "#ff5765";
+					else if (cormz == 'ZEA') corzona = "#7cc5ab";
+					else if (cormz == 'ZEU') corzona = "#d4d4bc";
+					else if (cormz == 'ZIP') corzona = "#c82d2d";
+					else if (cormz == 'ZIT') corzona = "#caf5f5";
+					else if (cormz == 'ZPA 1') corzona = "#468e57";
+					else if (cormz == 'ZPA 2') corzona = "#11cd00";
+					else if (cormz == 'ZPN') corzona = "#83cada";
+					else if (cormz == 'ZR') corzona = "#96b7ab";
+					else if (cormz == 'ZR 1') corzona = "#7090d0";
+					else if (cormz == 'ZR 2') corzona = "#b599da";
+					else if (cormz == 'ZR 3') corzona = "#da89bc";
+					else if (cormz == 'ZSI') corzona = "#ff721b";
+					else if (cormz == 'ZTRA') corzona = "#fdf5b0";
+					else if (cormz == 'ZTRU') corzona = "#bfdb99";
+					else if (cormz == 'ZU 1') corzona = "#ef8242";
+					else if (cormz == 'ZU 2') corzona = "#e9e9a8";
+					else if (cormz == 'ZU 3') corzona = "#ffff00";
+					else if (cormz == 'ZU 4') corzona = "#deb239";
+					else if (cormz == 'ZU 5') corzona = "#8c8a23";
+					else corzona = "#fff";
+					return { stroke: false, fillColor: corzona, fillOpacity: 0.2 };
+				},
+				onEachFeature: function (feature, layer) {
+					layer.bindTooltip(feature.properties.legenda, { direction: "center", sticky: true });
+				}
+			}).addTo(map);
+		});
+
+		//ZPA3
+		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewzonzpa3&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return { stroke: false, fillColor: "#71b580", fillOpacity: 0.2 };
+				},
+				onEachFeature: function (feature, layer) {
+					layer.bindTooltip(feature.properties.nome, { direction: "center", sticky: true });
+				}
+			}).addTo(sobrep);
+		});
+
+		//Mapa base, viário
+		var wmsLayer = L.tileLayer.wms('http://10.10.1.158:8080/geoserver/ows?', {
+			layers: 'geoitj:viewsistemaviario',
+			format: 'image/png',
+			opacity: 0.9,
+			maxZoom: 19,
+			attribution: false,
+			transparent: true
+		}).addTo(sobrep);
+
+		//Norte
+		var titulomapa = L.control({ position: 'topright' });
+
+		titulomapa.onAdd = function (map) {
+			var div = L.DomUtil.create('div', 'info legend');
+			div.innerHTML +=
+				'<center><sub><font size="4">▲</font></sub><br/>' +
+				'<sup><font size="2">N</font></sup></center>'
+			return div;
+		};
+		titulomapa.addTo(map);
+
+		//*****CONSULTA PRÉVIA****
+		//cria o layer define como geoJson e adiciona ao mapa
+		var polig = L.geoJson().addTo(map);
+
+		//estilo padrão, a ser alterado
+		function estilo(feature) {
+			return {
+				fillOpacity: 0,
+				opacity: 0
+			};
+		};
+
+		//carrega dados e adiciona ao mapa aplicando o estilo padrão e colocando a função onEachFeature
+		$.getJSON("http://10.10.1.158:8080/geoserver/geoitj/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=geoitj:viewconsultaprevia&outputFormat=application%2Fjson", function (data) {
+			L.geoJson(data, {
+				style: estilo
+			}).addTo(polig);
+		});
+
+		//search
+		var searchControl = new L.Control.Search({
+			layer: polig,
+			propertyName: 'nprotocolo',
+			marker: false,
+			container: 'cxpesquisa',
+			collapsed: false,
+			textPlaceholder: "nº do protocolo",
+			textErr: "Não localizado",
+			textCancel: "Cancelar",
+			firstTipSubmit: true,
+			moveToLocation: function (latlng, title, map) {
+				//map.fitBounds( latlng.layer.getBounds() );
+				var zoom = map.getBoundsZoom(latlng.layer.getBounds());
+				map.setView(latlng, zoom); // access the zoom
+			}
+		});
+
+		//função reseta estilo
+		function resetestilo() {
+			//definir estilo da camada como um todo
+			polig.setStyle({
+				fillOpacity: 0,
+				opacity: 0
+			});
+		};
+
+		searchControl.on('search:locationfound', function (e) {
+			resetestilo();
+			e.layer.setStyle({ fillColor: 'red', color: 'red', fillOpacity: 0.3, opacity: 1, dashArray: '10', weight: 6 });
+			document.getElementById("dataconsulta").innerHTML = e.layer.feature.properties.to_char;
+			document.getElementById("nprotocolo").innerHTML = e.layer.feature.properties.nprotocolo;
+			document.getElementById("cabnome").innerHTML = e.layer.feature.properties.cabnome;
+			document.getElementById("cabend").innerHTML = e.layer.feature.properties.cabend;
+			document.getElementById("cabproprie").innerHTML = e.layer.feature.properties.cabproprie;
+			document.getElementById("cabendim").innerHTML = e.layer.feature.properties.cabendim;
+			document.getElementById("cabbairro").innerHTML = e.layer.feature.properties.cabbairro;
+			document.getElementById("cabnumerou").innerHTML = e.layer.feature.properties.cabnumerou;
+			document.getElementById("cabtel").innerHTML = e.layer.feature.properties.cabtel;
+			document.getElementById("numcadastr").innerHTML = e.layer.feature.properties.numcadastr;
+			document.getElementById("inscrimob").innerHTML = e.layer.feature.properties.inscrimob;
+			document.getElementById("zona").innerHTML = e.layer.feature.properties.zona;
+			document.getElementById("caixavia").innerHTML = e.layer.feature.properties.caixavia;
+			document.getElementById("rrecuofron").innerHTML = e.layer.feature.properties.rrecuofron;
+			document.getElementById("parecdc").innerHTML = e.layer.feature.properties.parecdc;
+			document.getElementById("licambient").innerHTML = e.layer.feature.properties.licambient;
+			document.getElementById("parecdeinf").innerHTML = e.layer.feature.properties.parecdeinf;
+			document.getElementById("parecpatri").innerHTML = e.layer.feature.properties.parecpatri;
+			document.getElementById("cota20").innerHTML = e.layer.feature.properties.cota20;
+			document.getElementById("parecomaer").innerHTML = e.layer.feature.properties.parecomaer;
+			document.getElementById("vagaacada").innerHTML = e.layer.feature.properties.vagaacada;
+			document.getElementById("observacoes").innerHTML = e.layer.feature.properties.observacoes;
+			document.getElementById("coefaprov").innerHTML = e.layer.feature.properties.coefaprov;
+			document.getElementById("toemb").innerHTML = e.layer.feature.properties.toemb;
+			document.getElementById("totorre").innerHTML = e.layer.feature.properties.totorre;
+			document.getElementById("permeab").innerHTML = e.layer.feature.properties.permeab;
+			document.getElementById("embrecfron").innerHTML = e.layer.feature.properties.embrecfron;
+			document.getElementById("embreclatc").innerHTML = e.layer.feature.properties.embreclatc;
+			document.getElementById("lotemaxare").innerHTML = e.layer.feature.properties.lotemaxare;
+			document.getElementById("lotemaxtes").innerHTML = e.layer.feature.properties.lotemaxtes;
+			document.getElementById("lotemaxpro").innerHTML = e.layer.feature.properties.lotemaxpro;
+			document.getElementById("recuoftorre").innerHTML = e.layer.feature.properties.recuoftorre;
+			//permição ou aprovação
+			aprovact = e.layer.feature.properties.perpermiti;
+			if (aprovact == 'permitido') document.getElementById("perpermiti").innerHTML = "X";
+			if (aprovact == 'permitido') document.getElementById("perproib").innerHTML = " ";
+			if (aprovact == 'proibido') document.getElementById("perproib").innerHTML = "X";
+			if (aprovact == 'proibido') document.getElementById("perpermiti").innerHTML = " ";
+			//usos permitidos
+			ccspermitidos = e.layer.feature.properties.ccs;
+			if (ccspermitidos == 'CCS1') document.getElementById("permitidos").innerHTML = "(H 1-2), (CO), (CS 1-2-3), (I 1)";
+			else if (ccspermitidos == 'CCS2') document.getElementById("permitidos").innerHTML = "(H 1-2), (CO), (CS 1-2), (I 1)";
+			else if (ccspermitidos == 'CCS3') document.getElementById("permitidos").innerHTML = "(H 1-2), (CO), (CS 1-2), (I 1)";
+			else ccspermitidos = document.getElementById("permitidos").innerHTML = e.layer.feature.properties.permitidos;
+			//usos permissíveis
+			if (ccspermitidos == 'CCS1') document.getElementById("permissiv").innerHTML = "(CS 4-E), (I 2-3-4)";
+			else if (ccspermitidos == 'CCS2') document.getElementById("permissiv").innerHTML = "(CS 3-4-E), (I 2-3)";
+			else if (ccspermitidos == 'CCS3') document.getElementById("permissiv").innerHTML = "(CS 3-E)";
+			else ccspermitidos = document.getElementById("permissiv").innerHTML = e.layer.feature.properties.permissiv;
+			//usos requeridos x zona
+			szona = e.layer.feature.properties.zona;
+			susohabuni = e.layer.feature.properties.usohabuni;
+			susohabmult = e.layer.feature.properties.usohabmult;
+			susocs1 = e.layer.feature.properties.usocs1;
+			susocs2 = e.layer.feature.properties.usocs2;
+			susocs3 = e.layer.feature.properties.usocs3;
+			susocomunit = e.layer.feature.properties.usocomunit;
+			susoindbaix = e.layer.feature.properties.usoindbaix;
+			susoindmedi = e.layer.feature.properties.usoindmedi;
+			susoindalto = e.layer.feature.properties.usoindalto;
+			susoindinco = e.layer.feature.properties.usoindinco;
+			susoindcse = e.layer.feature.properties.usoindcse;
+			//marcadores
+			//h1
+			if (susohabuni == "X") {
+				document.getElementById("usohabuni").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usohabuni").innerHTML = " ";
+				document.getElementById("susohabuni").innerHTML = " ";
+			};
+			//h2
+			if (susohabmult == "X") {
+				document.getElementById("usohabmult").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usohabmult").innerHTML = " ";
+				document.getElementById("susohabmult").innerHTML = " ";
+			};
+			//cs1
+			if (susocs1 == "X") {
+				document.getElementById("usocs1").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usocs1").innerHTML = " ";
+				document.getElementById("susocs1").innerHTML = " ";
+			};
+			//cs2
+			if (susocs2 == "X") {
+				document.getElementById("usocs2").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usocs2").innerHTML = " ";
+				document.getElementById("susocs2").innerHTML = " ";
+			};
+			//cs3
+			if (susocs3 == "X") {
+				document.getElementById("usocs3").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usocs3").innerHTML = " ";
+				document.getElementById("susocs3").innerHTML = " ";
+			};
+			//comunitário
+			if (susocomunit == "X") {
+				document.getElementById("usocomunit").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usocomunit").innerHTML = " ";
+				document.getElementById("susocomunit").innerHTML = " ";
+			};
+			//I1
+			if (susoindbaix == "X") {
+				document.getElementById("usoindbaix").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usoindbaix").innerHTML = " ";
+				document.getElementById("susoindbaix").innerHTML = " ";
+			};
+			//I2
+			if (susoindmedi == "X") {
+				document.getElementById("usoindmedi").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usoindmedi").innerHTML = " ";
+				document.getElementById("susoindmedi").innerHTML = " ";
+			};
+			//I3
+			if (susoindalto == "X") {
+				document.getElementById("usoindalto").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usoindalto").innerHTML = " ";
+				document.getElementById("susoindalto").innerHTML = " ";
+			};
+			//I4
+			if (susoindinco == "X") {
+				document.getElementById("usoindinco").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usoindinco").innerHTML = " ";
+				document.getElementById("susoindinco").innerHTML = " ";
+			};
+			//cse
+			if (susoindcse == "X") {
+				document.getElementById("usoindcse").innerHTML = "X";
+			}
+			else {
+				document.getElementById("usoindcse").innerHTML = " ";
+				document.getElementById("susoindcse").innerHTML = " ";
+			};
+			//Comunitário
+			if (susocomunit == "X") document.getElementById("susocomunit").innerHTML = "Permitido";
+			//CCS
+			if (susohabuni == "X" && ccspermitidos.includes("CCS")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && ccspermitidos.includes("CCS")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocomunit == "X" && ccspermitidos.includes("CCS")) document.getElementById("susocomunit").innerHTML = "Permitido";
+			if (susocs1 == "X" && ccspermitidos.includes("CCS")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && ccspermitidos.includes("CCS")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && ccspermitidos == "CCS1") document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susocs3 == "X" && ccspermitidos == "CCS2") document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susocs3 == "X" && ccspermitidos == "CCS3") document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindbaix == "X" && ccspermitidos.includes("CCS")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && ccspermitidos == "CCS3") document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindmedi == "X" && ccspermitidos == "CCS2") document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindmedi == "X" && ccspermitidos == "CCS1") document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && ccspermitidos == "CCS3") document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindalto == "X" && ccspermitidos == "CCS2") document.getElementById("susoindalto").innerHTML = "Permissível";
+			if (susoindalto == "X" && ccspermitidos == "CCS1") document.getElementById("susoindalto").innerHTML = "Permissível";
+			if (susoindinco == "X" && ccspermitidos == "CCS3") document.getElementById("susoindinco").innerHTML = "Proibido";
+			if (susoindinco == "X" && ccspermitidos == "CCS2") document.getElementById("susoindinco").innerHTML = "Proibido";
+			if (susoindinco == "X" && ccspermitidos == "CCS1") document.getElementById("susoindinco").innerHTML = "Permissível";
+			if (susoindcse == "X" && ccspermitidos.includes("CCS")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			//zonas específicas
+			//zu 5
+			if (susohabuni == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permissível";
+			if (susocs1 == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permissível";
+			if (susoindinco == "X" && szona == "ZU 5" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permissível";
+			//zu 4
+			if (susohabuni == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindalto == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZU 4" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//zu 3
+			if (susohabuni == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindalto == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZU 3" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZU 2
+			if (susohabuni == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona.includes("ZU 2") && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//zu 1
+			if (susohabuni == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZU 1" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZTRU
+			if (susohabuni == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Proibido";
+			if (susoindbaix == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permitido";
+			if (susoindinco == "X" && szona == "ZTRU" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permissível";
+			//ZTRA
+			if (susohabuni == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Proibido";
+			if (susoindbaix == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permitido";
+			if (susoindinco == "X" && szona == "ZTRA" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permissível";
+			//ZSI
+			if (susohabuni == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Proibido";
+			if (susocs1 == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permitido";
+			if (susoindinco == "X" && szona == "ZSI" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permitido";
+			//ZR 3
+			if (susohabuni == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Proibido";
+			if (susoindcse == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZR 3" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZR 2
+			if (susohabuni == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindalto == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona.includes("ZR 2") && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZR 1
+			if (susohabuni == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindalto == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona.includes("ZR 1") && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZR
+			if (susohabuni == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Proibido";
+			if (susoindbaix == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permissível";
+			if (susoindinco == "X" && szona == "ZR" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permissível";
+			//ZPN
+			if (susohabuni == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permissível";
+			if (susohabmult == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Proibido";
+			if (susocs1 == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permitido";
+			if (susoindinco == "X" && szona == "ZPN" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permitido";
+			//ZPA 3
+			if (susohabuni == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Proibido";
+			if (susohabmult == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Proibido";
+			if (susocs1 == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Proibido";
+			if (susocs2 == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Proibido";
+			if (susocs3 == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Proibido";
+			if (susoindcse == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Proibido";
+			if (susoindmedi == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindalto == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZPA 3" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZPA 2
+			if (susohabuni == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Proibido";
+			if (susocs1 == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Proibido";
+			if (susocs3 == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Proibido";
+			if (susoindcse == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZPA 2" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZPA 1
+			if (susohabuni == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Proibido";
+			if (susocs1 == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permissível";
+			if (susocs3 == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Proibido";
+			if (susoindcse == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZPA 1" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZIT
+			if (susohabuni == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Proibido";
+			if (susocs1 == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindalto == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZIT" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZIP
+			if (susohabuni == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permissível";
+			if (susohabmult == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Proibido";
+			if (susocs1 == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permitido";
+			if (susoindinco == "X" && szona == "ZIP" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permitido";
+			//ZEU
+			if (susohabuni == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Proibido";
+			if (susoindbaix == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permitido";
+			if (susoindalto == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Permissível";
+			if (susoindinco == "X" && szona == "ZEU" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Permissível";
+			//ZEA
+			if (susohabuni == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permissível";
+			if (susocs3 == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permissível";
+			if (susoindmedi == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Proibido";
+			if (susoindalto == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZEA" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZC 2
+			if (susohabuni == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permissível";
+			if (susoindcse == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZC 2" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZC 1
+			if (susohabuni == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permitido";
+			if (susocs1 == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZC 1" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//ZAP
+			if (susohabuni == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susohabuni").innerHTML = "Permitido";
+			if (susohabmult == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susohabmult").innerHTML = "Permissível";
+			if (susocs1 == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susocs1").innerHTML = "Permitido";
+			if (susocs2 == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susocs2").innerHTML = "Permitido";
+			if (susocs3 == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susocs3").innerHTML = "Permitido";
+			if (susoindcse == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susoindcse").innerHTML = "Permissível";
+			if (susoindbaix == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susoindbaix").innerHTML = "Permitido";
+			if (susoindmedi == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susoindmedi").innerHTML = "Permissível";
+			if (susoindalto == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susoindalto").innerHTML = "Proibido";
+			if (susoindinco == "X" && szona == "ZAP" && ccspermitidos.includes(" ")) document.getElementById("susoindinco").innerHTML = "Proibido";
+			//Altura embasamento
+			if (ccspermitidos.includes("CCS")) {
+				document.getElementById("alturaemb").innerHTML = "16,40m";
+			}
+			else {
+				document.getElementById("alturaemb").innerHTML = e.layer.feature.properties.alturaemb;
+			};
+			//Recuo lateral e fundos
+			if (ccspermitidos.includes("CCS")) {
+				document.getElementById("embreclat").innerHTML = "zero até altura 16,40m";
+			}
+			else {
+				document.getElementById("embreclat").innerHTML = e.layer.feature.properties.embreclat;
+			};
+			//css
+			scss = e.layer.feature.properties.ccs;
+			if (scss == "( )") {
+				document.getElementById("ccs").innerHTML = "-";
+			}
+			else {
+				document.getElementById("ccs").innerHTML = e.layer.feature.properties.ccs;
+			};
+			//Altura máxima
+			saltmaxcalc = e.layer.feature.properties.altmaxcalc;
+			if (szona == "ZR 3" && scss.includes("CCS")) {
+				document.getElementById("alturamax").innerHTML = "Embasamento + 04 Pav.";
+			}
+			else if (saltmaxcalc !== null) {
+				document.getElementById("alturamax").innerHTML = saltmaxcalc;
+			}
+			else {
+				document.getElementById("alturamax").innerHTML = e.layer.feature.properties.alturamax;
+			};
+		});
+		map.addControl(searchControl);  //inizialize search control
+
+		//zoom control
+		map.on('zoomend', function () {
+			if (map.getZoom() >= 12) {
+				map.addLayer(sobrep);
+			}
+			else {
+				map.removeLayer(sobrep);
+			}
+		});
+
+		//Limites Município
+		$.getJSON("http://geo-smu.itajai.local/geo/data/limitesmunicipais.geojson", function (data) {
+			L.geoJson(data, {
+				style: function (feature) {
+					return {
+						color: '#000000',
+						fill: false
+					};
+				},
+			}).addTo(map);
+		});
+
+	</script>
+</body>
+
+</html>

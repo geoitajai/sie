@@ -3,13 +3,14 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Teste</title>
+    <title>Planta Cadastral - SEFAZ</title>
     <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
     <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
     <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <link rel="stylesheet" href="lib/leaflet.css" />
     <link rel="stylesheet" href="lib/jquery-ui.min.css" />
+    <link rel="stylesheet" href="lib/jquery-ui.theme.min.css" />
     <link rel="stylesheet" href="lib/tabulator_simple.min.css" />
     <script src="lib/leaflet.js"></script>
     <script src="lib/jquery-3.3.1.min.js"></script>
@@ -173,6 +174,24 @@
             zoomControl: false
         });
 
+        //barra escala
+        L.control.scale({ position: "bottomright", imperial: false }).addTo(mapa);
+
+        //Norte
+        let nortemapa = L.control({ position: 'bottomright' });
+
+        nortemapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info2 legend');
+            div.innerHTML +=
+                '<center><sub><font size="4">▲</font></sub><br/>' +
+                '<sup><font size="2">N</font></sup></center>'
+            return div;
+        };
+        nortemapa.addTo(mapa);
+
+        //Botão zoom posicionado
+        L.control.zoom({ position: 'topright' }).addTo(mapa);
+
         //Mapa base, google
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
             opacity: 0.6,
@@ -180,6 +199,16 @@
             transparent: false,
             attribution: '©2018 Google, Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(mapa);
+
+        //Curvas 10x10
+        new L.tileLayer.wms('http://10.10.1.158:8080/geoserver/ows?', {
+            layers: 'geoitj:curvas10x10govest2013',
+            format: 'image/png8',
+            minZoom: 16,
+            maxZoom: 20,
+            attribution: false,
+            transparent: true
         }).addTo(mapa);
 
         //Limites Município
@@ -200,21 +229,22 @@
             height: "100%",
             layout: "fitColumns",
             columns: [
-                { title: "Código", field: "ncodimov", width: 80 },
+                { title: "nºCadastro", field: "ncodimov", width: 98 },
                 { title: "Inscrição imob.", field: "ninscrao", width: 160 },
                 { title: "Razão social", field: "nrazaoso", width: 350 },
-                { title: "Tipo", field: "ntipopes", width: 70 },
-                { title: "CNPJ/CPF", field: "nncpfpj", width: 120 },
+                { title: "Tipo", field: "ntipopes", width: 60 },
+                { title: "CNPJ/CPF", field: "nncpfpj", width: 110 },
                 { title: "Logradouro", field: "nlogrado", width: 150 },
                 { title: "nº", field: "nnumimov", width: 60 },
                 { title: "Compl.", field: "ncomplem", width: 120 },
-                { title: "CEP", field: "nceplogr", width: 100 },
+                { title: "CEP", field: "nceplogr", width: 70 },
                 { title: "Bairro", field: "nnomebai", width: 100 },
-                { title: "Testada", field: "ntestapr", width: 80 },
-                { title: "Profund.", field: "nmfundos", width: 80 },
-                { title: "Área terreno", field: "nareater", width: 80 },
-                { title: "nº matrícula", field: "nmatricu", width: 100 },
-                { title: "Cód.contrib.", field: "ncodcont", width: 100 },
+                { title: "Testada", field: "ntestapr", width: 90 },
+                { title: "Profund.", field: "nmfundos", width: 90 },
+                { title: "Área terreno", field: "nareater", width: 110 },
+                { title: "nº matrícula", field: "nmatricu", width: 110 },
+                { title: "Cód.contrib.", field: "ncodcont", width: 110 },
+                { title: "Fração ideal informada", field: "nfracaoi", width: 90 }
             ]
         });
 
@@ -343,8 +373,8 @@
             'showFeatureInfo': function (latlng, info) {
                 if (!this._map) { return };
                 pesquisaL.clearLayers();
-                let liginscr = info.split(/\n|=/)[9].trim();
-                $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:tmigeom&outputFormat=application%2Fjson&CQL_FILTER=inscrlig='" + liginscr + "'",
+                let liginscr = info.split(/\n|=/)[7].trim();
+                $.getJSON("http://geo-smu.itajai.local:8080/geoserver/wfs?service=wfs&version=1.0.0&request=getfeature&typename=geoitj:tmimgeom&outputFormat=application%2Fjson&CQL_FILTER=inscrlig='" + liginscr + "'",
                     (data) => {
                         L.geoJson(data, {
                             style: (feature) => {
@@ -362,7 +392,6 @@
                         table.setData(results.data);
                     }
                 });
-
                 //legenda - ANTIGA
                 let nadaencontrado = info.split(/\n|=/)[0];
                 let vianomechk = info.split(/\n|=/)[16];
@@ -400,7 +429,7 @@
         source.addSubLayer('geoitj:hidrobase');
         source.addSubLayer('geoitj:hidrobasepoly');
         source.addSubLayer('geoitj:viewsistemaviarioestilosempauta');
-        source.addSubLayer('geoitj:tmigeom');
+        source.addSubLayer('geoitj:viewplantacadastralwms');
         source.addTo(mapa);
 
     </script>

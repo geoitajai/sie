@@ -1,0 +1,601 @@
+@media print {
+	@page {
+		margin-right:1;
+	}
+	
+	html, body {
+		overflow: visible;
+	}
+	
+	body {
+		transform: scale(0.95);
+		-webkit-transition: none;
+	}
+}
+
+#cxpesquisa {
+	/*+placement: anchor-top-left 28px 9px;*/
+	position: absolute;
+	left: 28px;
+	top: 9px;
+	background-color: white;
+}
+
+.leaflet-container {
+	border: none;
+	width: 885px;
+	height: 417px;
+	/*+placement: anchor-top-left 47px 686px;*/
+	position: absolute;
+	left: 47px;
+	top: 686px;
+	background-color: white;
+}
+
+#folha {
+	/*+placement: anchor-top-left 39px 51px;*/
+	position: absolute;
+	left: 39px;
+	top: 51px;
+}
+
+.search-tooltip {
+	width: 200px;
+}
+
+.leaflet-control-search .search-cancel {
+	position: static;
+	float: left;
+	margin-left: -22px;
+	background-color: white;
+}
+
+.leaflet-control-search.search-exp {
+	background-color: white;
+}
+
+#nprotocolo {
+	/*+placement: anchor-top-left 781px 1149px;*/
+	position: absolute;
+	left: 781px;
+	top: 1149px;
+	text-align: center;
+	font-size: 21px;
+}
+
+#cabnome {
+	/*+placement: anchor-top-left 147px 157px;*/
+	position: absolute;
+	left: 147px;
+	top: 157px;
+	font-size: 17px;
+	width: 414px;
+}
+
+#cabproprie {
+	/*+placement: anchor-top-left 155px 183px;*/
+	position: absolute;
+	left: 155px;
+	top: 183px;
+	font-size: 17px;
+	width: 404px;
+}
+
+#cabendim {
+	/*+placement: anchor-top-left 139px 207px;*/
+	position: absolute;
+	left: 139px;
+	top: 207px;
+	font-size: 17px;
+	width: 348px;
+}
+
+#cabbairro {
+	/*+placement: anchor-top-left 103px 230px;*/
+	position: absolute;
+	left: 103px;
+	top: 230px;
+	font-size: 17px;
+	width: 166px;
+}
+
+#cabnumerou {
+	/*+placement: anchor-top-left 498px 205px;*/
+	position: absolute;
+	left: 498px;
+	top: 205px;
+	font-size: 17px;
+	width: 61px;
+}
+
+#cabtel {
+	/*+placement: anchor-top-left 318px 229px;*/
+	position: absolute;
+	left: 318px;
+	top: 229px;
+	font-size: 17px;
+	width: 241px;
+}
+
+#numcadastr {
+	/*+placement: anchor-top-left 564px 176px;*/
+	position: absolute;
+	left: 564px;
+	top: 176px;
+	font-size: 12px;
+	text-align: center;
+	width: 371px;
+	font-weight: bold;
+	height: 28px;
+}
+
+#inscrimob {
+	/*+placement: anchor-top-left 562px 221px;*/
+	position: absolute;
+	left: 562px;
+	top: 221px;
+	font-size: 12px;
+	text-align: center;
+	width: 375px;
+	height: 30px;
+}
+
+#usohabuni {
+	/*+placement: anchor-top-left 147px 300px;*/
+	position: absolute;
+	left: 147px;
+	top: 300px;
+	font-size: 19px;
+}
+
+#susohabuni {
+	/*+placement: anchor-top-left 200px 298px;*/
+	position: absolute;
+	left: 200px;
+	top: 298px;
+	font-size: 19px;
+}
+
+#usohabmult {
+	/*+placement: anchor-top-left 147px 320px;*/
+	position: absolute;
+	left: 147px;
+	top: 320px;
+	font-size: 19px;
+}
+
+#susohabmult {
+	/*+placement: anchor-top-left 200px 319px;*/
+	position: absolute;
+	left: 200px;
+	top: 319px;
+	font-size: 19px;
+}
+
+#usocs1 {
+	/*+placement: anchor-top-left 148px 364px;*/
+	position: absolute;
+	left: 148px;
+	top: 364px;
+	font-size: 19px;
+}
+
+#susocs1 {
+	/*+placement: anchor-top-left 199px 364px;*/
+	position: absolute;
+	left: 199px;
+	top: 364px;
+	font-size: 19px;
+}
+
+#usocs2 {
+	/*+placement: anchor-top-left 148px 384px;*/
+	position: absolute;
+	left: 148px;
+	top: 384px;
+	font-size: 19px;
+}
+
+#susocs2 {
+	/*+placement: anchor-top-left 199px 382px;*/
+	position: absolute;
+	left: 199px;
+	top: 382px;
+	font-size: 19px;
+}
+
+#usocs3 {
+	/*+placement: anchor-top-left 148px 403px;*/
+	position: absolute;
+	left: 148px;
+	top: 403px;
+	font-size: 19px;
+}
+
+#susocs3 {
+	/*+placement: anchor-top-left 199px 401px;*/
+	position: absolute;
+	left: 199px;
+	top: 401px;
+	font-size: 19px;
+}
+
+#usocomunit {
+	/*+placement: anchor-top-left 147px 430px;*/
+	position: absolute;
+	left: 147px;
+	top: 430px;
+	font-size: 19px;
+}
+
+#susocomunit {
+	/*+placement: anchor-top-left 200px 428px;*/
+	position: absolute;
+	left: 200px;
+	top: 428px;
+	font-size: 19px;
+}
+
+#usoindbaix {
+	/*+placement: anchor-top-left 149px 475px;*/
+	position: absolute;
+	left: 149px;
+	top: 475px;
+	font-size: 19px;
+}
+
+#susoindbaix {
+	/*+placement: anchor-top-left 200px 474px;*/
+	position: absolute;
+	left: 200px;
+	top: 474px;
+	font-size: 19px;
+}
+
+#usoindmedi {
+	/*+placement: anchor-top-left 148px 494px;*/
+	position: absolute;
+	left: 148px;
+	top: 494px;
+	font-size: 19px;
+}
+
+#susoindmedi {
+	/*+placement: anchor-top-left 201px 493px;*/
+	position: absolute;
+	left: 201px;
+	top: 493px;
+	font-size: 19px;
+}
+
+#usoindalto {
+	/*+placement: anchor-top-left 147px 513px;*/
+	position: absolute;
+	left: 147px;
+	top: 513px;
+	font-size: 19px;
+}
+
+#susoindalto {
+	/*+placement: anchor-top-left 201px 513px;*/
+	position: absolute;
+	left: 201px;
+	top: 513px;
+	font-size: 19px;
+}
+
+#usoindinco {
+	/*+placement: anchor-top-left 147px 530px;*/
+	position: absolute;
+	left: 147px;
+	top: 530px;
+	font-size: 19px;
+}
+
+#susoindinco {
+	/*+placement: anchor-top-left 201px 532px;*/
+	position: absolute;
+	left: 201px;
+	top: 532px;
+	font-size: 19px;
+}
+
+#usoindcse {
+	/*+placement: anchor-top-left 148px 558px;*/
+	position: absolute;
+	left: 148px;
+	top: 558px;
+	font-size: 19px;
+}
+
+#susoindcse {
+	/*+placement: anchor-top-left 201px 558px;*/
+	position: absolute;
+	left: 201px;
+	top: 558px;
+	font-size: 19px;
+}
+
+#perpermiti {
+	/*+placement: anchor-top-left 328px 264px;*/
+	position: absolute;
+	left: 328px;
+	top: 264px;
+	font-size: 19px;
+}
+
+#perproib {
+	/*+placement: anchor-top-left 457px 265px;*/
+	position: absolute;
+	left: 457px;
+	top: 265px;
+	font-size: 19px;
+}
+
+#zona {
+	/*+placement: anchor-top-left 361px 291px;*/
+	position: absolute;
+	left: 361px;
+	top: 291px;
+	font-size: 19px;
+	font-weight: bold;
+	text-align: center;
+	width: 150px;
+}
+
+#caixavia {
+	/*+placement: anchor-top-left 398px 618px;*/
+	position: absolute;
+	left: 398px;
+	top: 618px;
+	font-size: 15px;
+	text-align: center;
+	width: 533px;
+	height: 45px;
+}
+
+#rrecuofron {
+	/*+placement: anchor-top-left 45px 1204px;*/
+	position: absolute;
+	left: 45px;
+	top: 1204px;
+	font-size: 19px;
+}
+
+#licambient {
+	/*+placement: anchor-top-left 45px 1226px;*/
+	position: absolute;
+	left: 45px;
+	top: 1226px;
+	font-size: 19px;
+}
+
+#parecdc {
+	/*+placement: anchor-top-left 324px 1204px;*/
+	position: absolute;
+	left: 324px;
+	top: 1204px;
+	font-size: 19px;
+}
+
+#parecdeinf {
+	/*+placement: anchor-top-left 324px 1226px;*/
+	position: absolute;
+	left: 324px;
+	top: 1226px;
+	font-size: 19px;
+}
+
+#parecpatri {
+	/*+placement: anchor-top-left 325px 1248px;*/
+	position: absolute;
+	left: 325px;
+	top: 1248px;
+	font-size: 19px;
+}
+
+#cota20 {
+	/*+placement: anchor-top-left 325px 1274px;*/
+	position: absolute;
+	left: 325px;
+	top: 1274px;
+	font-size: 19px;
+}
+
+#parecomaer {
+	/*+placement: anchor-top-left 324px 1293px;*/
+	position: absolute;
+	left: 324px;
+	top: 1293px;
+	font-size: 19px;
+}
+
+#vagaacada {
+	/*+placement: anchor-top-left 45px 1293px;*/
+	position: absolute;
+	left: 45px;
+	top: 1293px;
+	font-size: 19px;
+}
+
+#observacoes {
+	/*+placement: anchor-top-left 76px 1316px;*/
+	position: absolute;
+	left: 76px;
+	top: 1316px;
+	font-size: 16px;
+	width: 610px;
+	height: 71px;
+}
+
+#ccs {
+	/*+placement: anchor-top-left 373px 310px;*/
+	position: absolute;
+	left: 373px;
+	top: 310px;
+	font-size: 16px;
+	width: 136px;
+	text-align: center;
+}
+
+#permitidos {
+	/*+placement: anchor-top-left 677px 254px;*/
+	position: absolute;
+	left: 677px;
+	top: 254px;
+	font-size: 13px;
+	width: 259px;
+	text-align: center;
+}
+
+#permissiv {
+	/*+placement: anchor-top-left 684px 275px;*/
+	position: absolute;
+	left: 684px;
+	top: 275px;
+	font-size: 13px;
+	width: 252px;
+	text-align: center;
+}
+
+#alturamax {
+	/*+placement: anchor-top-left 419px 353px;*/
+	position: absolute;
+	left: 419px;
+	top: 353px;
+	font-size: 11px;
+	text-align: center;
+	width: 242px;
+	height: 35px;
+}
+
+#alturaemb {
+	/*+placement: anchor-top-left 520px 393px;*/
+	position: absolute;
+	left: 520px;
+	top: 393px;
+	font-size: 11px;
+	text-align: center;
+	width: 140px;
+}
+
+#coefaprov {
+	/*+placement: anchor-top-left 520px 411px;*/
+	position: absolute;
+	left: 520px;
+	top: 411px;
+	font-size: 11px;
+	width: 141px;
+	text-align: center;
+}
+
+#toemb {
+	/*+placement: anchor-top-left 521px 429px;*/
+	position: absolute;
+	left: 521px;
+	top: 429px;
+	font-size: 11px;
+	width: 140px;
+	text-align: center;
+}
+
+#totorre {
+	/*+placement: anchor-top-left 521px 448px;*/
+	position: absolute;
+	left: 521px;
+	top: 448px;
+	font-size: 11px;
+	width: 139px;
+	text-align: center;
+}
+
+#permeab {
+	/*+placement: anchor-top-left 520px 467px;*/
+	position: absolute;
+	left: 520px;
+	top: 467px;
+	font-size: 11px;
+	width: 140px;
+	text-align: center;
+}
+
+#embrecfron {
+	/*+placement: anchor-top-left 374px 510px;*/
+	position: absolute;
+	left: 374px;
+	top: 510px;
+	font-size: 11px;
+	text-align: center;
+	width: 288px;
+}
+
+#embreclat {
+	/*+placement: anchor-top-left 412px 532px;*/
+	position: absolute;
+	left: 412px;
+	top: 532px;
+	font-size: 11px;
+	width: 250px;
+	text-align: center;
+}
+
+#embreclatc {
+	/*+placement: anchor-top-left 538px 556px;*/
+	position: absolute;
+	left: 538px;
+	top: 556px;
+	font-size: 11px;
+	text-align: center;
+	width: 123px;
+}
+
+#lotemaxare {
+	/*+placement: anchor-top-left 554px 312px;*/
+	position: absolute;
+	left: 554px;
+	top: 312px;
+	font-size: 13px;
+	width: 104px;
+	text-align: left;
+}
+
+#lotemaxtes {
+	/*+placement: anchor-top-left 711px 312px;*/
+	position: absolute;
+	left: 711px;
+	top: 312px;
+	font-size: 13px;
+	width: 70px;
+	text-align: left;
+}
+
+#lotemaxpro {
+	/*+placement: anchor-top-left 871px 313px;*/
+	position: absolute;
+	left: 871px;
+	top: 313px;
+	font-size: 13px;
+	width: 64px;
+	text-align: left;
+}
+
+#recuoftorre {
+	/*+placement: anchor-top-left 666px 331px;*/
+	position: absolute;
+	left: 666px;
+	top: 331px;
+	font-size: 12px;
+	width: 269px;
+	height: 261px;
+	text-align: center;
+}
+
+#dataconsulta {
+	/*+placement: 722px 1193px;*/
+	position: relative;
+	left: 722px;
+	top: 1193px;
+	width: 196px;
+	text-align: center;
+	font-size: 20px;
+}
