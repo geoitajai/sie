@@ -97,7 +97,7 @@
 
         //articula
         $.getJSON("data/articula.json", (data) => {
-            
+
             let articulabbox = data.map((feicoes) => {
                 return {
                     'sw': [Number(feicoes.y2), Number(feicoes.x2)],
