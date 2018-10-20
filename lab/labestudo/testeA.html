@@ -91,11 +91,19 @@
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(mapa);
 
-        $.getJSON("data/articulateste.geojson", (data) => {
-            L.geoJson(data).addTo(mapa);
+        //camada planta cadastral que irá receber os lotes
+        let plantacadastral = L.layerGroup();
+        mapa.on('zoomend', function () {
+            if (mapa.getZoom() < 18) {
+                mapa.removeLayer(plantacadastral);
+            }
+            else {
+                mapa.addLayer(plantacadastral);
+            }
         });
 
-        //articula
+        //navegação articulação com indice > carregar planta
+        let plantaindice = [];
         $.getJSON("data/articula.json", (data) => {
 
             let articulabbox = data.map((feicoes) => {
@@ -107,18 +115,20 @@
             });
 
             mapa.on('moveend', () => {
-
                 if (mapa.getZoom() >= 18) {
-
-                    //let filtradoobj = articulabbox.find(e => mapa.getBounds().intersects(L.latLngBounds(e.sw, e.ne)) === true);
-
-                    var filtradoobj = articulabbox.filter((e) => {
-                        return mapa.getBounds().intersects(L.latLngBounds(e.sw, e.ne)) === true
-                    });
-
-                    console.log(filtradoobj);
+                    let filtradoobj = articulabbox
+                        .filter((e) => {
+                            return mapa.getBounds().intersects(L.latLngBounds(e.sw, e.ne)) === true
+                        })
+                        .forEach(x => {
+                            if (plantaindice.includes(x.nome) === false) {
+                                $.getJSON("data/divisaolotes/export/" + x.nome + ".geojson", (data) => {
+                                    L.geoJson(data).addTo(plantacadastral);
+                                });
+                                plantaindice.push(x.nome);
+                            }
+                        });
                 }
-
             });
         });
 
