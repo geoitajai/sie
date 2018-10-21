@@ -1,91 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
 
-<div class="mapa" id="mapa"></div>
+<head>
+    <meta charset="utf-8" />
+    <title>TesteA</title>
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="lib/leaflet.css" />
+    <script src="lib/leaflet.js"></script>
+    <script src="lib/jquery-3.3.1.min.js"></script>
+</head>
 
-<script>
-    //div do mapa
-    let mapa = new L.Map('mapa', {
-        zoom: 14,
-        minZoom: 11,
-        maxZoom: 20,
-        maxBounds: [
-            //south west
-            [-27.3000, -49.2300],
-            //north east
-            [-26.3285, -48.3200]
-        ],
-        center: new L.latLng([-26.9046, -48.6874]),
-        zoomControl: false
-    });
+<style>
+    body {
 
-    //barra escala
-    L.control.scale({ position: "bottomright", imperial: false }).addTo(mapa);
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
 
-    //Norte
-    let nortemapa = L.control({ position: 'bottomright' });
+    #mapa {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
 
-    nortemapa.onAdd = function (map) {
-        var div = L.DomUtil.create('div', 'info2 legend');
-        div.innerHTML +=
-            '<center><sub><font size="4">▲</font></sub><br/>' +
-            '<sup><font size="2">N</font></sup></center>'
-        return div;
-    };
-    nortemapa.addTo(mapa);
+    .leaflet-container {
+        background: #ffffff;
+    }
 
-    //Botão zoom posicionado
-    L.control.zoom({ position: 'topright' }).addTo(mapa);
+    .leaflet-default-icon-path {
+        background-image: url(../images/marker-icon.png);
+    }
 
-    //Mapa base, google
-    new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-        opacity: 0.6,
-        maxZoom: 20,
-        transparent: false,
-        attribution: '©2018 Google, Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-    }).addTo(mapa);
+    .leaflet-control-layers-toggle {
+        background-image: url(../images/layers.png);
+    }
 
-    //camada planta cadastral que irá receber os lotes
-    let plantacadastral = L.layerGroup();
-    mapa.on('zoomend', function () {
-        if (mapa.getZoom() < 18) {
-            mapa.removeLayer(plantacadastral);
-        }
-        else {
-            mapa.addLayer(plantacadastral);
-        }
-    });
+    .leaflet-retina .leaflet-control-layers-toggle {
+        background-image: url(../images/layers-2x.png);
+    }
+</style>
 
-    //navegação articulação com indice > carregar planta
-    let plantaindice = [];
-    $.getJSON("data/articula.json", (data) => {
+<body>
 
-        let articulabbox = data.map((feicoes) => {
-            return {
-                'sw': [Number(feicoes.y2), Number(feicoes.x2)],
-                'ne': [Number(feicoes.y), Number(feicoes.x)],
-                'nome': feicoes.nome
+    <div class="mapa" id="mapa"></div>
+
+    <script>
+        //div do mapa
+        let mapa = new L.Map('mapa', {
+            zoom: 14,
+            minZoom: 11,
+            maxZoom: 20,
+            maxBounds: [
+                //south west
+                [-27.3000, -49.2300],
+                //north east
+                [-26.3285, -48.3200]
+            ],
+            center: new L.latLng([-26.9046, -48.6874]),
+            zoomControl: false
+        });
+
+        //barra escala
+        L.control.scale({ position: "bottomright", imperial: false }).addTo(mapa);
+
+        //Norte
+        let nortemapa = L.control({ position: 'bottomright' });
+
+        nortemapa.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info2 legend');
+            div.innerHTML +=
+                '<center><sub><font size="4">▲</font></sub><br/>' +
+                '<sup><font size="2">N</font></sup></center>'
+            return div;
+        };
+        nortemapa.addTo(mapa);
+
+        //Botão zoom posicionado
+        L.control.zoom({ position: 'topright' }).addTo(mapa);
+
+        //Mapa base, google
+        new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            opacity: 0.6,
+            maxZoom: 20,
+            transparent: false,
+            attribution: '©2018 Google, Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(mapa);
+
+        //camada planta cadastral que irá receber os lotes
+        let plantacadastral = L.layerGroup();
+        mapa.on('zoomend', function () {
+            if (mapa.getZoom() < 18) {
+                mapa.removeLayer(plantacadastral);
+            }
+            else {
+                mapa.addLayer(plantacadastral);
             }
         });
 
-        mapa.on('moveend', () => {
-            if (mapa.getZoom() >= 18) {
-                let filtradoobj = articulabbox
-                    .filter((e) => {
-                        return mapa.getBounds().intersects(L.latLngBounds(e.sw, e.ne)) === true
-                    })
-                    .forEach(x => {
-                        if (plantaindice.includes(x.nome) === false) {
-                            $.getJSON("data/divisaolotes/export/" + x.nome + ".geojson", (data) => {
-                                L.geoJson(data).addTo(plantacadastral);
-                            });
-                            plantaindice.push(x.nome);
-                        }
-                    });
-            }
+        //navegação articulação com indice > carregar planta
+        let plantaindice = [];
+        $.getJSON("data/articula.json", (data) => {
+
+            let articulabbox = data.map((feicoes) => {
+                return {
+                    'sw': [Number(feicoes.y2), Number(feicoes.x2)],
+                    'ne': [Number(feicoes.y), Number(feicoes.x)],
+                    'nome': feicoes.nome
+                }
+            });
+
+            mapa.on('moveend', () => {
+                if (mapa.getZoom() >= 18) {
+                    let filtradoobj = articulabbox
+                        .filter((e) => {
+                            return mapa.getBounds().intersects(L.latLngBounds(e.sw, e.ne)) === true
+                        })
+                        .forEach(x => {
+                            if (plantaindice.includes(x.nome) === false) {
+                                $.getJSON("data/divisaolotes/export/" + x.nome + ".geojson", (data) => {
+                                    L.geoJson(data).addTo(plantacadastral);
+                                });
+                                plantaindice.push(x.nome);
+                            }
+                        });
+                }
+            });
         });
-    });
 
-</script>
+    </script>
+</body>
 
-
-
+</html>
