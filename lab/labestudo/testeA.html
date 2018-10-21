@@ -15,7 +15,7 @@
         ],
         center: new L.latLng([-26.9046, -48.6874]),
         zoomControl: false,
-        renderer: L.canvas()
+        preferCanvas: true
     });
 
     //barra escala
@@ -42,7 +42,8 @@
         maxZoom: 20,
         transparent: false,
         attribution: '©2018 Google, Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        renderer: L.canvas()
     }).addTo(mapa);
 
     //camada planta cadastral que irá receber os lotes
@@ -77,7 +78,9 @@
                     .forEach(x => {
                         if (plantaindice.includes(x.nome) === false) {
                             $.getJSON("data/divisaolotes/export/" + x.nome + ".geojson", (data) => {
-                                L.geoJson(data).addTo(plantacadastral);
+                                L.geoJson(data,{
+                                    renderer: L.canvas()
+                                }).addTo(plantacadastral);
                             });
                             plantaindice.push(x.nome);
                         }
