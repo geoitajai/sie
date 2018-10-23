@@ -61,7 +61,8 @@
                 [-26.3285, -48.3200]
             ],
             center: new L.latLng([-26.9046, -48.6874]),
-            zoomControl: false
+            zoomControl: false,
+            preferCanvas: true
         });
 
         //barra escala
@@ -94,7 +95,7 @@
         //camada planta cadastral que irá receber os lotes
         let plantacadastral = L.layerGroup();
         mapa.on('zoomend', function () {
-            if (mapa.getZoom() < 18) {
+            if (mapa.getZoom() < 10) {
                 mapa.removeLayer(plantacadastral);
             }
             else {
@@ -115,7 +116,7 @@
             });
 
             mapa.on('moveend', () => {
-                if (mapa.getZoom() >= 18) {
+                if (mapa.getZoom() >= 10) {
                     let filtradoobj = articulabbox
                         .filter((e) => {
                             return mapa.getBounds().intersects(L.latLngBounds(e.sw, e.ne)) === true
