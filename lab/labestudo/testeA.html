@@ -95,29 +95,32 @@
         //camada planta cadastral que irá receber os lotes
         let plantacadastral = L.layerGroup();
         mapa.on('zoomend', function () {
-            if (mapa.getZoom() < 10) {
+            if (mapa.getZoom() < 19) {
                 mapa.removeLayer(plantacadastral);
             }
             else {
                 mapa.addLayer(plantacadastral);
             }
         });
+        
+        /*
+        //teste articulação
+        $.getJSON("data/articula2.geojson", (data) => {
+            L.geoJson(data).addTo(mapa);
+        });
+        */
+
+        //teste sistema viário
+        $.getJSON("data/sviario.geojson", (data) => {
+            L.geoJson(data).addTo(mapa);
+        });
 
         //navegação articulação com indice > carregar planta
         let plantaindice = [];
-        $.getJSON("data/articula.json", (data) => {
-
-            let articulabbox = data.map((feicoes) => {
-                return {
-                    'sw': [Number(feicoes.y2), Number(feicoes.x2)],
-                    'ne': [Number(feicoes.y), Number(feicoes.x)],
-                    'nome': feicoes.nome
-                }
-            });
-
+        $.getJSON("data/artic.json", (data) => {
             mapa.on('moveend', () => {
-                if (mapa.getZoom() >= 10) {
-                    let filtradoobj = articulabbox
+                if (mapa.getZoom() >= 19) {
+                    let filtradoobj = data
                         .filter((e) => {
                             return mapa.getBounds().intersects(L.latLngBounds(e.sw, e.ne)) === true
                         })
