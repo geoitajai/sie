@@ -66,10 +66,15 @@
         });
 
         //barra escala
-        L.control.scale({ position: "bottomright", imperial: false }).addTo(mapa);
+        L.control.scale({
+            position: "bottomright",
+            imperial: false
+        }).addTo(mapa);
 
         //Norte
-        let nortemapa = L.control({ position: 'bottomright' });
+        let nortemapa = L.control({
+            position: 'bottomright'
+        });
 
         nortemapa.onAdd = function (map) {
             var div = L.DomUtil.create('div', 'info2 legend');
@@ -81,9 +86,12 @@
         nortemapa.addTo(mapa);
 
         //Botão zoom posicionado
-        L.control.zoom({ position: 'topright' }).addTo(mapa);
+        L.control.zoom({
+            position: 'topright'
+        }).addTo(mapa);
 
         //Mapa base, google
+        /*
         new L.TileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
             opacity: 0.6,
             maxZoom: 20,
@@ -91,18 +99,24 @@
             attribution: '©2018 Google, Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>',
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(mapa);
+        */
+
+        //bairros
+        mapa.addLayer(new L.TileLayer('tiles/svias/{z}/{x}/{y}.png', {
+            minZoom: 10,
+            maxZoom: 20
+        }));
 
         //camada planta cadastral que irá receber os lotes
         let plantacadastral = L.layerGroup();
         mapa.on('zoomend', function () {
             if (mapa.getZoom() < 19) {
                 mapa.removeLayer(plantacadastral);
-            }
-            else {
+            } else {
                 mapa.addLayer(plantacadastral);
             }
         });
-        
+
         /*
         //teste articulação
         $.getJSON("data/articula2.geojson", (data) => {
@@ -111,10 +125,12 @@
         */
 
         //teste sistema viário
-        $.getJSON("data/sviario.geojson", (data) => {
+        /*
+        $.getJSON("data/sistemaviario.geojson", (data) => {
             L.geoJson(data).addTo(mapa);
         });
-
+        */
+        
         //navegação articulação com indice > carregar planta
         let plantaindice = [];
         $.getJSON("data/artic.json", (data) => {
@@ -135,7 +151,6 @@
                 }
             });
         });
-
     </script>
 </body>
 
