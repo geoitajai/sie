@@ -360,7 +360,7 @@
 
         //vias
         let plantaVias = L.featureGroup().addTo(mapa);
-        $.getJSON("data/sviarioGeom.geojson", (data) => {
+        $.getJSON("https://geoitajai.github.io/geo/data/sviarioGeom.geojson", (data) => {
             L.geoJson(data, {
                 style: (feature) => {
                     return {
@@ -390,7 +390,7 @@
         });
 
         //Limites Município
-        $.getJSON("data/limintermunicipais.geojson", (data) => {
+        $.getJSON("https://geoitajai.github.io/geo/data/limintermunicipais.geojson", (data) => {
             L.geoJson(data, {
                 style: (feature) => {
                     return {
