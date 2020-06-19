@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <title>CODETRAN - Tabela ocorrências 2019</title>
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/tabulator_simple.min.css" />
+    <link rel="stylesheet" href="lib/measure/leaflet.draw.css" />
+    <script src="lib/jquery-3.3.1.min.js"></script>
+    <script src="lib/tabulator.min.js"></script>
+    <script src="lib/leaflet.js"></script>
+    <script src="lib/leaflet-heat.js"></script>
+    <script src="lib/fallback.js"></script>
+    <script src="lib/xlsx.full.min.js"></script>
+    <script src="lib/measure/Leaflet.draw.js"></script>
+    <script src="lib/measure/Leaflet.Draw.Event.js"></script>
+    <script src="lib/measure/Toolbar.js"></script>
+    <script src="lib/measure/Tooltip.js"></script>
+    <script src="lib/measure/GeometryUtil.js"></script>
+    <script src="lib/measure/LatLngUtil.js"></script>
+    <script src="lib/measure/TouchEvents.js"></script>
+    <script src="lib/measure/DrawToolbar.js"></script>
+    <script src="lib/measure/Draw.Feature.js"></script>
+    <script src="lib/measure/Draw.SimpleShape.js"></script>
+    <script src="lib/measure/Draw.Polyline.js"></script>
+    <script src="lib/measure/Control.Draw.js"></script>
+    <script src="lib/measure/leaflet.measurecontrol.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+
+<style>
+    :root {
+        --base: #00bcd4;
+        --escuro: #333;
+        --claro: #e9e9e9;
+    }
+
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .conteiner0 {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 100%;
+    }
+
+    .conteiner1 {
+        display: flex;
+        flex: 3;
+        overflow: auto;
+    }
+
+    .conteiner1b {
+        display: flex;
+        overflow: auto;
+    }
+
+    .conteiner2 {
+        height: 19px;
+        display: flex;
+    }
+
+    .botoes {
+        background: var(--base);
+        display: flex;
+        flex: 1;
+    }
+
+    .butabela {
+        align-content: right;
+    }
+
+    .brasao {
+        display: flex;
+        flex: 1;
+        background: var(--base);
+        background-repeat: no-repeat;
+        background-size: 42px;
+        background-position: left;
+    }
+
+    .titulograficos {
+        background: var(--base);
+        color: var(--claro);
+        text-shadow: 1px 1px 2px black;
+    }
+
+    #brastitulo {
+        color: var(--claro);
+        text-shadow: 1px 1px 2px black;
+    }
+
+    #tabelaocorr {
+        flex: .6;
+    }
+
+    .mapa {
+        flex: 1;
+    }
+
+    .tabulator {
+        font-size: 12px;
+        background: var(--claro);
+    }
+
+    .tabulator .tabulator-header .tabulator-col {
+        background: var(--base);
+        color: var(--claro);
+        text-shadow: 1px 1px 2px black;
+    }
+
+    .tabulator .tabulator-header {
+        border-bottom: 0px;
+    }
+
+    .tabulator .tabulator-header,
+    .tabulator .tabulator-header .tabulator-col {
+        background-color: var(--base);
+    }
+
+    .leaflet-container {
+        background: #e6e6e6;
+    }
+
+    .leaflet-default-icon-path {
+        background-image: url(images/marker-icon.png);
+    }
+
+    .leaflet-control-layers-toggle {
+        background-image: url(images/layers.png);
+    }
+
+    .leaflet-retina .leaflet-control-layers-toggle {
+        background-image: url(images/layers-2x.png);
+    }
+
+    .leaflet-control-draw-measure {
+        background-image: url(images/measure-control.png);
+    }
+
+    .info {
+        padding: 6px 8px;
+    }
+</style>
+
+<body>
+    <div class='conteiner0'>
+        <div class='conteiner1'>
+            <div class="mapa" id="mapa"></div>
+            <div class='conteiner1b'>
+                <div id="chart_div">
+                    <tr>
+                        <td>
+                            <div class='titulograficos'>Ocorrências / Tipo</div>
+                            <div id="graf06"></div>
+                        </td>
+                        <td>
+                            <div class='titulograficos'>Ocorrências / Dia da semana</div>
+                            <div id="graf01"></div>
+                        </td>
+                        <td>
+                            <div class='titulograficos'>Ocorrências / Hora</div>
+                            <div id="graf08"></div>
+                        </td>
+                        <td>
+                            <div class='titulograficos'>Ocorrências / Vítimas e óbitos</div>
+                            <div id="graf02"></div>
+                        </td>
+                        <td>
+                            <div class='titulograficos'>Ocorrências / Tipo do veículo</div>
+                            <div id="graf03"></div>
+                        </td>
+                        <td>
+                            <div class='titulograficos'>Ocorrências / Faixa etária</div>
+                            <div id="graf04"></div>
+                        </td>
+                        <td>
+                            <div class='titulograficos'>Ocorrências / Gênero</div>
+                            <div id="graf05"></div>
+                        </td>
+                    </tr>
+                </div>
+            </div>
+        </div>
+        <div class='conteiner2' id="brastitulo">
+            <div class='botoes'>
+                <div>_ CODETRAN - OCORRÊNCIAS 2019 _</div>
+                <button id="filtro-mapa">Atualizar mapa/gráficos com dados da tabela</button>
+                <button id="download-xlsx">Baixar.XLSX</button>
+                <button class=butabela id="maxTabela" onclick="tabelaMaior()"><strong>+</strong></button>
+                <button class=butabela id="minTabela" onclick="tabelaMenor()"><strong>-</strong></button>
+            </div>
+        </div>
+        <div class="tabela" id="tabelaocorr"></div>
+    </div>
+
+    <script>
+
+        //botão tabela
+        function tabelaMaior() {
+            document.getElementById("tabelaocorr").style.flex = "3";
+        }
+
+        function tabelaMenor() {
+            document.getElementById("tabelaocorr").style.flex = ".6";
+        }
+
+        //layergroup Map
+        let calor = L.featureGroup();
+        let ptdestaque = L.featureGroup();
+        let mapabase = L.featureGroup();
+
+        //gráficos google
+        google.charts.load('current', { 'packages': ['corechart'] });
+
+        //dia da semana
+        let chart1;
+        //com vítimas
+        let chart2;
+        //com óbito
+        let chart3;
+        //tipo
+        let chart4;
+        //fx.etária
+        let chart5;
+        //ocorrência
+        let chart6;
+        //hora
+        let chart7;
+        //hora
+        let chart8;
+
+        //#basemaps
+        //Mapa base, SMU
+        let tilesmu = new L.TileLayer('https://geoitajai.github.io/sie/tiles/basemap/{z}/{x}/{y}.png', {
+            minZoom: 12,
+            maxZoom: 19,
+            attribution: 'Município de Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>'
+        });
+
+        //Mapa base, ESRI
+        let tileesri = new L.TileLayer(
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            minZoom: 12,
+            maxZoom: 19,
+            opacity: 0.4,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+
+        let cadbairros = L.tileLayer.fallback('https://geoitajai.github.io/geo/tiles/bairros/{z}/{x}/{y}.png', {
+            minZoom: 12,
+            maxZoom: 19,
+            opacity: 0.3
+        });
+
+        //div do mapa
+        let mapa = new L.Map('mapa', {
+            zoom: 15,
+            minZoom: 12,
+            maxZoom: 19,
+            maxBounds: [
+                //south west
+                [-27.3000, -49.2300],
+                //north east
+                [-26.3285, -48.3200]
+            ],
+            center: new L.latLng([-26.9061, -48.6702]),
+            zoomControl: false,
+            preferCanvas: true,
+            layers: [mapabase, calor, ptdestaque]
+        });
+
+        const basesmu = L.layerGroup([tilesmu, cadbairros]).addTo(mapa);
+
+        //Controle de camadas
+        const baseMaps = {
+            "SIE.Itajaí": mapabase,
+            "Satélite": tileesri
+        };
+        L.control.layers(baseMaps, null, {
+            collapsed: false,
+            position: 'bottomleft'
+        }).addTo(mapa);
+
+        //Limites Município
+        $.getJSON("https://geoitajai.github.io/geo/data/limintermunicipais.geojson", (data) => {
+            L.geoJson(data, {
+                style: (feature) => {
+                    return {
+                        color: '#000000',
+                        opacity: 0.5,
+                        fill: false,
+                        interactive: false
+                    };
+                }
+            }).addTo(mapa);
+        });
+
+        //Botão zoom posicionado
+        L.control.zoom({
+            position: 'topleft'
+        }).addTo(mapa);
+
+        //Medidas
+        L.Control.measureControl({
+            position: 'topleft'
+        }).addTo(mapa);
+
+        //barra escala
+        L.control.scale({
+            position: "bottomright",
+            imperial: false
+        }).addTo(mapa);
+
+        //Norte
+        let nortemapa = L.control({
+            position: 'bottomright'
+        });
+
+        nortemapa.onAdd = (map) => {
+            var div = L.DomUtil.create('div', 'info2 legend');
+            div.innerHTML +=
+                '<center><sub><font size="4">▲</font></sub><br/>' +
+                '<sup><font size="2">N</font></sup></center>'
+            return div;
+        };
+        nortemapa.addTo(mapa);
+
+        //Tabela
+        let table = new Tabulator("#tabelaocorr", {
+            locale: 'pt-br',
+            langs: {
+                "pt-br": {
+                    "columns": {
+                        "name": "Nome",
+                    },
+                    "ajax": {
+                        "loading": "Carregando",
+                        "error": "Erro",
+                    },
+                    "groups": {
+                        "item": "item",
+                        "items": "ocorrências",
+                    },
+                    "pagination": {
+                        "page_size": "Tamanho da página",
+                        "first": "Primeira",
+                        "first_title": "Próxima página",
+                        "last": "Última",
+                        "last_title": "Última página",
+                        "prev": "Anterior",
+                        "prev_title": "Página anterior",
+                        "next": "Próxima",
+                        "next_title": "Próxima página",
+                    },
+                    "headerFilters": {
+                        "default": "filtrar...",
+                        "columns": {
+                            "name": "filtrar...",
+                        }
+                    }
+                }
+            },
+            height: "100%",
+            columnVertAlign: "bottom",
+            selectable: 1,
+            groupBy: ["mes"],
+            groupToggleElement: "header",
+            initialSort: [
+                { column: "mesnum", dir: "asc" }
+            ],
+            columns: [
+                { title: "Mês.", field: "mes", width: 65, editor: "select", headerFilter: true, headerFilterParams: { values: { "Janeiro": "Janeiro", "Fevereiro": "Fevereiro", "Março": "Março", "Abril": "Abril", "Maio": "Maio", "Junho": "Junho", "Julho": "Julho", "Agosto": "Agosto", "Setembro": "Setembro", "Outubro": "Outubro", "Novembro": "Novembro", "Dezembro": "Dezembro", "": "" } } },
+                { title: "Cód.", field: "codigo", width: 80, headerFilter: "input" },
+                { title: "Tipo", field: "tipo", width: 120, headerFilter: "input" },
+
+                {//grupo ocorrência
+                    title: "Ocorrência",
+                    columns: [
+                        { title: "Local(Vias)", field: "via", width: 300, formatter: "html", headerFilter: "input" },
+                        { title: "Local(Referência)", field: "referencia", width: 150 },
+                        { title: "Dia", field: "dia", width: 45 },
+                        { title: "Hr", field: "horaocorr", width: 45 },
+                        { title: "Hora", field: "hora", visible: false },
+                        { title: "Dia semana", field: "diasemana", width: 90, editor: "select", headerFilter: true, headerFilterParams: { values: { "domingo": "domingo", "segunda-feira": "segunda-feira", "terça-feira": "terça-feira", "quarta-feira": "quarta-feira", "quinta-feira": "quinta-feira", "sexta-feira": "sexta-feira", "sábado": "sábado", "": "" } } }
+                    ],
+                },
+
+                {//grupo envolvidos
+                    title: "Envolvidos",
+                    columns: [
+                        { title: "Envolvidos", field: "tipoenvolvidos", width: 150, headerFilter: "input" },
+                        { title: "Veículos", field: "veicenvolvidos", width: 250, headerFilter: "input" },
+                        { title: "Gênero", field: "generoenvolvidos", width: 110, headerFilter: "input" },
+                        { title: "Idade", field: "idadeenvolvidos", width: 80, headerFilter: "input" },
+                        { title: "Embriagado", field: "envolvEmbr", formatter: "tickCross", width: 115, align: "center", headerFilter: "tickCross", headerFilterParams: { "tristate": true }, headerFilterEmptyCheck: function (value) { return value === null } },
+                        { title: "C/vítima", field: "comvitima", formatter: "tickCross", width: 90, align: "center", headerFilter: "tickCross", headerFilterParams: { "tristate": true }, headerFilterEmptyCheck: function (value) { return value === null } },
+                        { title: "C/óbito", field: "comobito", formatter: "tickCross", width: 90, align: "center", headerFilter: "tickCross", headerFilterParams: { "tristate": true }, headerFilterEmptyCheck: function (value) { return value === null } },
+                        { title: "CNH", field: "habilitado", formatter: "tickCross", width: 70, align: "center", headerFilter: "tickCross", headerFilterParams: { "tristate": true }, headerFilterEmptyCheck: function (value) { return value === null } },
+                    ],
+                },
+                { title: "Mês", field: "mesnum", visible: false }
+            ],
+            rowClick: (e, row) => { //eventos quando clique sobre uma linha
+                ptdestaque.clearLayers();
+                mapa.flyTo(L.latLng(row._row.data.geometria[1], row._row.data.geometria[0]), 18);
+                L.marker(L.latLng(row._row.data.geometria[1], row._row.data.geometria[0])).addTo(ptdestaque);
+            },
+        });
+
+        $.getJSON("data/acidentes2019.geojson", (data) => {
+            let objtabela = data.features.map((feicoes) => {
+                return {
+                    'id': feicoes.properties.id,
+                    'codigo': feicoes.properties.codocorrencia,
+                    'mesnum': feicoes.properties.mm,
+                    'mes': (() => {
+                        if (feicoes.properties.mm === '01') { return 'Janeiro' }
+                        else if (feicoes.properties.mm === '02') { return 'Fevereiro' }
+                        else if (feicoes.properties.mm === '03') { return 'Março' }
+                        else if (feicoes.properties.mm === '04') { return 'Abril' }
+                        else if (feicoes.properties.mm === '05') { return 'Maio' }
+                        else if (feicoes.properties.mm === '06') { return 'Junho' }
+                        else if (feicoes.properties.mm === '07') { return 'Julho' }
+                        else if (feicoes.properties.mm === '08') { return 'Agosto' }
+                        else if (feicoes.properties.mm === '09') { return 'Setembro' }
+                        else if (feicoes.properties.mm === '10') { return 'Outubro' }
+                        else if (feicoes.properties.mm === '11') { return 'Novembro' }
+                        else if (feicoes.properties.mm === '12') { return 'Dezembro' }
+                        else { return '-' }
+                    })(),
+                    'dia': feicoes.properties.dd,
+                    'diasemana': (() => {
+                        if (feicoes.properties.diasem === 0) { return 'domingo' }
+                        else if (feicoes.properties.diasem === 1) { return 'segunda-feira' }
+                        else if (feicoes.properties.diasem === 2) { return 'terça-feira' }
+                        else if (feicoes.properties.diasem === 3) { return 'quarta-feira' }
+                        else if (feicoes.properties.diasem === 4) { return 'quinta-feira' }
+                        else if (feicoes.properties.diasem === 5) { return 'sexta-feira' }
+                        else if (feicoes.properties.diasem === 6) { return 'sábado' }
+                        else { return '-' }
+                    })(),
+                    'horaocorr': feicoes.properties.horaocorr,
+                    'hora': feicoes.properties.hora,
+                    'tipo': feicoes.properties.tipo,
+                    'tipoenvolvidos':
+                        (feicoes.properties.tipoenv1 === null ? '' : feicoes.properties.tipoenv1) +
+                        (feicoes.properties.tipoenv2 === null ? '' : ',' + feicoes.properties.tipoenv2) +
+                        (feicoes.properties.tipoenv3 === null ? '' : ',' + feicoes.properties.tipoenv3) +
+                        (feicoes.properties.tipoenv4 === null ? '' : ',' + feicoes.properties.tipoenv4) +
+                        (feicoes.properties.tipoenv5 === null ? '' : ',' + feicoes.properties.tipoenv5) +
+                        (feicoes.properties.tipoenv6 === null ? '' : ',' + feicoes.properties.tipoenv6) +
+                        (feicoes.properties.tipoenv7 === null ? '' : ',' + feicoes.properties.tipoenv7) +
+                        (feicoes.properties.tipoenv8 === null ? '' : ',' + feicoes.properties.tipoenv8),
+                    'veicenvolvidos':
+                        (feicoes.properties.veiculo1 === null ? '' : feicoes.properties.veiculo1) +
+                        (feicoes.properties.veiculo2 === null ? '' : ',' + feicoes.properties.veiculo2) +
+                        (feicoes.properties.veiculo3 === null ? '' : ',' + feicoes.properties.veiculo3) +
+                        (feicoes.properties.veiculo4 === null ? '' : ',' + feicoes.properties.veiculo4) +
+                        (feicoes.properties.veiculo5 === null ? '' : ',' + feicoes.properties.veiculo5) +
+                        (feicoes.properties.veiculo6 === null ? '' : ',' + feicoes.properties.veiculo6) +
+                        (feicoes.properties.veiculo7 === null ? '' : ',' + feicoes.properties.veiculo7) +
+                        (feicoes.properties.veiculo8 === null ? '' : ',' + feicoes.properties.veiculo8),
+                    'via': (() => {
+                        if (feicoes.properties.nomevia2 === "") { return feicoes.properties.nomevia1 }
+                        else { return feicoes.properties.nomevia1 + ' <strong>e</strong> ' + feicoes.properties.nomevia2 }
+                    })(),
+                    'referencia': feicoes.properties.refelocal,
+                    'generoenvolvidos':
+                        (feicoes.properties.p1genero === null ? '' : feicoes.properties.p1genero) +
+                        (feicoes.properties.p2genero === null ? '' : ',' + feicoes.properties.p2genero) +
+                        (feicoes.properties.p3genero === null ? '' : ',' + feicoes.properties.p3genero) +
+                        (feicoes.properties.p4genero === null ? '' : ',' + feicoes.properties.p4genero) +
+                        (feicoes.properties.p5genero === null ? '' : ',' + feicoes.properties.p5genero) +
+                        (feicoes.properties.p6genero === null ? '' : ',' + feicoes.properties.p6genero) +
+                        (feicoes.properties.p7genero === null ? '' : ',' + feicoes.properties.p7genero) +
+                        (feicoes.properties.p8genero === null ? '' : ',' + feicoes.properties.p8genero),
+                    'idadeenvolvidos':
+                        (feicoes.properties.p1idade === null ? '' : feicoes.properties.p1idade) +
+                        (feicoes.properties.p2idade === null ? '' : ',' + feicoes.properties.p2idade) +
+                        (feicoes.properties.p3idade === null ? '' : ',' + feicoes.properties.p3idade) +
+                        (feicoes.properties.p4idade === null ? '' : ',' + feicoes.properties.p4idade) +
+                        (feicoes.properties.p5idade === null ? '' : ',' + feicoes.properties.p5idade) +
+                        (feicoes.properties.p6idade === null ? '' : ',' + feicoes.properties.p6idade) +
+                        (feicoes.properties.p7idade === null ? '' : ',' + feicoes.properties.p7idade) +
+                        (feicoes.properties.p8idade === null ? '' : ',' + feicoes.properties.p8idade),
+                    'envolvEmbr': (() => {
+                        if (feicoes.properties.env1estado || feicoes.properties.env1estado || feicoes.properties.env1estado || feicoes.properties.env1estado || feicoes.properties.env1estado || feicoes.properties.env1estado || feicoes.properties.env1estado != null) { return true }
+                        else { return false }
+                    })(),
+                    'habilitado': (() => {
+                        if (feicoes.properties.env1habilit || feicoes.properties.env2habilit || feicoes.properties.env3habilit || feicoes.properties.env4habilit || feicoes.properties.env5habilit || feicoes.properties.env6habilit || feicoes.properties.env7habilit || feicoes.properties.env8habilit != null) { return true }
+                        else { return false }
+                    })(),
+                    'comvitima': (() => {
+                        if (feicoes.properties.env1cvit === 'sim' || feicoes.properties.env2cvit === 'sim' || feicoes.properties.env3cvit === 'sim' || feicoes.properties.env4cvit === 'sim' || feicoes.properties.env5cvit === 'sim' || feicoes.properties.env6cvit === 'sim' || feicoes.properties.env7cvit === 'sim' || feicoes.properties.env8cvit === 'sim' || feicoes.properties.pass1.includes("-v") || feicoes.properties.pass2.includes("-v") || feicoes.properties.pass3.includes("-v") || feicoes.properties.pass4.includes("-v") || feicoes.properties.pass5.includes("-v") || feicoes.properties.pass6.includes("-v") || feicoes.properties.pass7.includes("-v") || feicoes.properties.pass8.includes("-v")) { return true }
+                        else { return false }
+                    })(),
+                    'comobito': (() => {
+                        if (feicoes.properties.env1cvit === 'óbito' || feicoes.properties.env2cvit === 'óbito' || feicoes.properties.env3cvit === 'óbito' || feicoes.properties.env4cvit === 'óbito' || feicoes.properties.env5cvit === 'óbito' || feicoes.properties.env6cvit === 'óbito' || feicoes.properties.env7cvit === 'óbito' || feicoes.properties.env8cvit === 'óbito' || feicoes.properties.pass1.includes("-o") || feicoes.properties.pass2.includes("-o") || feicoes.properties.pass3.includes("-o") || feicoes.properties.pass4.includes("-o") || feicoes.properties.pass5.includes("-o") || feicoes.properties.pass6.includes("-o") || feicoes.properties.pass7.includes("-o") || feicoes.properties.pass8.includes("-o")) { return true }
+                        else { return false }
+                    })(),
+                    'geometria': feicoes.geometry.coordinates,
+                    //dados tabela
+                    'v1': feicoes.properties.veiculo1,
+                    'v2': feicoes.properties.veiculo1,
+                    'v3': feicoes.properties.veiculo1,
+                    'v4': feicoes.properties.veiculo1,
+                    'v5': feicoes.properties.veiculo1,
+                    'v6': feicoes.properties.veiculo1,
+                    'v7': feicoes.properties.veiculo1,
+                    'v8': feicoes.properties.veiculo1,
+                    'i1': feicoes.properties.p1idade,
+                    'i2': feicoes.properties.p2idade,
+                    'i3': feicoes.properties.p3idade,
+                    'i4': feicoes.properties.p4idade,
+                    'i5': feicoes.properties.p5idade,
+                    'i6': feicoes.properties.p6idade,
+                    'i7': feicoes.properties.p7idade,
+                    'i8': feicoes.properties.p8idade,
+                    'g1': feicoes.properties.p1genero,
+                    'g2': feicoes.properties.p2genero,
+                    'g3': feicoes.properties.p3genero,
+                    'g4': feicoes.properties.p4genero,
+                    'g5': feicoes.properties.p5genero,
+                    'g6': feicoes.properties.p6genero,
+                    'g7': feicoes.properties.p7genero,
+                    'g8': feicoes.properties.p8genero
+                }
+            });
+            table.setData(objtabela);
+
+            //mapa, contúdo inicial
+            let objGeom0 = data.features.map((feicoes) => {
+                return [feicoes.geometry.coordinates[1], feicoes.geometry.coordinates[0], 1]
+            });
+            L.heatLayer(objGeom0, { radius: 45, minOpacity: 0.3, blur: 45, maxZoom: 20 }).addTo(calor);
+
+            //Tabela dia da semana
+            google.charts.setOnLoadCallback(drawChart1);
+            function drawChart1() {
+                let total = {
+                    segunda: 0,
+                    terca: 0,
+                    quarta: 0,
+                    quinta: 0,
+                    sexta: 0,
+                    sabado: 0,
+                    domingo: 0
+                };
+                let contagem = data.features.map((feicoes) => {
+                    if (feicoes.properties.diasem === 0) { total.domingo++ }
+                    else if (feicoes.properties.diasem === 1) { total.segunda++ }
+                    else if (feicoes.properties.diasem === 2) { total.terca++ }
+                    else if (feicoes.properties.diasem === 3) { total.quarta++ }
+                    else if (feicoes.properties.diasem === 4) { total.quinta++ }
+                    else if (feicoes.properties.diasem === 5) { total.sexta++ }
+                    else if (feicoes.properties.diasem === 6) { total.sabado++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'dia da semana');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['segunda-feira', total.segunda],
+                    ['terça-feira', total.terca],
+                    ['quarta-feira', total.quarta],
+                    ['quinta-feira', total.quinta],
+                    ['sexta-feira', total.sexta],
+                    ['sábado', total.sabado],
+                    ['domingo', total.domingo]
+                ]);
+                // Set chart options
+                let options = {
+                    'width': 400,
+                    'height': 250
+                };
+                chart1 = new google.visualization.ColumnChart(document.getElementById('graf01'));
+                chart1.draw(datatab, options);
+            };
+
+            //Tabela ocorrências com vítima
+            google.charts.setOnLoadCallback(drawChart2);
+            function drawChart2() {
+                let total = {
+                    vitima: 0,
+                    obito: 0,
+                    ncomputado: 0
+                };
+                let contagem = data.features.map((feicoes) => {
+                    if (feicoes.properties.env1cvit === 'sim' || feicoes.properties.env2cvit === 'sim' || feicoes.properties.env3cvit === 'sim' || feicoes.properties.env4cvit === 'sim' || feicoes.properties.env5cvit === 'sim' || feicoes.properties.env6cvit === 'sim' || feicoes.properties.env7cvit === 'sim' || feicoes.properties.env8cvit === 'sim' || feicoes.properties.pass1.includes("-v") || feicoes.properties.pass2.includes("-v") || feicoes.properties.pass3.includes("-v") || feicoes.properties.pass4.includes("-v") || feicoes.properties.pass5.includes("-v") || feicoes.properties.pass6.includes("-v") || feicoes.properties.pass7.includes("-v") || feicoes.properties.pass8.includes("-v")) { total.vitima++ }
+                    else if (feicoes.properties.env1cvit === 'óbito' || feicoes.properties.env2cvit === 'óbito' || feicoes.properties.env3cvit === 'óbito' || feicoes.properties.env4cvit === 'óbito' || feicoes.properties.env5cvit === 'óbito' || feicoes.properties.env6cvit === 'óbito' || feicoes.properties.env7cvit === 'óbito' || feicoes.properties.env8cvit === 'óbito' || feicoes.properties.pass1.includes("-o") || feicoes.properties.pass2.includes("-o") || feicoes.properties.pass3.includes("-o") || feicoes.properties.pass4.includes("-o") || feicoes.properties.pass5.includes("-o") || feicoes.properties.pass6.includes("-o") || feicoes.properties.pass7.includes("-o") || feicoes.properties.pass8.includes("-o")) { total.obito++ }
+                    else total.ncomputado++
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'vítimas/óbitos');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['com vítima', total.vitima],
+                    ['com óbito', total.obito],
+                    ['apenas danos materiais', total.ncomputado]
+                ]);
+                // Set chart options
+                let options = {
+                    'width': 400,
+                    'height': 250
+                };
+                chart2 = new google.visualization.PieChart(document.getElementById('graf02'));
+                chart2.draw(datatab, options);
+            };
+
+            //Tabela tipo veículo envolvido
+            google.charts.setOnLoadCallback(drawChart3);
+            function drawChart3() {
+                let total = {
+                    ciclo: 0,
+                    automov: 0,
+                    onibus: 0,
+                    reboque: 0,
+                    camionet: 0,
+                    caminhao: 0,
+                    bicicleta: 0,
+                    pedestre: 0
+                };
+                let contagem1 = data.features.map((feicoes) => {
+                    if (feicoes.properties.tipo === 'pedestre') { total.pedestre++ }
+                    if (feicoes.properties.tipo === 'ciclista') { total.bicicleta++ }
+                    //
+                    if (feicoes.properties.veiculo1 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo1 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo1 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo1 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo1 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo1 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo1 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo1 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo1 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo1 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo1 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo1 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo1 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo1 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo1 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo1 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo1 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.properties.veiculo2 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo2 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo2 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo2 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo2 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo2 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo2 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo2 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo2 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo2 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo2 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo2 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo2 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo2 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo2 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo2 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo2 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.properties.veiculo3 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo3 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo3 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo3 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo3 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo3 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo3 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo3 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo3 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo3 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo3 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo3 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo3 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo3 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo3 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo3 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo3 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.properties.veiculo4 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo4 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo4 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo4 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo4 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo4 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo4 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo4 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo4 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo4 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo4 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo4 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo4 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo4 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo4 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo4 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo4 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.properties.veiculo5 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo5 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo5 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo5 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo5 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo5 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo5 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo5 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo5 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo5 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo5 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo5 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo5 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo5 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo5 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo5 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo5 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.properties.veiculo6 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo6 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo6 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo6 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo6 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo6 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo6 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo6 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo6 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo6 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo6 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo6 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo6 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo6 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo6 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo6 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo6 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.properties.veiculo7 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo7 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo7 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo7 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo7 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo7 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo7 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo7 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo7 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo7 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo7 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo7 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo7 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo7 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo7 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo7 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo7 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.properties.veiculo8 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.properties.veiculo8 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo8 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.properties.veiculo8 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo8 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.properties.veiculo8 === 'Automóvel') { total.automov++ }
+                    if (feicoes.properties.veiculo8 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo8 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.properties.veiculo8 === 'Reboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo8 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.properties.veiculo8 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.properties.veiculo8 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.properties.veiculo8 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.properties.veiculo8 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.properties.veiculo8 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.properties.veiculo8 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.properties.veiculo8 === 'Motor-Casa') { total.caminhao++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'tipo veículo');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['Automóvel', total.automov],
+                    ['Moto', total.ciclo],
+                    ['Ônibus', total.onibus],
+                    ['Camionete', total.camionet],
+                    ['Caminhão', total.caminhao],
+                    ['Bicicleta', total.bicicleta],
+                    ['Bicicleta', total.bicicleta]
+                ]);
+                // Set chart options
+                let options = {
+                    'width': 400,
+                    'height': 250
+                };
+                chart3 = new google.visualization.PieChart(document.getElementById('graf03'));
+                chart3.draw(datatab, options);
+            };
+
+            //Tabela faixa etária
+            google.charts.setOnLoadCallback(drawChart4);
+            function drawChart4() {
+                let total = {
+                    m18: 0,
+                    a1829: 0,
+                    a3039: 0,
+                    a4049: 0,
+                    a5059: 0,
+                    a59m: 0
+                };
+                let contagem = data.features.map((feicoes) => {
+                    if (feicoes.properties.p1idade >= 18 && feicoes.properties.p1idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p1idade >= 30 && feicoes.properties.p1idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p1idade >= 40 && feicoes.properties.p1idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p1idade >= 50 && feicoes.properties.p1idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p1idade != null && feicoes.properties.p1idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p1idade != null && feicoes.properties.p1idade < 18) { total.m18++ }
+                    //
+                    if (feicoes.properties.p2idade >= 18 && feicoes.properties.p2idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p2idade >= 30 && feicoes.properties.p2idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p2idade >= 40 && feicoes.properties.p2idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p2idade >= 50 && feicoes.properties.p2idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p2idade != null && feicoes.properties.p2idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p2idade != null && feicoes.properties.p2idade < 18) { total.m18++ }
+                    //
+                    if (feicoes.properties.p3idade >= 18 && feicoes.properties.p3idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p3idade >= 30 && feicoes.properties.p3idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p3idade >= 40 && feicoes.properties.p3idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p3idade >= 50 && feicoes.properties.p3idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p3idade != null && feicoes.properties.p3idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p3idade != null && feicoes.properties.p3idade < 18) { total.m18++ }
+                    //
+                    if (feicoes.properties.p4idade >= 18 && feicoes.properties.p4idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p4idade >= 30 && feicoes.properties.p4idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p4idade >= 40 && feicoes.properties.p4idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p4idade >= 50 && feicoes.properties.p4idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p4idade != null && feicoes.properties.p4idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p4idade != null && feicoes.properties.p4idade < 18) { total.m18++ }
+                    //
+                    if (feicoes.properties.p5idade >= 18 && feicoes.properties.p5idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p5idade >= 30 && feicoes.properties.p5idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p5idade >= 40 && feicoes.properties.p5idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p5idade >= 50 && feicoes.properties.p5idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p5idade != null && feicoes.properties.p5idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p5idade != null && feicoes.properties.p5idade < 18) { total.m18++ }
+                    //
+                    if (feicoes.properties.p6idade >= 18 && feicoes.properties.p6idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p6idade >= 30 && feicoes.properties.p6idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p6idade >= 40 && feicoes.properties.p6idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p6idade >= 50 && feicoes.properties.p6idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p6idade != null && feicoes.properties.p6idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p6idade != null && feicoes.properties.p6idade < 18) { total.m18++ }
+                    //
+                    if (feicoes.properties.p7idade >= 18 && feicoes.properties.p7idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p7idade >= 30 && feicoes.properties.p7idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p7idade >= 40 && feicoes.properties.p7idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p7idade >= 50 && feicoes.properties.p7idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p7idade != null && feicoes.properties.p7idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p7idade != null && feicoes.properties.p7idade < 18) { total.m18++ }
+                    //
+                    if (feicoes.properties.p8idade >= 18 && feicoes.properties.p8idade <= 29) { total.a1829++ }
+                    else if (feicoes.properties.p8idade >= 30 && feicoes.properties.p8idade <= 39) { total.a3039++ }
+                    else if (feicoes.properties.p8idade >= 40 && feicoes.properties.p8idade <= 49) { total.a4049++ }
+                    else if (feicoes.properties.p8idade >= 50 && feicoes.properties.p8idade <= 59) { total.a5059++ }
+                    else if (feicoes.properties.p8idade != null && feicoes.properties.p8idade >= 59) { total.a59m++ }
+                    else if (feicoes.properties.p8idade != null && feicoes.properties.p8idade < 18) { total.m18++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'faixa etária');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['Menores de 18 anos', total.m18],
+                    ['18 à 29 anos ', total.a1829],
+                    ['30 à 39 anos', total.a3039],
+                    ['40 à 49 anos', total.a4049],
+                    ['50 à 59 anos', total.a5059],
+                    ['Maiores de 59 anos', total.a59m]
+                ]);
+                // Set chart options
+                let options = {
+                    'width': 400,
+                    'height': 250
+                };
+                chart4 = new google.visualization.PieChart(document.getElementById('graf04'));
+                chart4.draw(datatab, options);
+            };
+
+            //Tabela gênero
+            google.charts.setOnLoadCallback(drawChart5);
+            function drawChart5() {
+                let total = {
+                    masculino: 0,
+                    feminino: 0
+                };
+                let contagem = data.features.map((feicoes) => {
+                    if (feicoes.properties.p1genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p1genero === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.properties.p2genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p2genero === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.properties.p3genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p3genero === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.properties.p4genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p4genero === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.properties.p5genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p5genero === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.properties.p6genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p6genero === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.properties.p7genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p7genero === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.properties.p8genero === 'masc.') { total.masculino++ }
+                    if (feicoes.properties.p8genero === 'fem.') { total.feminino++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'gênero');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['masculino', total.masculino],
+                    ['feminino', total.feminino]
+                ]);
+                // Set chart options
+                let options = {
+                    'width': 400,
+                    'height': 250
+                };
+                chart5 = new google.visualization.PieChart(document.getElementById('graf05'));
+                chart5.draw(datatab, options);
+            };
+
+            //Tabela tipo de ocorrência
+            google.charts.setOnLoadCallback(drawChart6);
+            function drawChart6() {
+                let total = {
+                    abalroamento: 0,
+                    atropelamento: 0,
+                    capotamento: 0,
+                    choque: 0,
+                    choquefio: 0,
+                    choquepatri: 0,
+                    choqueplaca: 0,
+                    choqueposte: 0,
+                    colisao: 0,
+                    engavetamento: 0,
+                    outros: 0,
+                    queda: 0,
+                    tombamento: 0
+                };
+                let contagem = data.features.map((feicoes) => {
+                    if (feicoes.properties.tipo.includes('abalroamento')) { total.abalroamento++ }
+                    if (feicoes.properties.tipo.includes('atropelamento')) { total.atropelamento++ }
+                    if (feicoes.properties.tipo.includes('capotamento')) { total.capotamento++ }
+                    if (feicoes.properties.tipo.includes('choque')) { total.choque++ }
+                    if (feicoes.properties.tipo.includes('choque - fio')) { total.choquefio++ }
+                    if (feicoes.properties.tipo.includes('choque - patrimônio')) { total.choquepatri++ }
+                    if (feicoes.properties.tipo.includes('choque - placa')) { total.choqueplaca++ }
+                    if (feicoes.properties.tipo.includes('choque - poste')) { total.choqueposte++ }
+                    if (feicoes.properties.tipo.includes('colisão')) { total.colisao++ }
+                    if (feicoes.properties.tipo.includes('engavetamento')) { total.engavetamento++ }
+                    if (feicoes.properties.tipo.includes('outros')) { total.outros++ }
+                    if (feicoes.properties.tipo.includes('queda')) { total.queda++ }
+                    if (feicoes.properties.tipo.includes('tombamento')) { total.tombamento++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'tipo');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['abalroamento', total.abalroamento],
+                    ['atropelamento', total.atropelamento],
+                    ['capotamento', total.capotamento],
+                    ['choque', total.choque],
+                    ['choque - fio', total.choquefio],
+                    ['choque - patrimônio', total.choquepatri],
+                    ['choque - placa', total.choqueplaca],
+                    ['choque - poste', total.choqueposte],
+                    ['colisão', total.colisao],
+                    ['engavetamento', total.engavetamento],
+                    ['outros', total.outros],
+                    ['queda', total.queda],
+                    ['tombamento', total.tombamento]
+                ]);
+                // Set chart options
+                let options = {
+                    'width': 400,
+                    'height': 250
+                };
+                chart6 = new google.visualization.PieChart(document.getElementById('graf06'));
+                chart6.draw(datatab, options);
+            };
+
+            //Tabela hora
+            google.charts.setOnLoadCallback(drawChart8);
+            function drawChart8() {
+                let total = {
+                    h6a8: 0,
+                    h8a10: 0,
+                    h10a12: 0,
+                    h12a14: 0,
+                    h14a16: 0,
+                    h16a18: 0,
+                    h18a20: 0,
+                    h20a22: 0,
+                    h22a6: 0
+                };
+                let contagem = data.features.map((feicoes) => {
+                    if (feicoes.properties.hora >= 6 && feicoes.properties.hora < 8) { total.h6a8++ }
+                    else if (feicoes.properties.hora >= 8 && feicoes.properties.hora < 10) { total.h8a10++ }
+                    else if (feicoes.properties.hora >= 10 && feicoes.properties.hora < 12) { total.h10a12++ }
+                    else if (feicoes.properties.hora >= 12 && feicoes.properties.hora < 14) { total.h12a14++ }
+                    else if (feicoes.properties.hora >= 14 && feicoes.properties.hora < 16) { total.h14a16++ }
+                    else if (feicoes.properties.hora >= 16 && feicoes.properties.hora < 18) { total.h16a18++ }
+                    else if (feicoes.properties.hora >= 18 && feicoes.properties.hora < 20) { total.h18a20++ }
+                    else if (feicoes.properties.hora >= 20 && feicoes.properties.hora < 22) { total.h20a22++ }
+                    else if (feicoes.properties.hora >= 22) { total.h22a6++ }
+                    else if (feicoes.properties.hora === 0) { total.h22a6++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'hora');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['6/7', total.h6a8],
+                    ['8/9', total.h8a10],
+                    ['10/11', total.h10a12],
+                    ['12/13', total.h12a14],
+                    ['14/15', total.h14a16],
+                    ['16/17', total.h16a18],
+                    ['18/19', total.h18a20],
+                    ['20/21', total.h20a22],
+                    ['22/5', total.h22a6]
+                ]);
+                // Set chart options
+                let options = {
+                    'width': 400,
+                    'height': 250
+                };
+                chart8 = new google.visualization.SteppedAreaChart(document.getElementById('graf08'));
+                chart8.draw(datatab, options);
+            };
+        });
+
+        //trigger download .xlsx
+        $("#download-xlsx").click(() => {
+            table.download("xlsx", "data.xlsx", { sheetName: "tabelaocorr" });
+        });
+
+        //trigger format tabela --> map
+        $("#filtro-mapa").click(() => {
+            ptdestaque.clearLayers();
+            calor.clearLayers();
+            let objGeom = table.rowManager.activeRows.map((feicoes) => {
+                return [feicoes.data.geometria[1], feicoes.data.geometria[0], 1]
+            });
+            L.heatLayer(objGeom, { radius: 45, minOpacity: 0.3, blur: 45, maxZoom: 20 }).addTo(calor);
+
+            //atualizar tabelas
+            //Tabela dia da semana
+            (() => {
+                let total = {
+                    segunda: 0,
+                    terca: 0,
+                    quarta: 0,
+                    quinta: 0,
+                    sexta: 0,
+                    sabado: 0,
+                    domingo: 0
+                };
+                let contagem = table.rowManager.activeRows.map((feicoes) => {
+                    if (feicoes.data.diasemana === 'domingo') { total.domingo++ }
+                    else if (feicoes.data.diasemana === 'segunda-feira') { total.segunda++ }
+                    else if (feicoes.data.diasemana === 'terça-feira') { total.terca++ }
+                    else if (feicoes.data.diasemana === 'quarta-feira') { total.quarta++ }
+                    else if (feicoes.data.diasemana === 'quinta-feira') { total.quinta++ }
+                    else if (feicoes.data.diasemana === 'sexta-feira') { total.sexta++ }
+                    else if (feicoes.data.diasemana === 'sábado') { total.sabado++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'dia da semana');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['segunda-feira', total.segunda],
+                    ['terça-feira', total.terca],
+                    ['quarta-feira', total.quarta],
+                    ['quinta-feira', total.quinta],
+                    ['sexta-feira', total.sexta],
+                    ['sábado', total.sabado],
+                    ['domingo', total.domingo]
+                ]);
+                chart1.draw(datatab);
+            })();
+
+            //Tabela ocorrências com vítima
+            (() => {
+                let total = {
+                    vitima: 0,
+                    obito: 0,
+                    ncomputado: 0
+                };
+                let contagem = table.rowManager.activeRows.map((feicoes) => {
+                    if (feicoes.data.comvitima === true) { total.vitima++ }
+                    else if (feicoes.data.comobito === true) { total.obito++ }
+                    else total.ncomputado++
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'vítimas/óbitos');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['com vítima', total.vitima],
+                    ['com óbito', total.obito],
+                    ['apenas danos materiais', total.ncomputado]
+                ]);
+                chart2.draw(datatab);
+            })();
+
+            //Tabela tipo veículo envolvido
+            (() => {
+                let total = {
+                    ciclo: 0,
+                    automov: 0,
+                    onibus: 0,
+                    reboque: 0,
+                    camionet: 0,
+                    caminhao: 0,
+                    bicicleta: 0,
+                    pedestre: 0
+                };
+                let contagem = table.rowManager.activeRows.map((feicoes) => {
+                    if (feicoes.data.tipo === 'pedestre') { total.pedestre++ }
+                    if (feicoes.data.tipo === 'ciclista') { total.bicicleta++ }
+                    //
+                    if (feicoes.data.v1 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v1 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v1 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v1 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v1 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v1 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v1 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v1 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v1 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v1 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v1 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v1 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v1 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v1 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v1 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v1 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v1 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.data.v2 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v2 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v2 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v2 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v2 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v2 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v2 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v2 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v2 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v2 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v2 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v2 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v2 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v2 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v2 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v2 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v2 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.data.v3 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v3 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v3 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v3 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v3 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v3 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v3 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v3 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v3 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v3 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v3 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v3 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v3 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v3 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v3 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v3 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v3 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.data.v4 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v4 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v4 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v4 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v4 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v4 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v4 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v4 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v4 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v4 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v4 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v4 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v4 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v4 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v4 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v4 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v4 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.data.v5 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v5 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v5 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v5 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v5 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v5 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v5 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v5 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v5 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v5 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v5 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v5 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v5 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v5 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v5 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v5 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v5 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.data.v6 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v6 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v6 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v6 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v6 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v6 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v6 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v6 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v6 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v6 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v6 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v6 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v6 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v6 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v6 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v6 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v6 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.data.v7 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v7 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v7 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v7 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v7 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v7 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v7 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v7 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v7 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v7 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v7 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v7 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v7 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v7 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v7 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v7 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v7 === 'Motor-Casa') { total.caminhao++ }
+                    //
+                    if (feicoes.data.v8 === 'Ciclomotor') { total.ciclo++ }
+                    if (feicoes.data.v8 === 'Motoneta') { total.ciclo++ }
+                    if (feicoes.data.v8 === 'Motocicleta') { total.ciclo++ }
+                    if (feicoes.data.v8 === 'Triciclo') { total.ciclo++ }
+                    if (feicoes.data.v8 === 'Quadriciclo') { total.ciclo++ }
+                    if (feicoes.data.v8 === 'Automóvel') { total.automov++ }
+                    if (feicoes.data.v8 === 'Micro-ônibus') { total.onibus++ }
+                    if (feicoes.data.v8 === 'Ônibus') { total.onibus++ }
+                    if (feicoes.data.v8 === 'Reboque') { total.reboque++ }
+                    if (feicoes.data.v8 === 'Semireboque') { total.reboque++ }
+                    if (feicoes.data.v8 === 'Camioneta') { total.camionet++ }
+                    if (feicoes.data.v8 === 'Caminhonete') { total.camionet++ }
+                    if (feicoes.data.v8 === 'Utilitário') { total.camionet++ }
+                    if (feicoes.data.v8 === 'Caminhão') { total.caminhao++ }
+                    if (feicoes.data.v8 === 'Caminhão_Trator') { total.caminhao++ }
+                    if (feicoes.data.v8 === 'Chassi_plataforma') { total.caminhao++ }
+                    if (feicoes.data.v8 === 'Motor-Casa') { total.caminhao++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'tipo veículo');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['Automóvel', total.automov],
+                    ['Moto', total.ciclo],
+                    ['Ônibus', total.onibus],
+                    ['Camionete', total.camionet],
+                    ['Caminhão', total.caminhao],
+                    ['Bicicleta', total.bicicleta],
+                    ['Pedestres', total.pedestre]
+                ]);
+                chart3.draw(datatab);
+            })();
+
+            //Tabela faixa etária
+            (() => {
+                let total = {
+                    m18: 0,
+                    a1829: 0,
+                    a3039: 0,
+                    a4049: 0,
+                    a5059: 0,
+                    a59m: 0
+                };
+                let contagem = table.rowManager.activeRows.map((feicoes) => {
+                    if (feicoes.data.i1 >= 18 && feicoes.data.i1 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i1 >= 30 && feicoes.data.i1 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i1 >= 40 && feicoes.data.i1 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i1 >= 50 && feicoes.data.i1 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i1 != null && feicoes.data.i1 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i1 != null && feicoes.data.i1 < 18) { total.m18++ }
+                    //
+                    if (feicoes.data.i2 >= 18 && feicoes.data.i2 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i2 >= 30 && feicoes.data.i2 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i2 >= 40 && feicoes.data.i2 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i2 >= 50 && feicoes.data.i2 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i2 != null && feicoes.data.i2 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i2 != null && feicoes.data.i2 < 18) { total.m18++ }
+                    //
+                    if (feicoes.data.i3 >= 18 && feicoes.data.i3 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i3 >= 30 && feicoes.data.i3 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i3 >= 40 && feicoes.data.i3 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i3 >= 50 && feicoes.data.i3 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i3 != null && feicoes.data.i3 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i3 != null && feicoes.data.i3 < 18) { total.m18++ }
+                    //
+                    if (feicoes.data.i4 >= 18 && feicoes.data.i4 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i4 >= 30 && feicoes.data.i4 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i4 >= 40 && feicoes.data.i4 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i4 >= 50 && feicoes.data.i4 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i4 != null && feicoes.data.i4 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i4 != null && feicoes.data.i4 < 18) { total.m18++ }
+                    //
+                    if (feicoes.data.i5 >= 18 && feicoes.data.i5 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i5 >= 30 && feicoes.data.i5 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i5 >= 40 && feicoes.data.i5 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i5 >= 50 && feicoes.data.i5 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i5 != null && feicoes.data.i5 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i5 != null && feicoes.data.i5 < 18) { total.m18++ }
+                    //
+                    if (feicoes.data.i6 >= 18 && feicoes.data.i6 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i6 >= 30 && feicoes.data.i6 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i6 >= 40 && feicoes.data.i6 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i6 >= 50 && feicoes.data.i6 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i6 != null && feicoes.data.i6 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i6 != null && feicoes.data.i6 < 18) { total.m18++ }
+                    //
+                    if (feicoes.data.i7 >= 18 && feicoes.data.i7 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i7 >= 30 && feicoes.data.i7 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i7 >= 40 && feicoes.data.i7 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i7 >= 50 && feicoes.data.i7 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i7 != null && feicoes.data.i7 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i7 != null && feicoes.data.i7 < 18) { total.m18++ }
+                    //
+                    if (feicoes.data.i8 >= 18 && feicoes.data.i8 <= 29) { total.a1829++ }
+                    else if (feicoes.data.i8 >= 30 && feicoes.data.i8 <= 39) { total.a3039++ }
+                    else if (feicoes.data.i8 >= 40 && feicoes.data.i8 <= 49) { total.a4049++ }
+                    else if (feicoes.data.i8 >= 50 && feicoes.data.i8 <= 59) { total.a5059++ }
+                    else if (feicoes.data.i8 != null && feicoes.data.i8 >= 59) { total.a59m++ }
+                    else if (feicoes.data.i8 != null && feicoes.data.i8 < 18) { total.m18++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'faixa etária');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['Menores de 18 anos', total.m18],
+                    ['18 à 29 anos ', total.a1829],
+                    ['30 à 39 anos', total.a3039],
+                    ['40 à 49 anos', total.a4049],
+                    ['50 à 59 anos', total.a5059],
+                    ['Maiores de 59 anos', total.a59m]
+                ]);
+                chart4.draw(datatab);
+            })();
+
+            //Tabela gênero
+            (() => {
+                let total = {
+                    masculino: 0,
+                    feminino: 0
+                };
+                let contagem = table.rowManager.activeRows.map((feicoes) => {
+                    if (feicoes.data.g1 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g1 === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.data.g2 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g2 === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.data.g3 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g3 === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.data.g4 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g4 === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.data.g5 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g5 === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.data.g6 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g6 === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.data.g7 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g7 === 'fem.') { total.feminino++ }
+                    //
+                    if (feicoes.data.g8 === 'masc.') { total.masculino++ }
+                    if (feicoes.data.g8 === 'fem.') { total.feminino++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'gênero');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['masculino', total.masculino],
+                    ['feminino', total.feminino]
+                ]);
+                chart5.draw(datatab);
+            })();
+
+            //Tabela tipo de ocorrência
+            (() => {
+                let total = {
+                    abalroamento: 0,
+                    atropelamento: 0,
+                    capotamento: 0,
+                    choque: 0,
+                    choquefio: 0,
+                    choquepatri: 0,
+                    choqueplaca: 0,
+                    choqueposte: 0,
+                    colisao: 0,
+                    engavetamento: 0,
+                    outros: 0,
+                    queda: 0,
+                    tombamento: 0
+                };
+                let contagem = table.rowManager.activeRows.map((feicoes) => {
+                    if (feicoes.data.tipo.includes('abalroamento')) { total.abalroamento++ }
+                    if (feicoes.data.tipo.includes('atropelamento')) { total.atropelamento++ }
+                    if (feicoes.data.tipo.includes('capotamento')) { total.capotamento++ }
+                    if (feicoes.data.tipo.includes('choque')) { total.choque++ }
+                    if (feicoes.data.tipo.includes('choque - fio')) { total.choquefio++ }
+                    if (feicoes.data.tipo.includes('choque - patrimônio')) { total.choquepatri++ }
+                    if (feicoes.data.tipo.includes('choque - placa')) { total.choqueplaca++ }
+                    if (feicoes.data.tipo.includes('choque - poste')) { total.choqueposte++ }
+                    if (feicoes.data.tipo.includes('colisão')) { total.colisao++ }
+                    if (feicoes.data.tipo.includes('engavetamento')) { total.engavetamento++ }
+                    if (feicoes.data.tipo.includes('outros')) { total.outros++ }
+                    if (feicoes.data.tipo.includes('queda')) { total.queda++ }
+                    if (feicoes.data.tipo.includes('tombamento')) { total.tombamento++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'tipo');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['abalroamento', total.abalroamento],
+                    ['atropelamento', total.atropelamento],
+                    ['capotamento', total.capotamento],
+                    ['choque', total.choque],
+                    ['choque - fio', total.choquefio],
+                    ['choque - patrimônio', total.choquepatri],
+                    ['choque - placa', total.choqueplaca],
+                    ['choque - poste', total.choqueposte],
+                    ['colisão', total.colisao],
+                    ['engavetamento', total.engavetamento],
+                    ['outros', total.outros],
+                    ['queda', total.queda],
+                    ['tombamento', total.tombamento]
+                ]);
+                chart6.draw(datatab);
+            })();
+
+            //Tabela hora ocorrência
+            (() => {
+                let total = {
+                    h6a8: 0,
+                    h8a10: 0,
+                    h10a12: 0,
+                    h12a14: 0,
+                    h14a16: 0,
+                    h16a18: 0,
+                    h18a20: 0,
+                    h20a22: 0,
+                    h22a6: 0
+                };
+                let contagem = table.rowManager.activeRows.map((feicoes) => {
+                    if (feicoes.data.hora >= 6 && feicoes.data.hora < 8) { total.h6a8++ }
+                    else if (feicoes.data.hora >= 8 && feicoes.data.hora < 10) { total.h8a10++ }
+                    else if (feicoes.data.hora >= 10 && feicoes.data.hora < 12) { total.h10a12++ }
+                    else if (feicoes.data.hora >= 12 && feicoes.data.hora < 14) { total.h12a14++ }
+                    else if (feicoes.data.hora >= 14 && feicoes.data.hora < 16) { total.h14a16++ }
+                    else if (feicoes.data.hora >= 16 && feicoes.data.hora < 18) { total.h16a18++ }
+                    else if (feicoes.data.hora >= 18 && feicoes.data.hora < 20) { total.h18a20++ }
+                    else if (feicoes.data.hora >= 20 && feicoes.data.hora < 22) { total.h20a22++ }
+                    else if (feicoes.data.hora >= 22) { total.h22a6++ }
+                    else if (feicoes.data.hora === 0) { total.h22a6++ }
+                });
+                // data para tabela
+                let datatab = new google.visualization.DataTable();
+                //colunas
+                datatab.addColumn('string', 'hora');
+                datatab.addColumn('number', 'total');
+                datatab.addRows([
+                    ['6/7', total.h6a8],
+                    ['8/9', total.h8a10],
+                    ['10/11', total.h10a12],
+                    ['12/13', total.h12a14],
+                    ['14/15', total.h14a16],
+                    ['16/17', total.h16a18],
+                    ['18/19', total.h18a20],
+                    ['20/21', total.h20a22],
+                    ['22/5', total.h22a6]
+                ]);
+                chart8.draw(datatab);
+            })();
+        });
+    </script>
+</body>
+
+</html>
