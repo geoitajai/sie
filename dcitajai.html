@@ -141,26 +141,11 @@
 			subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
 		}).addTo(tilegoogle);
 
-		//zona urbana e geral
-		new L.TileLayer('tiles/basemap/10-17/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 10,
-			maxZoom: 17
+		new L.TileLayer('https://geoitajai.github.io/sie/tiles/basemap/{z}/{x}/{y}.png', {
+			minZoom: 12,
+			maxZoom: 19,
+			attribution: 'Município de Itajaí/SC, <a href="mailto:jaceguay@itajai.sc.gov.br?Subject=WebGIS" target="_top">SIE</a>'
 		}).addTo(tilesmu);
-
-		//zona rural, zoom 17
-		new L.TileLayer('tiles/basemap/17rural/{z}/{x}/{y}.png', {
-			opacity: 0.6,
-			minZoom: 17,
-			maxZoom: 17
-		}).addTo(tilesmu);
-
-		//bairros
-		map.addLayer(new L.TileLayer('tiles/bairros/{z}/{x}/{y}.png', {
-			opacity: 0.5,
-			minZoom: 10,
-			maxZoom: 14
-		}));
 
 		//sistema viário com pesquisa
 		var sistviarioweb = L.geoJson(false, {
